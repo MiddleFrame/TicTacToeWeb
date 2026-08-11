@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { CSSProperties, PointerEvent, RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../game/cards";
 import { cardCost, type GameState, type Player } from "../../game/engine";
+import { useLocalization } from "../../game/localization";
 import { Figure } from "./Primitives";
 import type { DamageFlight, DragState } from "./types";
 
@@ -14,11 +15,12 @@ type HealthBarProps = {
 };
 
 export function HealthBar({ game, player, placement, remaining, trackRef }: HealthBarProps) {
+  const { t } = useLocalization();
   return (
-    <section className={`unity-health ${placement} ${game.turn === player ? "active" : ""}`} aria-label={`Здоровье игрока ${player}`}>
+    <section className={`unity-health ${placement} ${game.turn === player ? "active" : ""}`} aria-label={`${t("health")} ${player}`}>
       {placement === "enemy" && (
         <div className="unity-health-meta" aria-label={`Сейчас ходят ${game.turn === 1 ? "крестики" : "нолики"}`}>
-          <span>Ход</span>
+          <span>{t("turn")}</span>
           <Figure player={game.turn} small />
         </div>
       )}
@@ -41,6 +43,7 @@ type BoardProps = {
 };
 
 export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights }: BoardProps) {
+  const { t } = useLocalization();
   return (
     <div className={`unity-board-wrap ${drag?.overField ? "drag-over" : ""}`}>
       <div
@@ -48,7 +51,7 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
         ref={boardRef}
         style={{ "--board-size": game.size } as CSSProperties}
         role="grid"
-        aria-label={`Игровое поле ${game.size} на ${game.size}`}
+        aria-label={`${t("board")} ${game.size} × ${game.size}`}
       >
         {game.board.map((cell, index) => {
           const clearing = game.clearingCells.includes(index);
@@ -74,6 +77,8 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
                   style={flight ? {
                     "--flight-dx": `${flight.dx}px`,
                     "--flight-dy": `${flight.dy}px`,
+                    "--flight-fade-dx": `${flight.fadeDx}px`,
+                    "--flight-fade-dy": `${flight.fadeDy}px`,
                     "--flight-delay": `${flight.delay}ms`,
                   } as CSSProperties : undefined}
                 />
@@ -100,6 +105,7 @@ type ControlsProps = {
 };
 
 export function GameControls({ game, disabled, onRechange, onEndTurn }: ControlsProps) {
+  const { t } = useLocalization();
   const rechangeDisabled = disabled || game.phase !== "playing" || !game.rechangerAvailable[game.turn] || game.hands[game.turn].length === 0 || game.decks[game.turn].length === 0;
   return (
     <section className="unity-controls">
@@ -109,8 +115,8 @@ export function GameControls({ game, disabled, onRechange, onEndTurn }: Controls
           {Array.from({ length: game.maxMana }, (_, index) => <span className={index < game.mana ? "filled" : ""} key={index} />)}
         </div>
       </div>
-      <button className="unity-rechange" disabled={rechangeDisabled} onClick={onRechange} aria-label="Заменить карту">↻</button>
-      <button className="unity-end-turn" disabled={disabled || game.phase !== "playing"} onClick={onEndTurn}>Конец хода</button>
+      <button className="unity-rechange" disabled={rechangeDisabled} onClick={onRechange} aria-label={t("replaceCard")}>↻</button>
+      <button className="unity-end-turn" disabled={disabled || game.phase !== "playing"} onClick={onEndTurn}>{t("endTurn")}</button>
     </section>
   );
 }
@@ -127,12 +133,14 @@ type HandProps = {
 };
 
 export function GameHand(props: HandProps) {
+  const { card: localizeCard, t } = useLocalization();
   const hand = props.game.hands[props.player];
   return (
-    <section className="unity-hand-zone" aria-label="Карты в руке">
+    <section className="unity-hand-zone" aria-label={t("hand")}>
       <div className="unity-hand-cards">
         {hand.map((card, index) => {
           const definition = CARD_DEFINITIONS[card.kind];
+          const localized = localizeCard(card.kind);
           const cost = cardCost(props.game, card);
           const unavailable = props.disabled || props.player !== props.game.turn || cost > props.game.mana || props.game.phase !== "playing";
           const dragging = props.drag?.cardId === card.id;
@@ -152,11 +160,11 @@ export function GameHand(props: HandProps) {
                 "--drag-x": props.drag ? `${props.drag.x}px` : undefined,
                 "--drag-y": props.drag ? `${props.drag.y}px` : undefined,
               } as CSSProperties}
-              aria-label={`${definition.name}. Стоимость ${cost}. Перетащите карту на поле. ${definition.description}`}
+              aria-label={`${localized.name}. ${t("cost")} ${cost}. ${t("dragCard")}. ${localized.description}`}
             >
               <span className="unity-card-cost">{cost}</span>
               <span className="unity-card-art" style={{ backgroundImage: `url("${definition.image[props.player]}")` }} aria-hidden="true" />
-              <small>{definition.description}</small>
+              <small>{localized.description}</small>
             </button>
           );
         })}

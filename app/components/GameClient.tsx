@@ -45,8 +45,10 @@ import { MenuScreen } from "./game/MenuScreen";
 import { SettingsScreen } from "./game/SettingsScreen";
 import { StoreScreen } from "./game/StoreScreen";
 import type { DamageFlight, DragState, GameMode } from "./game/types";
+import { useLocalization } from "../game/localization";
 
-const playerName = (player: Player) => (player === 1 ? "Крестики" : "Нолики");
+const DAMAGE_HIT_MS = 800;
+const DAMAGE_FLIGHT_MS = 850;
 const PHOTON_APP_ID = process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "";
 const INITIAL_NETWORK: PhotonSnapshot = {
   phase: "idle",
@@ -113,6 +115,7 @@ function chooseBotTarget(game: GameState): number | null {
 }
 
 export function GameClient() {
+  const { t } = useLocalization();
   const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "game">("menu");
   const [mode, setMode] = useState<GameMode>("local");
   const [network, setNetwork] = useState<PhotonSnapshot>(INITIAL_NETWORK);
@@ -132,6 +135,7 @@ export function GameClient() {
   const [muted, setMuted] = useState(false);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [damageFlights, setDamageFlights] = useState<DamageFlight[]>([]);
+  const [previewDamage, setPreviewDamage] = useState<Record<Player, number>>({ 1: 0, 2: 0 });
   const [turnBanner, setTurnBanner] = useState<Player | null>(1);
   const [roguelike, setRoguelike] = useState<RoguelikeRun | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -252,18 +256,27 @@ export function GameClient() {
             id: `${game.turn}-${index}-${game.scores[game.turn]}`,
             index,
             player: game.turn,
-            dx: (targetX - x) * 0.9,
-            dy: (targetY - y) * 0.9,
+            dx: targetX - x,
+            dy: targetY - y,
+            fadeDx: (targetX - x) * 0.94,
+            fadeDy: (targetY - y) * 0.94,
             delay: flightIndex * 75,
           }];
         })
       : [];
     setDamageFlights(flights);
 
+    setPreviewDamage((current) => ({ ...current, [targetPlayer]: 0 }));
     const impactTimeouts = flights.map((flight) =>
       window.setTimeout(
-        () => playSfx("impact", 0.46),
-        720 + flight.delay,
+        () => {
+          playSfx("impact", 0.46);
+          setPreviewDamage((current) => ({
+            ...current,
+            [targetPlayer]: current[targetPlayer] + 1,
+          }));
+        },
+        DAMAGE_HIT_MS + flight.delay,
       ),
     );
     const timeout = window.setTimeout(() => {
@@ -271,7 +284,8 @@ export function GameClient() {
       if (canSettle) {
         setGame((current) => settleClear(current));
       }
-    }, Math.max(960, 850 + flights.length * 85));
+      setPreviewDamage((current) => ({ ...current, [targetPlayer]: 0 }));
+    }, DAMAGE_FLIGHT_MS + Math.max(0, flights.length - 1) * 75);
     return () => {
       window.clearTimeout(timeout);
       impactTimeouts.forEach((impactTimeout) =>
@@ -490,23 +504,24 @@ export function GameClient() {
   const topPlayer: Player = displayedPlayer === 1 ? 2 : 1;
   const bottomPlayer = displayedPlayer;
   const remainingHealth = (player: Player) =>
-    Math.max(0, game.scoreToWin - game.scores[player === 1 ? 2 : 1]);
+    Math.max(0, game.scoreToWin - game.scores[player === 1 ? 2 : 1] - previewDamage[player]);
 
   const status = useMemo(() => {
-    if (game.phase === "thawing") return "Лёд разбивается";
-    if (game.phase === "clearing") return `Линия! +${game.lastGain}`;
+    const sideName = (player: Player) => player === 1 ? t("crosses") : t("circles");
+    if (game.phase === "thawing") return t("thawing");
+    if (game.phase === "clearing") return `${t("line")}! +${game.lastGain}`;
     if (game.phase === "round-over") {
       return game.roundWinner
-        ? `Раунд за ${playerName(game.roundWinner).toLowerCase()}`
-        : "Раунд завершён вничью";
+        ? `${t("wonRound")} ${sideName(game.roundWinner).toLowerCase()}`
+        : t("roundDraw");
     }
     if (game.phase === "game-over") {
       return game.gameWinner
-        ? `${playerName(game.gameWinner)} выиграли матч`
-        : "Матч завершён вничью";
+        ? `${sideName(game.gameWinner)} ${t("wonMatch")}`
+        : t("matchDraw");
     }
     return game.lastAction;
-  }, [game]);
+  }, [game, t]);
 
   const canCardTargetCell = (cardId: string, index: number) => {
     if (

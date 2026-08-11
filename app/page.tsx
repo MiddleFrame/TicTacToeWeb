@@ -1,5 +1,6 @@
 import { GameClient } from "./components/GameClient";
+import { LocalizationProvider } from "./game/localization";
 
 export default function Home() {
-  return <GameClient />;
+  return <LocalizationProvider><GameClient /></LocalizationProvider>;
 }

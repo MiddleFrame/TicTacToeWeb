@@ -452,6 +452,17 @@ body {
   text-align: right;
 }
 
+.settings-language-row select {
+  min-width: 126px;
+  padding: 9px 34px 9px 11px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+}
+
 .settings-toggle,
 .settings-link {
   width: 100%;
@@ -468,7 +479,7 @@ body {
 .settings-sound-state .sound-icon {
   width: 32px;
   height: 32px;
-  stroke-width: 6;
+  stroke-width: 3;
 }
 
 .settings-link img {
@@ -481,9 +492,12 @@ body {
   gap: 6px;
 }
 
-.store-coins img,
-.store-buy-button img {
+.store-coins img {
   filter: brightness(0);
+}
+
+.store-buy-button img {
+  filter: brightness(0) invert(1);
 }
 
 .store-card-panel {
@@ -1902,15 +1916,11 @@ body {
   width: 64px;
   height: 64px;
   overflow: visible;
-  fill: var(--ink);
+  fill: none;
   stroke: var(--ink);
-  stroke-width: 5;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.sound-icon path:first-child {
-  stroke: none;
 }
 
 .unity-menu-nav button:hover .sound-icon {
@@ -2595,7 +2605,11 @@ body {
   }
   88% {
     opacity: 1;
-    transform: translate(var(--flight-dx), var(--flight-dy)) scale(0.32);
+    transform: translate(var(--flight-fade-dx), var(--flight-fade-dy)) scale(0.32);
+  }
+  94% {
+    opacity: 0;
+    transform: translate(var(--flight-fade-dx), var(--flight-fade-dy)) scale(0.18);
   }
   100% {
     opacity: 0;

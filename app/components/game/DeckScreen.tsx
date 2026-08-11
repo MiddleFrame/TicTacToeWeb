@@ -1,4 +1,5 @@
 import { CARD_COUNTS, CARD_DEFINITIONS, DECK_BUILDING_KINDS, type CardKind } from "../../game/cards";
+import { useLocalization } from "../../game/localization";
 
 type DeckScreenProps = {
   selectedKinds: CardKind[];
@@ -9,24 +10,26 @@ type DeckScreenProps = {
 };
 
 export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onSave }: DeckScreenProps) {
+  const { card, t } = useLocalization();
   const cardCount = selectedKinds.reduce((total, kind) => total + CARD_COUNTS[kind], 0);
 
   return (
     <main className="collection-shell">
       <header className="collection-header">
-        <button className="back-button" onClick={onBack} aria-label="Назад в меню">←</button>
+        <button className="back-button" onClick={onBack} aria-label={t("back")}>←</button>
         <div>
-          <span>Колода</span>
-          <h1>Соберите свою колоду</h1>
+          <span>{t("deck")}</span>
+          <h1>{t("buildDeck")}</h1>
         </div>
         <strong>{selectedKinds.length}/16</strong>
       </header>
       <p className="collection-lead">
-        Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.
+        {t("deckLead")}
       </p>
       <section className="collection-grid">
         {DECK_BUILDING_KINDS.map((kind) => {
           const definition = CARD_DEFINITIONS[kind];
+          const localized = card(kind);
           const selected = selectedKinds.includes(kind);
           const locked = !unlockedKinds.includes(kind);
           return (
@@ -41,8 +44,8 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
               <span className="collection-art-circle">
                 <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />
               </span>
-              <strong>{definition.name}</strong>
-              <small>{definition.description}</small>
+              <strong>{localized.name}</strong>
+              <small>{localized.description}</small>
               {CARD_COUNTS[kind] > 1 && <span className="collection-count">×{CARD_COUNTS[kind]}</span>}
               <span className="collection-check" aria-hidden="true">{locked ? "🔒" : selected ? "✓" : "+"}</span>
             </button>
@@ -50,8 +53,8 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
         })}
       </section>
       <footer className="collection-footer">
-        <span>В колоде экземпляров: {cardCount}</span>
-        <button className="primary-button" onClick={onSave}>Сохранить колоду</button>
+        <span>{t("deckCopies")}: {cardCount}</span>
+        <button className="primary-button" onClick={onSave}>{t("saveDeck")}</button>
       </footer>
     </main>
   );

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useLocalization } from "../../game/localization";
 import { RulesModal } from "./RulesModal";
 import type { GameMode } from "./types";
 
@@ -16,12 +17,13 @@ type MenuScreenProps = {
 };
 
 export function MenuScreen(props: MenuScreenProps) {
+  const { t } = useLocalization();
   return (
     <main className="unity-menu-shell">
       <header className="unity-menu-top">
         <button className="unity-top-action" onClick={props.onOpenRules}>
           <Image src="/game/menu/friends.png" alt="" width="64" height="64" unoptimized />
-          Друзья
+          {t("friends")}
         </button>
         <a
           className="unity-discord-link"
@@ -41,25 +43,25 @@ export function MenuScreen(props: MenuScreenProps) {
       <section className="unity-menu-content">
         <Image className="unity-logo" src="/game/logo.png" alt="Tic Tac Toe Plus Card Game" width="420" height="160" priority unoptimized />
         <div className="unity-menu-actions">
-          <button className="unity-menu-button unity-menu-button-main" onClick={() => props.onStart("bot")}>Игра с ботом</button>
-          <button className="unity-menu-button" onClick={() => props.onStart("roguelike")}>Рогалик</button>
-          <button className="unity-menu-button" disabled={!props.photonAvailable} onClick={props.onStartOnline}>Мультиплеер</button>
-          <button className="unity-menu-button" onClick={() => props.onStart("local")}>Игра с другом</button>
-          <button className="unity-menu-button" onClick={props.onOpenRules}>Руководство</button>
+          <button className="unity-menu-button unity-menu-button-main" onClick={() => props.onStart("bot")}>{t("bot")}</button>
+          <button className="unity-menu-button" onClick={() => props.onStart("roguelike")}>{t("roguelike")}</button>
+          <button className="unity-menu-button" disabled={!props.photonAvailable} onClick={props.onStartOnline}>{t("multiplayer")}</button>
+          <button className="unity-menu-button" onClick={() => props.onStart("local")}>{t("local")}</button>
+          <button className="unity-menu-button" onClick={props.onOpenRules}>{t("guide")}</button>
         </div>
 
         <nav className="unity-menu-nav" aria-label="Разделы">
           <button onClick={props.onDeck}>
             <Image src="/game/menu/deck.png" alt="" width="88" height="76" unoptimized />
-            <span>Колода</span>
+            <span>{t("deck")}</span>
           </button>
           <button onClick={props.onStore}>
             <Image src="/game/menu/store.png" alt="" width="88" height="76" unoptimized />
-            <span>Магазин</span>
+            <span>{t("store")}</span>
           </button>
           <button onClick={props.onSettings}>
             <Image src="/game/menu/settings.png" alt="" width="88" height="76" unoptimized />
-            <span>Настройки</span>
+            <span>{t("settings")}</span>
           </button>
         </nav>
       </section>

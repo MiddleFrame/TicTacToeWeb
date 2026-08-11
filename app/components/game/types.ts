@@ -21,5 +21,7 @@ export type DamageFlight = {
   player: Player;
   dx: number;
   dy: number;
+  fadeDx: number;
+  fadeDy: number;
   delay: number;
 };
