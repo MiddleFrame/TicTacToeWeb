@@ -78,6 +78,13 @@ export function GameClient() {
   const damage = useDamageSequence(game, mode, network.side, setGame, playSfx);
 
   useEffect(() => {
+    document.body.dataset.gameScreen = screen;
+    return () => {
+      delete document.body.dataset.gameScreen;
+    };
+  }, [screen]);
+
+  useEffect(() => {
     if (
       mode !== "roguelike" ||
       game.phase !== "game-over" ||

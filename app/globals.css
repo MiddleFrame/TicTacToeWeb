@@ -32,24 +32,12 @@
   color-scheme: dark;
 }
 
-:root[data-theme="dark"] body {
-  background: #080808;
-}
-
-:root[data-theme="dark"] .unity-menu-shell::before,
-:root[data-theme="dark"] .unity-game-shell::before,
-:root[data-theme="dark"] .collection-shell::before,
-:root[data-theme="dark"] .settings-shell::before,
-:root[data-theme="dark"] .store-shell::before {
+:root[data-theme="dark"] body::before {
   filter: none;
   opacity: 0.085;
 }
 
-:root[data-theme="dark"] .unity-menu-shell::after,
-:root[data-theme="dark"] .unity-game-shell::after,
-:root[data-theme="dark"] .collection-shell::after,
-:root[data-theme="dark"] .settings-shell::after,
-:root[data-theme="dark"] .store-shell::after {
+:root[data-theme="dark"] body::after {
   background: rgb(17 17 17 / 20%);
 }
 
@@ -156,6 +144,35 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: "Roboto TTTP", Arial, sans-serif;
+  isolation: isolate;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  background: url("/game/pattern.png") 0 0 / 124px 125px repeat;
+  filter: brightness(0);
+  opacity: 0.052;
+}
+
+body::after {
+  background: rgb(255 255 255 / 16%);
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-game-screen="menu"]::before {
+  animation: unity-pattern-drift 16.67s linear infinite;
 }
 
 .unity-menu-shell,
@@ -163,57 +180,7 @@ body {
 .collection-shell,
 .settings-shell,
 .store-shell {
-  position: relative;
-  isolation: isolate;
-  background: var(--paper);
-}
-
-.unity-menu-shell::before,
-.unity-game-shell::before,
-.collection-shell::before,
-.settings-shell::before,
-.store-shell::before,
-.unity-menu-shell::after,
-.unity-game-shell::after,
-.collection-shell::after,
-.settings-shell::after,
-.store-shell::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  pointer-events: none;
-}
-
-.unity-menu-shell::before,
-.unity-game-shell::before,
-.collection-shell::before,
-.settings-shell::before,
-.store-shell::before {
-  background: url("/game/pattern.png") 0 0 / 124px 125px repeat;
-  filter: brightness(0);
-  opacity: 0.052;
-}
-
-.unity-menu-shell::after,
-.unity-game-shell::after,
-.collection-shell::after,
-.settings-shell::after,
-.store-shell::after {
-  background: rgb(255 255 255 / 16%);
-}
-
-.unity-menu-shell > *,
-.unity-game-shell > *,
-.collection-shell > *,
-.settings-shell > *,
-.store-shell > * {
-  position: relative;
-  z-index: 1;
-}
-
-.unity-menu-shell::before {
-  animation: unity-pattern-drift 16.67s linear infinite;
+  background: transparent;
 }
 
 .menu-shell {
@@ -1852,10 +1819,6 @@ body {
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-}
-
-.unity-menu-shell {
-  box-shadow: 0 0 55px rgb(0 0 0 / 18%);
 }
 
 .unity-menu-shell {
