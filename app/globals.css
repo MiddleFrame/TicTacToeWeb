@@ -55,19 +55,28 @@
   filter: none;
 }
 
+:root[data-theme="dark"] .unity-menu-nav img {
+  filter: invert(1);
+}
+
 :root[data-theme="dark"] .unity-turn-banner {
-  color: #090909;
+  color: #f7f7f7;
   background:
     linear-gradient(
       135deg,
       transparent 0 8%,
-      rgb(245 245 245 / 97%) 8% 92%,
+      rgb(18 18 18 / 98%) 8% 92%,
       transparent 92%
     );
+  filter: drop-shadow(0 5px 5px rgb(0 0 0 / 32%));
 }
 
 :root[data-theme="dark"] .unity-turn-banner .figure {
-  filter: brightness(0);
+  filter: none;
+}
+
+:root[data-theme="dark"] .unity-game-shell {
+  background: rgb(17 17 17 / 90%);
 }
 
 :root[data-theme="dark"] .collection-art,
@@ -88,7 +97,6 @@
 :root[data-theme="dark"] .hand-zone,
 :root[data-theme="dark"] .unity-menu-button,
 :root[data-theme="dark"] .unity-game-tools button,
-:root[data-theme="dark"] .unity-rechange,
 :root[data-theme="dark"] .unity-end-turn {
   background: rgb(23 23 23 / 92%);
 }
@@ -157,7 +165,7 @@ body::after {
 }
 
 body::before {
-  background: url("/game/pattern.png") 0 0 / 124px 125px repeat;
+  background: var(--scene-pattern, url("/game/pattern.png")) 0 0 / 128px 128px repeat;
   filter: brightness(0);
   opacity: 0.052;
 }
@@ -181,6 +189,10 @@ body[data-game-screen="menu"]::before {
 .settings-shell,
 .store-shell {
   background: transparent;
+}
+
+.unity-game-shell {
+  background: rgb(255 255 255 / 90%);
 }
 
 .menu-shell {
@@ -1999,20 +2011,24 @@ body[data-game-screen="menu"]::before {
   border: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  row-gap: 7px;
 }
 
 .unity-menu-nav img {
   width: auto;
   max-width: 80px;
-  height: 64px;
+  height: 70px;
+  margin-bottom: 3px;
   object-fit: contain;
   filter: brightness(0);
+  transform: translateY(-5px);
   transition: transform 120ms ease;
 }
 
 .unity-menu-nav button:hover img {
-  transform: translateY(-4px);
+  transform: translateY(-9px);
 }
 
 .unity-menu-nav-compact {
@@ -2231,7 +2247,7 @@ body[data-game-screen="menu"]::before {
   width: 100%;
   min-height: 54px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
 }
@@ -2272,21 +2288,11 @@ body[data-game-screen="menu"]::before {
   opacity: 1;
 }
 
-.unity-rechange,
 .unity-end-turn {
   cursor: pointer;
   border: 2px solid var(--ink);
   background: rgb(255 255 255 / 88%);
   color: var(--ink);
-}
-
-.unity-rechange {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 24px;
-  line-height: 1;
 }
 
 .unity-end-turn {
@@ -2298,7 +2304,6 @@ body[data-game-screen="menu"]::before {
   font-weight: 700;
 }
 
-.unity-rechange:disabled,
 .unity-end-turn:disabled {
   cursor: default;
   opacity: 0.24;

@@ -8,7 +8,7 @@ export function TurnBanner({ player, turn }: { player: Player | null; turn: Play
   if (!player) return null;
   return (
     <div className="unity-turn-banner" key={`${player}-${turn}`}>
-      <span>{t("turn")}</span>
+      <span>{t("turn")} {player === 1 ? "X" : "O"}</span>
       <Figure player={player} />
     </div>
   );

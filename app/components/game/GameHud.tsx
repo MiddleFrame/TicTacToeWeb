@@ -110,13 +110,11 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
 type ControlsProps = {
   game: GameState;
   disabled: boolean;
-  onRechange: () => void;
   onEndTurn: () => void;
 };
 
-export function GameControls({ game, disabled, onRechange, onEndTurn }: ControlsProps) {
+export function GameControls({ game, disabled, onEndTurn }: ControlsProps) {
   const { t } = useLocalization();
-  const rechangeDisabled = disabled || game.phase !== "playing" || !game.rechangerAvailable[game.turn] || game.hands[game.turn].length === 0 || game.decks[game.turn].length === 0;
   return (
     <section className="unity-controls">
       <div className="unity-mana">
@@ -125,7 +123,6 @@ export function GameControls({ game, disabled, onRechange, onEndTurn }: Controls
           {Array.from({ length: game.maxMana }, (_, index) => <span className={index < game.mana ? "filled" : ""} key={index} />)}
         </div>
       </div>
-      <button className="unity-rechange" disabled={rechangeDisabled} onClick={onRechange} aria-label={t("replaceCard")}>↻</button>
       <button className="unity-end-turn" disabled={disabled || game.phase !== "playing"} onClick={onEndTurn}>{t("endTurn")}</button>
     </section>
   );

@@ -8,7 +8,6 @@ import {
   endTurn,
   placeFigure,
   playCard,
-  rechangeRandomCard,
   settleThaw,
   startNextRound,
   type Player,
@@ -41,6 +40,7 @@ import { useDamageSequence } from "./game/hooks/useDamageSequence";
 import { useCardDrag } from "./game/hooks/useCardDrag";
 import { useGameAudio } from "./game/hooks/useGameAudio";
 import { usePlayerCollection } from "./game/hooks/usePlayerCollection";
+import { useScenePattern } from "./game/hooks/useScenePattern";
 import { useLocalization } from "../game/localization";
 import { chooseBotCard, chooseBotCardTarget, chooseBotTarget } from "../game/bot-player";
 
@@ -53,6 +53,7 @@ const INITIAL_NETWORK: PhotonSnapshot = {
   error: "",
 };
 export function GameClient() {
+  useScenePattern();
   const { action, t } = useLocalization();
   const { muted, setMuted, playSfx } = useGameAudio();
   const collection = usePlayerCollection(playSfx);
@@ -404,16 +405,6 @@ export function GameClient() {
     setGame(next);
   };
 
-  const rechangeCard = () => {
-    playSfx("click", 0.38);
-    if (mode === "online" && network.side === 2) {
-      setNetworkIntentPending(true);
-      photonSession.current?.sendIntent({ type: "rechange" });
-      return;
-    }
-    setGame((current) => rechangeRandomCard(current));
-  };
-
   const finishTurn = () => {
     playSfx("click", 0.38);
     if (mode === "online" && network.side === 2) {
@@ -544,7 +535,6 @@ export function GameClient() {
       onPause={() => setPauseOpen(true)}
       onResume={() => setPauseOpen(false)}
       onMenu={leaveToMenu}
-      onRechange={rechangeCard}
       onEndTurn={finishTurn}
       onContinue={continueAfterResult}
       onChooseMana={() => roguelike && startRoguelikeStage(chooseManaReward(roguelike))}
