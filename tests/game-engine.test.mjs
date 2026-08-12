@@ -12,6 +12,8 @@ import {
   settleThaw,
 } from "../app/game/engine.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
+import { chooseRandomTarget } from "../app/game/bot-player.ts";
+import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
 import {
   chooseCardReward,
   createRoguelikeGame,
@@ -19,6 +21,34 @@ import {
   getRoguelikeStage,
   resolveRoguelikeResult,
 } from "../app/game/roguelike.ts";
+
+test("chooses random targets through an injected random source", () => {
+  const game = { ...createGame(), board: [1, null, null, 2, 1, 2, 1, 2, 1] };
+  assert.equal(chooseRandomTarget(game, () => 0), 1);
+  assert.equal(chooseRandomTarget(game, () => 0.99), 2);
+});
+
+test("derives player placement without UI state", () => {
+  assert.deepEqual(getGamePlayers("local", 2, null), {
+    bottomPlayer: 2,
+    displayedPlayer: 2,
+    topPlayer: 1,
+  });
+  assert.deepEqual(getGamePlayers("online", 1, 2), {
+    bottomPlayer: 2,
+    displayedPlayer: 2,
+    topPlayer: 1,
+  });
+});
+
+test("validates card targets outside the component", () => {
+  const game = createGame();
+  const card = game.hands[1].find((item) => item.kind === "place");
+  assert.ok(card);
+  assert.equal(canTargetCard(game, card.id, 0, true), true);
+  assert.equal(canTargetCard({ ...game, board: [2, ...game.board.slice(1)] }, card.id, 0, true), false);
+  assert.equal(canTargetCard(game, card.id, 0, false), false);
+});
 
 test("finds a horizontal line of three", () => {
   const board = [1, 1, 1, null, 2, null, 2, null, null];

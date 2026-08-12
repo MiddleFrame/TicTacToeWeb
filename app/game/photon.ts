@@ -79,11 +79,21 @@ interface PhotonModule {
   setOnLoad: (callback: () => void) => void;
 }
 
-interface PhotonCallbacks {
+export interface PhotonCallbacks {
   onSnapshot: (snapshot: PhotonSnapshot) => void;
   onState: (state: GameState) => void;
   onIntent: (intent: NetworkIntent) => void;
 }
+
+export interface PhotonSession {
+  updateCallbacks: (callbacks: PhotonCallbacks) => void;
+  connect: (appId: string) => Promise<void>;
+  broadcastState: (state: GameState) => void;
+  sendIntent: (intent: NetworkIntent) => void;
+  disconnect: () => void;
+}
+
+export type PhotonSessionFactory = (callbacks: PhotonCallbacks) => PhotonSession;
 
 const EVENT_STATE = 11;
 const EVENT_INTENT = 12;
@@ -116,7 +126,7 @@ export function applyNetworkIntent(
   return state;
 }
 
-const initialSnapshot: PhotonSnapshot = {
+export const INITIAL_PHOTON_SNAPSHOT: PhotonSnapshot = {
   phase: "idle",
   side: null,
   roomName: "",
@@ -127,7 +137,7 @@ const initialSnapshot: PhotonSnapshot = {
 export class PhotonGameSession {
   private client: PhotonClient | null = null;
   private photon: PhotonModule | null = null;
-  private snapshot: PhotonSnapshot = initialSnapshot;
+  private snapshot: PhotonSnapshot = INITIAL_PHOTON_SNAPSHOT;
   private callbacks: PhotonCallbacks;
 
   constructor(callbacks: PhotonCallbacks) {
@@ -146,7 +156,7 @@ export class PhotonGameSession {
   async connect(appId: string): Promise<void> {
     if (!appId || this.snapshot.phase === "connecting") return;
     this.disconnect();
-    this.emit({ ...initialSnapshot, phase: "connecting" });
+    this.emit({ ...INITIAL_PHOTON_SNAPSHOT, phase: "connecting" });
 
     try {
       const imported = await import("photon-realtime");
@@ -256,7 +266,10 @@ export class PhotonGameSession {
     this.client?.disconnect();
     this.client = null;
     this.photon = null;
-    this.snapshot = initialSnapshot;
-    this.callbacks.onSnapshot(initialSnapshot);
+    this.snapshot = INITIAL_PHOTON_SNAPSHOT;
+    this.callbacks.onSnapshot(INITIAL_PHOTON_SNAPSHOT);
   }
 }
+
+export const createPhotonSession: PhotonSessionFactory = (callbacks) =>
+  new PhotonGameSession(callbacks);

@@ -1,11 +1,25 @@
-import { CARD_DEFINITIONS, type CardInstance } from "./cards";
-import { findScoringCells } from "./board-rules";
-import { cardCost, type GameState } from "./engine";
+import { CARD_DEFINITIONS, type CardInstance } from "./cards.ts";
+import { findScoringCells } from "./board-rules.ts";
+import { cardCost, type GameState } from "./engine.ts";
 
-export function chooseBotTarget(game: GameState): number | null {
-  const available = game.board
+export function availableTargets(game: GameState): number[] {
+  return game.board
     .map((cell, index) => cell === null && !game.frozen[index] ? index : -1)
     .filter((index) => index >= 0);
+}
+
+export function chooseRandomTarget(
+  game: GameState,
+  random: () => number = Math.random,
+): number | null {
+  const available = availableTargets(game);
+  return available.length > 0
+    ? available[Math.floor(random() * available.length)]
+    : null;
+}
+
+export function chooseBotTarget(game: GameState): number | null {
+  const available = availableTargets(game);
   if (available.length === 0) return null;
   const center = (game.size - 1) / 2;
   return available.reduce((best, index) => {

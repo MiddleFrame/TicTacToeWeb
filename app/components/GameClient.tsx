@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { CARD_DEFINITIONS } from "../game/cards";
+import { useEffect, useRef, useState } from "react";
 import {
-  cardCost,
   createGame,
   endTurn,
-  placeFigure,
   playCard,
-  settleThaw,
   startNextRound,
   type Player,
 } from "../game/engine";
+import {
+  canTargetCard,
+  getGamePlayers,
+  getGameStatus,
+  isHumanGameTurn,
+  remainingHealth,
+} from "../game/game-presentation";
 import {
   chooseCardReward,
   chooseManaReward,
@@ -20,16 +23,9 @@ import {
   getRoguelikeStage,
   openCardReward,
   replaceRoguelikeCard,
-  resolveRoguelikeResult,
   restartDrawnStage,
   type RoguelikeRun,
 } from "../game/roguelike";
-import {
-  applyNetworkIntent,
-  PhotonGameSession,
-  type NetworkIntent,
-  type PhotonSnapshot,
-} from "../game/photon";
 import { DeckScreen } from "./game/DeckScreen";
 import { GameScene } from "./game/GameScene";
 import { MenuScreen } from "./game/MenuScreen";
@@ -41,17 +37,14 @@ import { useCardDrag } from "./game/hooks/useCardDrag";
 import { useGameAudio } from "./game/hooks/useGameAudio";
 import { usePlayerCollection } from "./game/hooks/usePlayerCollection";
 import { useScenePattern } from "./game/hooks/useScenePattern";
+import { useGamePhaseEffects } from "./game/hooks/useGamePhaseEffects";
+import { useOpponentTurns } from "./game/hooks/useOpponentTurns";
+import { usePhotonGame } from "./game/hooks/usePhotonGame";
+import { useTurnBanner } from "./game/hooks/useTurnBanner";
 import { useLocalization } from "../game/localization";
-import { chooseBotCard, chooseBotCardTarget, chooseBotTarget } from "../game/bot-player";
 
 const PHOTON_APP_ID = process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "";
-const INITIAL_NETWORK: PhotonSnapshot = {
-  phase: "idle",
-  side: null,
-  roomName: "",
-  playerCount: 0,
-  error: "",
-};
+
 export function GameClient() {
   useScenePattern();
   const { action, t } = useLocalization();
@@ -59,24 +52,41 @@ export function GameClient() {
   const collection = usePlayerCollection(playSfx);
   const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "game">("menu");
   const [mode, setMode] = useState<GameMode>("local");
-  const [network, setNetwork] = useState<PhotonSnapshot>(INITIAL_NETWORK);
-  const [networkIntentPending, setNetworkIntentPending] = useState(false);
   const [game, setGame] = useState(createGame);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [pauseOpen, setPauseOpen] = useState(false);
-  const [turnBanner, setTurnBanner] = useState<Player | null>(1);
   const [roguelike, setRoguelike] = useState<RoguelikeRun | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const previousTurnRef = useRef<Player>(game.turn);
-  const photonSession = useRef<PhotonGameSession | null>(null);
-  if (photonSession.current === null) {
-    photonSession.current = new PhotonGameSession({
-      onSnapshot: () => undefined,
-      onState: () => undefined,
-      onIntent: () => undefined,
-    });
-  }
+  const {
+    hide: hideTurnBanner,
+    player: turnBanner,
+    show: showTurnBanner,
+  } = useTurnBanner(1);
+  const online = usePhotonGame(game, mode, setGame);
+  const { intentPending: networkIntentPending, network } = online;
   const damage = useDamageSequence(game, mode, network.side, setGame, playSfx);
+
+  useGamePhaseEffects({
+    game,
+    mode,
+    networkSide: network.side,
+    playSfx,
+    roguelike,
+    setGame,
+    setRoguelike,
+  });
+
+  useOpponentTurns({
+    game,
+    mode,
+    pauseOpen,
+    playSfx,
+    roguelike,
+    screen,
+    setGame,
+    setRoguelike,
+  });
 
   useEffect(() => {
     document.body.dataset.gameScreen = screen;
@@ -85,216 +95,12 @@ export function GameClient() {
     };
   }, [screen]);
 
-  useEffect(() => {
-    if (
-      mode !== "roguelike" ||
-      game.phase !== "game-over" ||
-      !roguelike ||
-      roguelike.status !== "playing"
-    ) {
-      return;
-    }
-    const timeout = window.setTimeout(
-      () => setRoguelike(resolveRoguelikeResult(roguelike, game.gameWinner)),
-      0,
-    );
-    return () => window.clearTimeout(timeout);
-  }, [game.gameWinner, game.phase, mode, roguelike]);
-
-  useEffect(() => {
-    if (game.phase !== "thawing") return;
-    const canSettle = mode !== "online" || network.side === 1;
-    const revealTimeout = window.setTimeout(
-      () => playSfx("placeScale", 0.46),
-      390,
-    );
-    const settleTimeout = window.setTimeout(() => {
-      if (canSettle) {
-        setGame((current) => settleThaw(current));
-      }
-    }, 760);
-    return () => {
-      window.clearTimeout(revealTimeout);
-      window.clearTimeout(settleTimeout);
-    };
-  }, [game.phase, game.thawingCells, mode, network.side, playSfx]);
-
-  useEffect(() => {
-    if (!networkIntentPending) return;
-    const timeout = window.setTimeout(
-      () => setNetworkIntentPending(false),
-      4000,
-    );
-    return () => window.clearTimeout(timeout);
-  }, [networkIntentPending]);
-
-  useEffect(() => {
-    const session = photonSession.current;
-    if (!session) return;
-    session.updateCallbacks({
-      onSnapshot: (snapshot) => {
-        setNetwork(snapshot);
-        if (snapshot.phase !== "ready") setNetworkIntentPending(false);
-      },
-      onState: (remoteState) => {
-        setNetworkIntentPending(false);
-        setGame(remoteState);
-      },
-      onIntent: (intent: NetworkIntent) => {
-        if (network.side !== 1) return;
-        setGame((current) => applyNetworkIntent(current, intent, 2));
-      },
-    });
-  }, [network.side]);
-
-  useEffect(() => {
-    if (
-      mode === "online" &&
-      network.phase === "ready" &&
-      network.side === 1
-    ) {
-      photonSession.current?.broadcastState(game);
-    }
-  }, [game, mode, network.phase, network.side]);
-
-  useEffect(
-    () => () => {
-      photonSession.current?.disconnect();
-    },
-    [],
-  );
-
-  useEffect(() => {
-    if (
-      screen !== "game" ||
-      pauseOpen ||
-      mode !== "bot" ||
-      game.turn !== 2 ||
-      game.phase !== "playing"
-    ) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setGame((current) => {
-        if (
-          current.turn !== 2 ||
-          current.phase !== "playing" ||
-          mode !== "bot"
-        ) {
-          return current;
-        }
-        if (current.cardsPlayedThisTurn >= 2) return endTurn(current);
-
-        const target = chooseBotTarget(current);
-        const playable = chooseBotCard(current, target);
-
-        if (!playable) return endTurn(current);
-        const cardTarget = chooseBotCardTarget(current, playable, target);
-        const next = playCard(current, playable.id, cardTarget);
-        return next === current ? endTurn(current) : next;
-      });
-    }, 560);
-    return () => window.clearTimeout(timeout);
-  }, [game, mode, pauseOpen, screen]);
-
-  useEffect(() => {
-    if (
-      screen !== "game" ||
-      pauseOpen ||
-      mode !== "roguelike" ||
-      !roguelike ||
-      roguelike.status !== "playing" ||
-      game.turn !== 2 ||
-      game.phase !== "playing"
-    ) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      if (roguelike.enemyMovesRemaining <= 0) {
-        setGame((current) => endTurn(current));
-        return;
-      }
-      const stage = getRoguelikeStage(roguelike.stageIndex);
-      const useSmartMove = roguelike.enemyMovesRemaining > stage.randomFigures;
-      const target = useSmartMove
-        ? chooseBotTarget(game)
-        : (() => {
-            const available = game.board
-              .map((cell, index) =>
-                cell === null && !game.frozen[index] ? index : -1,
-              )
-              .filter((index) => index >= 0);
-            return available.length > 0
-              ? available[Math.floor(Math.random() * available.length)]
-              : null;
-          })();
-      if (target === null) {
-        setRoguelike({ ...roguelike, enemyMovesRemaining: 0 });
-        setGame((current) => endTurn(current));
-        return;
-      }
-      setGame((current) => placeFigure(current, target));
-      setRoguelike({
-        ...roguelike,
-        enemyMovesRemaining: roguelike.enemyMovesRemaining - 1,
-        enemyFiguresPlaced: roguelike.enemyFiguresPlaced + 1,
-      });
-      playSfx("placeScale", 0.48);
-    }, 520);
-    return () => window.clearTimeout(timeout);
-  }, [game, mode, pauseOpen, playSfx, roguelike, screen]);
-
-  const isHumanTurn =
-    mode === "local" ||
-    ((mode === "bot" || mode === "roguelike") && game.turn === 1) ||
-    (mode === "online" &&
-      network.phase === "ready" &&
-      network.side === game.turn);
-  const displayedPlayer: Player =
-    mode === "local"
-      ? game.turn
-      : mode === "online"
-        ? (network.side ?? 1)
-        : 1;
-  const topPlayer: Player = displayedPlayer === 1 ? 2 : 1;
-  const bottomPlayer = displayedPlayer;
-  const remainingHealth = (player: Player) =>
-    Math.max(0, game.scoreToWin - game.scores[player === 1 ? 2 : 1] - damage.previewDamage[player]);
-
-  const status = useMemo(() => {
-    const sideName = (player: Player) => player === 1 ? t("crosses") : t("circles");
-    if (game.phase === "thawing") return t("thawing");
-    if (game.phase === "clearing") return `${t("line")}! +${game.lastGain}`;
-    if (game.phase === "round-over") {
-      return game.roundWinner
-        ? `${t("wonRound")} ${sideName(game.roundWinner).toLowerCase()}`
-        : t("roundDraw");
-    }
-    if (game.phase === "game-over") {
-      return game.gameWinner
-        ? `${sideName(game.gameWinner)} ${t("wonMatch")}`
-        : t("matchDraw");
-    }
-    return action(game.lastAction);
-  }, [action, game, t]);
+  const isHumanTurn = isHumanGameTurn(mode, game, network);
+  const { bottomPlayer, displayedPlayer, topPlayer } = getGamePlayers(mode, game.turn, network.side);
+  const status = getGameStatus(game, t, action);
 
   const canCardTargetCell = (cardId: string, index: number) => {
-    if (
-      !isHumanTurn ||
-      networkIntentPending ||
-      game.phase !== "playing" ||
-      game.frozen[index]
-    ) {
-      return false;
-    }
-    const card = game.hands[game.turn].find((item) => item.id === cardId);
-    if (!card || cardCost(game, card) > game.mana) return false;
-    const definition = CARD_DEFINITIONS[card.kind];
-    if (definition.target === "empty") return game.board[index] === null;
-    if (definition.target === "ally") return game.board[index] === game.turn;
-    return false;
+    return canTargetCard(game, cardId, index, isHumanTurn && !networkIntentPending);
   };
 
   const playCardFromHand = (cardId: string, targetIndex?: number) => {
@@ -306,8 +112,7 @@ export function GameClient() {
       playSfx("click", 0.38);
     }
     if (mode === "online" && network.side === 2) {
-      setNetworkIntentPending(true);
-      photonSession.current?.sendIntent({
+      online.sendIntent({
         type: "play",
         cardId,
         targetIndex,
@@ -340,10 +145,8 @@ export function GameClient() {
     if (screen !== "game" || previousTurnRef.current === game.turn) return;
     previousTurnRef.current = game.turn;
     clearDrag();
-    setTurnBanner(game.turn);
-    const timeout = window.setTimeout(() => setTurnBanner(null), 760);
-    return () => window.clearTimeout(timeout);
-  }, [clearDrag, game.turn, screen]);
+    showTurnBanner(game.turn);
+  }, [clearDrag, game.turn, screen, showTurnBanner]);
 
   const startGame = (nextMode: GameMode) => {
     playSfx("click", 0.38);
@@ -355,10 +158,8 @@ export function GameClient() {
     setRoguelike(nextRun);
     setGame(next);
     previousTurnRef.current = next.turn;
-    setTurnBanner(next.turn);
+    showTurnBanner(next.turn);
     setPauseOpen(false);
-    window.setTimeout(() => setTurnBanner(null), 760);
-    setNetworkIntentPending(false);
     setScreen("game");
   };
 
@@ -369,22 +170,18 @@ export function GameClient() {
     setMode("online");
     setGame(next);
     previousTurnRef.current = next.turn;
-    setTurnBanner(next.turn);
+    showTurnBanner(next.turn);
     setPauseOpen(false);
-    window.setTimeout(() => setTurnBanner(null), 760);
-    setNetworkIntentPending(false);
     setScreen("game");
-    void photonSession.current?.connect(PHOTON_APP_ID);
+    void online.connect(PHOTON_APP_ID);
   };
 
   const leaveToMenu = () => {
     playSfx("click", 0.38);
-    photonSession.current?.disconnect();
-    setNetwork(INITIAL_NETWORK);
-    setNetworkIntentPending(false);
+    online.disconnect();
     clearDrag();
     damage.clearFlights();
-    setTurnBanner(null);
+    hideTurnBanner();
     setPauseOpen(false);
     setRulesOpen(false);
     setRoguelike(null);
@@ -394,22 +191,19 @@ export function GameClient() {
   const continueAfterResult = () => {
     playSfx("click", 0.38);
     if (mode === "online" && network.side === 2) {
-      setNetworkIntentPending(true);
-      photonSession.current?.sendIntent({ type: "next-round" });
+      online.sendIntent({ type: "next-round" });
       return;
     }
     const next = game.phase === "game-over" ? createGame(game.deckKinds) : startNextRound(game);
     previousTurnRef.current = next.turn;
-    setTurnBanner(next.turn);
-    window.setTimeout(() => setTurnBanner(null), 760);
+    showTurnBanner(next.turn);
     setGame(next);
   };
 
   const finishTurn = () => {
     playSfx("click", 0.38);
     if (mode === "online" && network.side === 2) {
-      setNetworkIntentPending(true);
-      photonSession.current?.sendIntent({ type: "end-turn" });
+      online.sendIntent({ type: "end-turn" });
       return;
     }
     setGame((current) => endTurn(current));
@@ -426,8 +220,7 @@ export function GameClient() {
     setRoguelike(nextRun);
     const next = createRoguelikeGame(nextRun);
     previousTurnRef.current = next.turn;
-    setTurnBanner(next.turn);
-    window.setTimeout(() => setTurnBanner(null), 760);
+    showTurnBanner(next.turn);
     setGame(next);
   };
 
@@ -526,7 +319,7 @@ export function GameClient() {
       boardRef={boardRef}
       setCellRef={damage.setCellRef}
       setHealthRef={damage.setHealthRef}
-      remainingHealth={remainingHealth}
+      remainingHealth={(player) => remainingHealth(game, player, damage.previewDamage)}
       canTarget={canCardTargetCell}
       onCardDown={cardDrag.begin}
       onCardMove={cardDrag.move}

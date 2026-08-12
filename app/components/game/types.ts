@@ -1,6 +1,6 @@
 import type { Player } from "../../game/engine";
 
-export type GameMode = "local" | "bot" | "roguelike" | "online";
+export type { GameMode } from "../../game/game-mode";
 
 export type DragState = {
   cardId: string;
