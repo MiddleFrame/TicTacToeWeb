@@ -75,6 +75,14 @@
   filter: none;
 }
 
+:root[data-theme="dark"] .unity-pause-button img {
+  filter: none;
+}
+
+:root[data-theme="dark"] .unity-board .cell {
+  background: transparent;
+}
+
 :root[data-theme="dark"] .unity-game-shell {
   background: rgb(17 17 17 / 90%);
 }
@@ -2083,6 +2091,7 @@ body[data-game-screen="menu"]::before {
   width: 48px;
   height: 48px;
   object-fit: contain;
+  filter: brightness(0);
 }
 
 .unity-game-tools {
