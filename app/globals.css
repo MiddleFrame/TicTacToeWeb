@@ -2039,7 +2039,7 @@ body {
   border-radius: inherit;
   background: var(--ink);
   transform-origin: left center;
-  transition: width 380ms cubic-bezier(0.22, 0.8, 0.25, 1);
+  transition: width 68ms linear;
 }
 
 .unity-health.active .unity-health-track {
@@ -2082,12 +2082,22 @@ body {
 }
 
 .unity-board .cell.drag-hover::after {
-  width: 88%;
-  border: 0;
-  border-radius: 12%;
-  background: rgb(126 193 255 / 50%);
-  opacity: 1;
-  transform: none;
+  opacity: 0;
+}
+
+.unity-board .placement-preview {
+  position: absolute;
+  z-index: 4;
+  opacity: 0.15;
+  filter: grayscale(1) brightness(0);
+  animation: none;
+}
+
+.unity-board .placement-preview-ice {
+  z-index: 4;
+  opacity: 0.15;
+  filter: grayscale(1) brightness(0);
+  animation: none;
 }
 
 .unity-board .cell.clearing {
@@ -2454,6 +2464,10 @@ body {
     0 0 0 3px rgb(31 164 216 / 85%),
     0 10px 24px rgb(0 0 0 / 20%);
   transition: none;
+}
+
+.unity-hand-card.dragging.cell-preview-active {
+  opacity: 0.38;
 }
 
 .unity-hand-card.dragging.returning {

@@ -44,8 +44,13 @@ type BoardProps = {
 
 export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights }: BoardProps) {
   const { t } = useLocalization();
+  const draggedCard = drag
+    ? game.hands[game.turn].find((card) => card.id === drag.cardId)
+    : null;
+  const draggedDefinition = draggedCard ? CARD_DEFINITIONS[draggedCard.kind] : null;
+  const highlightsField = draggedDefinition?.target === "none";
   return (
-    <div className={`unity-board-wrap ${drag?.overField ? "drag-over" : ""}`}>
+    <div className={`unity-board-wrap ${drag?.overField && highlightsField ? "drag-over" : ""}`}>
       <div
         className="board unity-board"
         ref={boardRef}
@@ -60,6 +65,9 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
           const targetable = drag ? canTarget(drag.cardId, index) : false;
           const hovered = drag?.hoverIndex === index;
           const flight = flights.find((current) => current.index === index);
+          const cellPreview = hovered && draggedCard && draggedDefinition?.target !== "none";
+          const figurePreview = cellPreview && draggedCard.kind !== "freeze-cell";
+          const icePreview = cellPreview && draggedCard.kind === "freeze-cell";
           return (
             <button
               className={`cell ${cell ? `has-player-${cell}` : ""} ${clearing ? "clearing" : ""} ${thawing ? "thawing" : ""} ${frozen ? "frozen" : ""} ${targetable ? "targetable" : ""} ${hovered ? "drag-hover" : ""}`}
@@ -83,6 +91,8 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
                   } as CSSProperties : undefined}
                 />
               )}
+              {figurePreview && <Figure player={game.turn} className="placement-preview" />}
+              {icePreview && <span className="ice-image placement-preview-ice" aria-hidden="true" />}
               {(frozen || thawing) && (
                 <>
                   <span className="ice-image" aria-hidden="true" />
@@ -144,9 +154,10 @@ export function GameHand(props: HandProps) {
           const cost = cardCost(props.game, card);
           const unavailable = props.disabled || props.player !== props.game.turn || cost > props.game.mana || props.game.phase !== "playing";
           const dragging = props.drag?.cardId === card.id;
+          const previewingCell = dragging && props.drag?.hoverIndex !== null && definition.target !== "none";
           return (
             <button
-              className={`unity-hand-card ${dragging ? "dragging" : ""} ${dragging && props.drag?.returning ? "returning" : ""} ${unavailable ? "unavailable" : ""}`}
+              className={`unity-hand-card ${dragging ? "dragging" : ""} ${previewingCell ? "cell-preview-active" : ""} ${dragging && props.drag?.returning ? "returning" : ""} ${unavailable ? "unavailable" : ""}`}
               disabled={unavailable}
               key={card.id}
               onPointerDown={(event) => props.onPointerDown(event, card.id)}
