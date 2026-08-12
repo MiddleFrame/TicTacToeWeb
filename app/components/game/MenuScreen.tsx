@@ -21,9 +21,10 @@ export function MenuScreen(props: MenuScreenProps) {
   return (
     <main className="unity-menu-shell">
       <header className="unity-menu-top">
-        <button className="unity-top-action" onClick={props.onOpenRules}>
+        <button className="unity-top-action" disabled>
           <Image src="/game/menu/friends.png" alt="" width="64" height="64" unoptimized />
-          {t("friends")}
+          <span>{t("friends")}</span>
+          <small>{t("inDevelopment")}</small>
         </button>
         <a
           className="unity-discord-link"

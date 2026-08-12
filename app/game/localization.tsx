@@ -9,7 +9,7 @@ export type Theme = "light" | "dark";
 const text = {
   ru: {
     back: "Назад в меню", settings: "Настройки", options: "Параметры", playerName: "Имя игрока", language: "Язык", russian: "Русский", english: "English", sound: "Звук", soundOn: "Включён", soundOff: "Выключен", theme: "Тема", classic: "Светлая", dark: "Тёмная",
-    friends: "Друзья", bot: "Игра с ботом", roguelike: "Рогалик", multiplayer: "Мультиплеер", local: "Игра с другом", guide: "Руководство", deck: "Колода", store: "Магазин",
+    friends: "Друзья", inDevelopment: "в разработке", bot: "Игра с ботом", roguelike: "Рогалик", multiplayer: "Мультиплеер", local: "Игра с другом", guide: "Руководство", deck: "Колода", store: "Магазин",
     newCards: "Новые карты", randomCard: "Случайная карта", collectionComplete: "Коллекция собрана", openNewCard: "Откройте новую карту", allUnlocked: "Все доступные карты уже открыты.", boughtToDeck: "Купленная карта сразу попадёт в вашу колоду.", buy50: "Купить за 50", soldOut: "Всё куплено", notEnough: "Недостаточно монет", newCard: "Новая карта", toDeck: "В колоду",
     buildDeck: "Соберите свою колоду", deckLead: "Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.", deckCopies: "В колоде экземпляров", saveDeck: "Сохранить колоду",
     turn: "Ход", endTurn: "Конец хода", replaceCard: "Заменить карту", hand: "Карты в руке", pause: "Пауза", resume: "Продолжить", toMenu: "В меню", mainMenu: "В главное меню", newMatch: "Новый матч", nextRound: "Следующий раунд", matchComplete: "Матч завершён", round: "Раунд", scoreByRounds: "Итог по раундам", nextBoard: "Следующее поле", mana: "мана",
@@ -19,7 +19,7 @@ const text = {
   },
   en: {
     back: "Back to menu", settings: "Settings", options: "Options", playerName: "Player name", language: "Language", russian: "Русский", english: "English", sound: "Sound", soundOn: "On", soundOff: "Off", theme: "Theme", classic: "Light", dark: "Dark",
-    friends: "Friends", bot: "Play with bot", roguelike: "Roguelike", multiplayer: "Multiplayer", local: "Local game", guide: "How to play", deck: "Deck", store: "Store",
+    friends: "Friends", inDevelopment: "in development", bot: "Play with bot", roguelike: "Roguelike", multiplayer: "Multiplayer", local: "Local game", guide: "How to play", deck: "Deck", store: "Store",
     newCards: "New cards", randomCard: "Random card", collectionComplete: "Collection complete", openNewCard: "Unlock a new card", allUnlocked: "Every available card is already unlocked.", boughtToDeck: "The purchased card is added directly to your deck.", buy50: "Buy for 50", soldOut: "Sold out", notEnough: "Not enough coins", newCard: "New card", toDeck: "Add to deck",
     buildDeck: "Build your deck", deckLead: "Choose at least 5 card types. The basic Place Figure card adds five copies.", deckCopies: "Cards in deck", saveDeck: "Save deck",
     turn: "Turn", endTurn: "End turn", replaceCard: "Replace card", hand: "Cards in hand", pause: "Pause", resume: "Continue", toMenu: "Menu", mainMenu: "Main menu", newMatch: "New match", nextRound: "Next round", matchComplete: "Match complete", round: "Round", scoreByRounds: "Round score", nextBoard: "Next board", mana: "mana",

@@ -32,24 +32,56 @@
   color-scheme: dark;
 }
 
-:root[data-theme="dark"] body,
-:root[data-theme="dark"] .unity-menu-shell,
-:root[data-theme="dark"] .unity-game-shell {
-  background:
-    linear-gradient(rgb(17 17 17 / 91%), rgb(17 17 17 / 91%)),
-    url("/game/pattern.png") center / 154px 155px repeat;
+:root[data-theme="dark"] body {
+  background: #080808;
 }
 
-:root[data-theme="dark"] .collection-shell,
-:root[data-theme="dark"] .settings-shell,
-:root[data-theme="dark"] .store-shell {
-  background:
-    linear-gradient(rgb(17 17 17 / 96%), rgb(17 17 17 / 96%)),
-    url("/game/pattern.png") 0 0 / 154px 155px repeat;
+:root[data-theme="dark"] .unity-menu-shell::before,
+:root[data-theme="dark"] .unity-game-shell::before,
+:root[data-theme="dark"] .collection-shell::before,
+:root[data-theme="dark"] .settings-shell::before,
+:root[data-theme="dark"] .store-shell::before {
+  filter: none;
+  opacity: 0.085;
 }
 
-:root[data-theme="dark"] img:not(.unity-logo):not(.unity-card-art),
-:root[data-theme="dark"] .figure,
+:root[data-theme="dark"] .unity-menu-shell::after,
+:root[data-theme="dark"] .unity-game-shell::after,
+:root[data-theme="dark"] .collection-shell::after,
+:root[data-theme="dark"] .settings-shell::after,
+:root[data-theme="dark"] .store-shell::after {
+  background: rgb(17 17 17 / 20%);
+}
+
+:root[data-theme="dark"] .unity-logo {
+  filter: invert(1) brightness(1.8);
+}
+
+:root[data-theme="dark"] .unity-top-action img,
+:root[data-theme="dark"] .unity-discord,
+:root[data-theme="dark"] .unity-coins img,
+:root[data-theme="dark"] .unity-menu-nav img,
+:root[data-theme="dark"] .settings-link img,
+:root[data-theme="dark"] .store-coins img,
+:root[data-theme="dark"] .figure {
+  filter: none;
+}
+
+:root[data-theme="dark"] .unity-turn-banner {
+  color: #090909;
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 8%,
+      rgb(245 245 245 / 97%) 8% 92%,
+      transparent 92%
+    );
+}
+
+:root[data-theme="dark"] .unity-turn-banner .figure {
+  filter: brightness(0);
+}
+
 :root[data-theme="dark"] .collection-art,
 :root[data-theme="dark"] .store-reveal-art,
 :root[data-theme="dark"] .roguelike-card-art {
@@ -124,6 +156,64 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: "Roboto TTTP", Arial, sans-serif;
+}
+
+.unity-menu-shell,
+.unity-game-shell,
+.collection-shell,
+.settings-shell,
+.store-shell {
+  position: relative;
+  isolation: isolate;
+  background: var(--paper);
+}
+
+.unity-menu-shell::before,
+.unity-game-shell::before,
+.collection-shell::before,
+.settings-shell::before,
+.store-shell::before,
+.unity-menu-shell::after,
+.unity-game-shell::after,
+.collection-shell::after,
+.settings-shell::after,
+.store-shell::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.unity-menu-shell::before,
+.unity-game-shell::before,
+.collection-shell::before,
+.settings-shell::before,
+.store-shell::before {
+  background: url("/game/pattern.png") 0 0 / 124px 125px repeat;
+  filter: brightness(0);
+  opacity: 0.052;
+}
+
+.unity-menu-shell::after,
+.unity-game-shell::after,
+.collection-shell::after,
+.settings-shell::after,
+.store-shell::after {
+  background: rgb(255 255 255 / 16%);
+}
+
+.unity-menu-shell > *,
+.unity-game-shell > *,
+.collection-shell > *,
+.settings-shell > *,
+.store-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.unity-menu-shell::before {
+  animation: unity-pattern-drift 16.67s linear infinite;
 }
 
 .menu-shell {
@@ -265,9 +355,6 @@ body {
     max(18px, env(safe-area-inset-right))
     max(88px, calc(env(safe-area-inset-bottom) + 72px))
     max(18px, env(safe-area-inset-left));
-  background:
-    linear-gradient(rgb(255 255 255 / 95%), rgb(255 255 255 / 95%)),
-    url("/game/pattern.png") 0 0 / 154px 155px repeat;
 }
 
 .collection-header {
@@ -477,9 +564,6 @@ body {
     max(18px, env(safe-area-inset-right))
     max(24px, env(safe-area-inset-bottom))
     max(18px, env(safe-area-inset-left));
-  background:
-    linear-gradient(rgb(255 255 255 / 96%), rgb(255 255 255 / 96%)),
-    url("/game/pattern.png") 0 0 / 154px 155px repeat;
 }
 
 .settings-panel,
@@ -1771,16 +1855,7 @@ body {
 }
 
 .unity-menu-shell {
-  background:
-    linear-gradient(rgb(255 255 255 / 91%), rgb(255 255 255 / 91%)),
-    url("/game/pattern.png") center / 154px 155px repeat;
   box-shadow: 0 0 55px rgb(0 0 0 / 18%);
-}
-
-.unity-game-shell {
-  background:
-    linear-gradient(rgb(255 255 255 / 91%), rgb(255 255 255 / 91%)),
-    url("/game/pattern.png") center / 154px 155px repeat;
 }
 
 .unity-menu-shell {
@@ -1809,9 +1884,16 @@ body {
   justify-self: start;
   display: grid;
   justify-items: center;
-  cursor: pointer;
+  cursor: default;
   color: #bababa;
   font-size: 10px;
+}
+
+.unity-top-action small {
+  margin-top: 1px;
+  font-size: 7px;
+  font-style: italic;
+  opacity: 0.72;
 }
 
 .unity-top-action img {
@@ -2627,6 +2709,12 @@ body {
   100% {
     opacity: 0;
     transform: translate(-50%, -58%) scaleX(0.35);
+  }
+}
+
+@keyframes unity-pattern-drift {
+  to {
+    background-position: 372px 250px;
   }
 }
 
