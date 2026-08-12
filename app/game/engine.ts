@@ -6,6 +6,9 @@ import {
   type CardKind,
   STARTER_SELECTED_KINDS,
 } from "./cards.ts";
+import { applyCardEffect } from "./card-effects.ts";
+import { findScoringCells, orthogonalNeighbours } from "./board-rules.ts";
+export { findScoringCells } from "./board-rules.ts";
 
 export type Player = 1 | 2;
 export type Cell = Player | null;
@@ -160,75 +163,6 @@ export function createSingleRoundGame(setup: {
     singleRound: true,
     exactDeck: setup.deck,
   });
-}
-
-function cellAt(board: Cell[], size: number, row: number, column: number): Cell {
-  if (row < 0 || column < 0 || row >= size || column >= size) return null;
-  return board[row * size + column];
-}
-
-export function findScoringCells(
-  board: Cell[],
-  size: number,
-  player: Player,
-  frozen: Readonly<Record<number, FrozenCell>> = {},
-): number[] {
-  const directions = [
-    [0, 1],
-    [1, 0],
-    [1, 1],
-    [1, -1],
-  ] as const;
-  const scored = new Set<number>();
-
-  for (let row = 0; row < size; row += 1) {
-    for (let column = 0; column < size; column += 1) {
-      const startIndex = row * size + column;
-      if (frozen[startIndex] || cellAt(board, size, row, column) !== player) {
-        continue;
-      }
-
-      for (const [rowStep, columnStep] of directions) {
-        const previousRow = row - rowStep;
-        const previousColumn = column - columnStep;
-        const previousIndex = previousRow * size + previousColumn;
-        const previous =
-          previousRow >= 0 &&
-          previousColumn >= 0 &&
-          previousRow < size &&
-          previousColumn < size &&
-          !frozen[previousIndex]
-            ? cellAt(board, size, previousRow, previousColumn)
-            : null;
-        if (previous === player) continue;
-
-        const line: number[] = [];
-        let currentRow = row;
-        let currentColumn = column;
-        while (
-          currentRow >= 0 &&
-          currentColumn >= 0 &&
-          currentRow < size &&
-          currentColumn < size
-        ) {
-          const currentIndex = currentRow * size + currentColumn;
-          if (
-            frozen[currentIndex] ||
-            cellAt(board, size, currentRow, currentColumn) !== player
-          ) {
-            break;
-          }
-          line.push(currentIndex);
-          currentRow += rowStep;
-          currentColumn += columnStep;
-        }
-
-        if (line.length >= 3) line.forEach((index) => scored.add(index));
-      }
-    }
-  }
-
-  return [...scored];
 }
 
 function finishRound(state: GameState, winner: Player | null): GameState {
@@ -487,17 +421,6 @@ function freezeEmptyCells(
   };
 }
 
-function orthogonalNeighbours(index: number, size: number): number[] {
-  const row = Math.floor(index / size);
-  const column = index % size;
-  const result: number[] = [];
-  if (row > 0) result.push(index - size);
-  if (row < size - 1) result.push(index + size);
-  if (column > 0) result.push(index - 1);
-  if (column < size - 1) result.push(index + 1);
-  return result;
-}
-
 function thawToCurrentFigures(
   state: GameState,
   indices: number[],
@@ -523,7 +446,7 @@ function thawToCurrentFigures(
 export function cardCost(state: GameState, card: CardInstance): number {
   const bonus = card.kind === "place"
     ? state.basePlacementCosts[state.turn]
-    : state.bonusCosts[card.id] ?? 0;
+    : state.bonusCosts[`${state.turn}:${card.kind}`] ?? 0;
   return CARD_DEFINITIONS[card.kind].cost + bonus;
 }
 
@@ -549,7 +472,8 @@ function consumeCard(
       ? state.bonusCosts
       : {
           ...state.bonusCosts,
-          [card.id]: (state.bonusCosts[card.id] ?? 0) + 1,
+          [`${state.turn}:${card.kind}`]:
+            (state.bonusCosts[`${state.turn}:${card.kind}`] ?? 0) + 1,
         },
     basePlacementCosts: card.kind === "place"
       ? {
@@ -595,158 +519,16 @@ export function playCard(
   }
 
   let next = consumeCard(state, card, cost);
-
-  switch (card.kind) {
-    case "place":
-      next = placeOnBoard(next, targetIndex as number);
-      break;
-    case "place-draw":
-      next = placeOnBoard(next, targetIndex as number);
-      next = cloneCardPools(next);
-      drawCardsMutable(next, next.turn, 1);
-      next = { ...next, lastAction: "Фигура поставлена, добрана карта" };
-      break;
-    case "random-effect":
-      next = {
-        ...next,
-        randomFigureTurns: {
-          ...next.randomFigureTurns,
-          [next.turn]: next.randomFigureTurns[next.turn] + 3,
-        },
-        lastAction: "Фигура будет появляться в начале следующих 3 ходов",
-      };
-      break;
-    case "freeze-3":
-      next = freezeEmptyCells(next, 3, "Заморожено клеток");
-      break;
-    case "place-5":
-      next = placeRandomFigures(next, 5);
-      break;
-    case "destroy-freeze": {
-      const candidates = Object.keys(next.frozen).map(Number);
-      const selected: number[] = [];
-      while (candidates.length > 0 && selected.length < 6) {
-        const position = Math.floor(Math.random() * candidates.length);
-        selected.push(candidates.splice(position, 1)[0]);
-      }
-      next = thawToCurrentFigures(
-        next,
-        selected,
-        `Разбито льдин: ${selected.length}`,
-      );
-      break;
-    }
-    case "freeze-effect":
-      next = {
-        ...next,
-        randomFreezeTurns: {
-          ...next.randomFreezeTurns,
-          [next.turn]: next.randomFreezeTurns[next.turn] + 3,
-        },
-        lastAction: "Лёд будет появляться в начале следующих 3 ходов",
-      };
-      break;
-    case "freeze-6-figures": {
-      const candidates = next.board
-        .map((cell, index) => (cell === next.turn ? index : -1))
-        .filter((index) => index >= 0);
-      const board = [...next.board];
-      const frozen = { ...next.frozen };
-      let count = 0;
-      while (candidates.length > 0 && count < 6) {
-        const position = Math.floor(Math.random() * candidates.length);
-        const [index] = candidates.splice(position, 1);
-        board[index] = null;
-        frozen[index] = { owner: next.turn, turns: 2 };
-        count += 1;
-      }
-      next = {
-        ...next,
-        board,
-        frozen,
-        lastAction: `Заморожено ваших фигур: ${count}`,
-      };
-      break;
-    }
-    case "freeze-all-mana": {
-      const iceCount = next.mana * 2;
-      next = freezeEmptyCells({ ...next, mana: 0 }, iceCount, "Создано льдин");
-      break;
-    }
-    case "freeze-cell":
-      next = {
-        ...next,
-        frozen: {
-          ...next.frozen,
-          [targetIndex as number]: { owner: next.turn, turns: 2 },
-        },
-        lastAction: "Клетка заморожена",
-      };
-      break;
-    case "full-house":
-      next = cloneCardPools(next);
-      drawCardsMutable(next, next.turn, MAX_HAND_SIZE);
-      next = { ...next, lastAction: "Рука заполнена картами" };
-      break;
-    case "ice-encirclement": {
-      const neighbours = orthogonalNeighbours(targetIndex as number, next.size)
-        .filter(
-          (index) => next.board[index] === null && !next.frozen[index],
-        );
-      const frozen = { ...next.frozen };
-      neighbours.forEach((index) => {
-        frozen[index] = { owner: next.turn, turns: 2 };
-      });
-      next = {
-        ...next,
-        frozen,
-        lastAction: `Заморожено соседних клеток: ${neighbours.length}`,
-      };
-      break;
-    }
-    case "place-around-freeze": {
-      const sourceIce = Object.keys(next.frozen).map(Number);
-      const frozen = { ...next.frozen };
-      let count = 0;
-      sourceIce.forEach((sourceIndex) => {
-        const candidates = orthogonalNeighbours(sourceIndex, next.size).filter(
-          (index) => next.board[index] === null && !frozen[index],
-        );
-        const index = randomFrom(candidates);
-        if (index === null) return;
-        frozen[index] = { owner: next.turn, turns: 2 };
-        count += 1;
-      });
-      next = {
-        ...next,
-        frozen,
-        lastAction: `Добавлено льдин: ${count}`,
-      };
-      break;
-    }
-    case "place-more": {
-      const figureCount = next.mana;
-      next = placeRandomFigures({ ...next, mana: 0 }, figureCount, false);
-      break;
-    }
-    case "shortage":
-      next = cloneCardPools(next);
-      drawCardsMutable(next, next.turn, 2);
-      next = { ...next, lastAction: "Добраны две карты" };
-      break;
-    case "surrounded-by-ice": {
-      const adjacentIce = orthogonalNeighbours(
-        targetIndex as number,
-        next.size,
-      ).filter((index) => Boolean(next.frozen[index]));
-      next = thawToCurrentFigures(
-        next,
-        adjacentIce,
-        `Разбито льдин рядом: ${adjacentIce.length}`,
-      );
-      break;
-    }
-  }
+  next = applyCardEffect(next, card, targetIndex, {
+    clonePools: cloneCardPools,
+    draw: (current, count) => drawCardsMutable(current, current.turn, count),
+    freezeEmpty: freezeEmptyCells,
+    neighbours: orthogonalNeighbours,
+    place: placeOnBoard,
+    placeRandom: placeRandomFigures,
+    random: randomFrom,
+    thaw: thawToCurrentFigures,
+  });
 
   if (next.phase === "playing" && enabledCellCount(next) === 0) {
     return finishRound(next, winnerByScore(next));
@@ -759,8 +541,8 @@ function resetPlayerBonusCosts(
   player: Player,
 ): Record<string, number> {
   const result = { ...bonusCosts };
-  Object.keys(result).forEach((cardId) => {
-    if (cardId.startsWith(`${player}-`)) result[cardId] = 0;
+  Object.keys(result).forEach((key) => {
+    if (key.startsWith(`${player}:`)) result[key] = 0;
   });
   return result;
 }

@@ -23,6 +23,79 @@
   color-scheme: light;
 }
 
+:root[data-theme="dark"] {
+  --ink: #f3f3f3;
+  --muted: #aaa;
+  --paper: #111;
+  --soft: #272727;
+  --mana: #68aee9;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .unity-menu-shell,
+:root[data-theme="dark"] .unity-game-shell {
+  background:
+    linear-gradient(rgb(17 17 17 / 91%), rgb(17 17 17 / 91%)),
+    url("/game/pattern.png") center / 154px 155px repeat;
+}
+
+:root[data-theme="dark"] .collection-shell,
+:root[data-theme="dark"] .settings-shell,
+:root[data-theme="dark"] .store-shell {
+  background:
+    linear-gradient(rgb(17 17 17 / 96%), rgb(17 17 17 / 96%)),
+    url("/game/pattern.png") 0 0 / 154px 155px repeat;
+}
+
+:root[data-theme="dark"] img:not(.unity-logo):not(.unity-card-art),
+:root[data-theme="dark"] .figure,
+:root[data-theme="dark"] .collection-art,
+:root[data-theme="dark"] .store-reveal-art,
+:root[data-theme="dark"] .roguelike-card-art {
+  filter: invert(1);
+}
+
+:root[data-theme="dark"] .unity-card-art {
+  filter: invert(1);
+}
+
+:root[data-theme="dark"] .collection-footer {
+  background: rgb(17 17 17 / 96%);
+}
+
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .hand-zone,
+:root[data-theme="dark"] .unity-menu-button,
+:root[data-theme="dark"] .unity-game-tools button,
+:root[data-theme="dark"] .unity-rechange,
+:root[data-theme="dark"] .unity-end-turn {
+  background: rgb(23 23 23 / 92%);
+}
+
+:root[data-theme="dark"] .modal-backdrop,
+:root[data-theme="dark"] .network-backdrop {
+  background: rgb(0 0 0 / 78%);
+}
+
+:root[data-theme="dark"] .settings-row {
+  border-bottom-color: #333;
+}
+
+:root[data-theme="dark"] .unity-hand-card,
+:root[data-theme="dark"] .cell,
+:root[data-theme="dark"] .settings-panel,
+:root[data-theme="dark"] .store-card-panel {
+  background: #171717;
+}
+
+:root[data-theme="dark"] .collection-lead,
+:root[data-theme="dark"] .collection-card small,
+:root[data-theme="dark"] .store-card-panel p,
+:root[data-theme="dark"] .store-reveal p {
+  color: #bbb;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -450,17 +523,6 @@ body {
   color: var(--ink);
   font: inherit;
   text-align: right;
-}
-
-.settings-language-row select {
-  min-width: 126px;
-  padding: 9px 34px 9px 11px;
-  border: 2px solid var(--ink);
-  border-radius: 7px;
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 700;
 }
 
 .settings-toggle,

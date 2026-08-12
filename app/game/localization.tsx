@@ -4,10 +4,11 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { CARD_DEFINITIONS, type CardKind } from "./cards";
 
 export type Language = "ru" | "en";
+export type Theme = "light" | "dark";
 
 const text = {
   ru: {
-    back: "Назад в меню", settings: "Настройки", options: "Параметры", playerName: "Имя игрока", language: "Язык", russian: "Русский", english: "English", sound: "Звук", soundOn: "Включён", soundOff: "Выключен", theme: "Тема", classic: "Классическая",
+    back: "Назад в меню", settings: "Настройки", options: "Параметры", playerName: "Имя игрока", language: "Язык", russian: "Русский", english: "English", sound: "Звук", soundOn: "Включён", soundOff: "Выключен", theme: "Тема", classic: "Светлая", dark: "Тёмная",
     friends: "Друзья", bot: "Игра с ботом", roguelike: "Рогалик", multiplayer: "Мультиплеер", local: "Игра с другом", guide: "Руководство", deck: "Колода", store: "Магазин",
     newCards: "Новые карты", randomCard: "Случайная карта", collectionComplete: "Коллекция собрана", openNewCard: "Откройте новую карту", allUnlocked: "Все доступные карты уже открыты.", boughtToDeck: "Купленная карта сразу попадёт в вашу колоду.", buy50: "Купить за 50", soldOut: "Всё куплено", notEnough: "Недостаточно монет", newCard: "Новая карта", toDeck: "В колоду",
     buildDeck: "Соберите свою колоду", deckLead: "Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.", deckCopies: "В колоде экземпляров", saveDeck: "Сохранить колоду",
@@ -17,7 +18,7 @@ const text = {
     connectFailed: "Не удалось подключиться", waitingOpponent: "Ждём соперника", connecting: "Подключаемся к Photon", roomCreated: "Комната создана. Матч начнётся, когда войдёт второй игрок.", searchingMatch: "Ищем свободный матч в европейском регионе.", returnMenu: "Вернуться в меню",
   },
   en: {
-    back: "Back to menu", settings: "Settings", options: "Options", playerName: "Player name", language: "Language", russian: "Русский", english: "English", sound: "Sound", soundOn: "On", soundOff: "Off", theme: "Theme", classic: "Classic",
+    back: "Back to menu", settings: "Settings", options: "Options", playerName: "Player name", language: "Language", russian: "Русский", english: "English", sound: "Sound", soundOn: "On", soundOff: "Off", theme: "Theme", classic: "Light", dark: "Dark",
     friends: "Friends", bot: "Play with bot", roguelike: "Roguelike", multiplayer: "Multiplayer", local: "Local game", guide: "How to play", deck: "Deck", store: "Store",
     newCards: "New cards", randomCard: "Random card", collectionComplete: "Collection complete", openNewCard: "Unlock a new card", allUnlocked: "Every available card is already unlocked.", boughtToDeck: "The purchased card is added directly to your deck.", buy50: "Buy for 50", soldOut: "Sold out", notEnough: "Not enough coins", newCard: "New card", toDeck: "Add to deck",
     buildDeck: "Build your deck", deckLead: "Choose at least 5 card types. The basic Place Figure card adds five copies.", deckCopies: "Cards in deck", saveDeck: "Save deck",
@@ -47,39 +48,92 @@ const englishCards: Record<CardKind, { name: string; description: string }> = {
   "surrounded-by-ice": { name: "Break nearby ice", description: "Breaks ice around your figure" },
 };
 
+const englishActions: Record<string, string> = {
+  "Выберите карту и разыграйте её": "Choose a card and play it",
+  "Фигура поставлена": "Figure placed",
+  "Фигура поставлена, добрана карта": "Figure placed and one card drawn",
+  "Фигура будет появляться в начале следующих 3 ходов": "A figure will appear at the start of your next 3 turns",
+  "Лёд будет появляться в начале следующих 3 ходов": "Ice will appear at the start of your next 3 turns",
+  "Рука заполнена картами": "Hand filled with cards",
+  "Добраны две карты": "Two cards drawn",
+  "Клетка заморожена": "Cell frozen",
+  "Нет свободных клеток": "No empty cells",
+  "Сработали эффекты начала хода": "Start-of-turn effects resolved",
+  "Новый ход: мана восстановлена, добраны 2 карты": "New turn: mana restored and 2 cards drawn",
+  "Одна случайная карта заменена": "One random card replaced",
+};
+
+const actionPrefixes: [string, string][] = [
+  ["Линия принесла ", "Line dealt "],
+  ["Размещено фигур: ", "Figures placed: "],
+  ["Случайные фигуры: +", "Random figures: +"],
+  ["Заморожено клеток: ", "Cells frozen: "],
+  ["Создано льдин: ", "Ice created: "],
+  ["Сработал эффект льда: ", "Ice effect resolved: "],
+  ["Разбито льдин: ", "Ice broken: "],
+  ["Заморожено ваших фигур: ", "Your figures frozen: "],
+  ["Заморожено соседних клеток: ", "Neighbouring cells frozen: "],
+  ["Добавлено льдин: ", "Ice added: "],
+  ["Разбито льдин рядом: ", "Nearby ice broken: "],
+];
+
+function localizeAction(value: string, language: Language): string {
+  if (language === "ru") return value;
+  const exact = englishActions[value];
+  if (exact) return exact;
+  const prefix = actionPrefixes.find(([source]) => value.startsWith(source));
+  if (!prefix) return value;
+  const translated = `${prefix[1]}${value.slice(prefix[0].length)}`;
+  return translated.replace(/ очк\.$/, " damage.");
+}
+
 type TranslationKey = keyof typeof text.ru;
 type LocalizationValue = {
   language: Language;
+  theme: Theme;
   setLanguage: (language: Language) => void;
+  setTheme: (theme: Theme) => void;
   t: (key: TranslationKey) => string;
   card: (kind: CardKind) => { name: string; description: string };
+  action: (value: string) => string;
 };
 
 const LocalizationContext = createContext<LocalizationValue | null>(null);
 
 export function LocalizationProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("ru");
+  const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
     const saved = window.localStorage.getItem("tttp-language");
-    if (saved !== "ru" && saved !== "en") return;
-    const timeout = window.setTimeout(() => setLanguageState(saved), 0);
+    const savedTheme = window.localStorage.getItem("tttp-theme");
+    const timeout = window.setTimeout(() => {
+      if (saved === "ru" || saved === "en") setLanguageState(saved);
+      if (savedTheme === "light" || savedTheme === "dark") setThemeState(savedTheme);
+    }, 0);
     return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
-  }, [language]);
+    document.documentElement.dataset.theme = theme;
+  }, [language, theme]);
 
   const value = useMemo<LocalizationValue>(() => ({
     language,
+    theme,
     setLanguage: (next) => {
       setLanguageState(next);
       window.localStorage.setItem("tttp-language", next);
     },
+    setTheme: (next) => {
+      setThemeState(next);
+      window.localStorage.setItem("tttp-theme", next);
+    },
     t: (key) => text[language][key],
     card: (kind) => language === "en" ? englishCards[kind] : CARD_DEFINITIONS[kind],
-  }), [language]);
+    action: (source) => localizeAction(source, language),
+  }), [language, theme]);
 
   return <LocalizationContext.Provider value={value}>{children}</LocalizationContext.Provider>;
 }
