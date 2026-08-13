@@ -84,7 +84,9 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
             <span className="eyebrow">{t("newCard")}</span>
             <h2 id="store-reveal-title">{localized.name}</h2>
             <p>{localized.description}</p>
-            <span className="purchase-card-scan" aria-hidden="true" />
+            <span className="purchase-card-scan-mask" aria-hidden="true">
+              <span className="purchase-card-scan" />
+            </span>
           </article>
           <span className="purchase-reveal-flare" aria-hidden="true" />
         </div>

@@ -851,7 +851,7 @@ body[data-game-screen="menu"]::before {
   isolation: isolate;
   transform-style: preserve-3d;
   will-change: transform, opacity;
-  animation: purchase-card-shell 1320ms cubic-bezier(0.16, 0.82, 0.22, 1) 620ms both;
+  animation: purchase-card-shell 1500ms cubic-bezier(0.2, 0.72, 0.18, 1) 620ms both;
 }
 
 .purchase-card::before {
@@ -962,28 +962,52 @@ body[data-game-screen="menu"]::before {
   animation: purchase-card-scan 1050ms ease-in-out 4650ms both;
 }
 
+.purchase-card-scan-mask {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  pointer-events: none;
+}
+
 .purchase-reveal-orbit {
   position: absolute;
   z-index: 1;
-  border: 3px dashed rgb(var(--reveal-accent-rgb, 84 211 255) / 76%);
   border-radius: 50%;
   opacity: 0;
   filter: drop-shadow(0 0 8px rgb(var(--reveal-accent-rgb) / 58%));
-  transform-style: preserve-3d;
+  transform-origin: center;
   will-change: transform, opacity;
+}
+
+.purchase-reveal-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 3px dashed rgb(var(--reveal-accent-rgb, 84 211 255) / 76%);
+  border-radius: 50%;
 }
 
 .purchase-reveal-orbit.orbit-one {
   width: 286px;
   height: 286px;
-  animation: purchase-orbit-clockwise 5200ms cubic-bezier(0.16, 0.78, 0.2, 1) both;
+  animation: purchase-orbit-grow-one 5200ms linear both;
+}
+
+.purchase-reveal-orbit.orbit-one::before {
+  animation: purchase-orbit-spin-clockwise 5200ms linear both;
 }
 
 .purchase-reveal-orbit.orbit-two {
   width: 238px;
   height: 238px;
+  animation: purchase-orbit-grow-two 5100ms linear 70ms both;
+}
+
+.purchase-reveal-orbit.orbit-two::before {
   border-style: dotted;
-  animation: purchase-orbit-counter 5100ms cubic-bezier(0.16, 0.78, 0.2, 1) 70ms both;
+  animation: purchase-orbit-spin-counter 5100ms linear 70ms both;
 }
 
 .purchase-reveal-flare {
@@ -1016,6 +1040,11 @@ body[data-game-screen="menu"]::before {
 
 .store-reveal-backdrop.reveal-rare .purchase-reveal-orbit,
 .store-reveal-backdrop.reveal-legendary .purchase-reveal-orbit {
+  filter: drop-shadow(0 0 11px rgb(var(--reveal-accent-rgb) / 62%));
+}
+
+.store-reveal-backdrop.reveal-rare .purchase-reveal-orbit::before,
+.store-reveal-backdrop.reveal-legendary .purchase-reveal-orbit::before {
   border-width: 4px;
 }
 
@@ -1257,16 +1286,21 @@ body[data-game-screen="menu"]::before {
 @keyframes purchase-card-shell {
   0% {
     opacity: 0;
-    transform: translate3d(0, -170px, 310px) rotateX(-62deg) rotateY(-18deg) rotateZ(-7deg) scale(0.34);
+    transform: translate3d(0, 72vh, 360px) rotateX(76deg) rotateY(-5deg) rotateZ(-4deg) scale(1.22);
   }
 
-  58% {
+  20% {
     opacity: 1;
-    transform: translate3d(0, 11px, 26px) rotateX(9deg) rotateY(5deg) rotateZ(2deg) scale(1.045);
+    transform: translate3d(0, 30vh, 220px) rotateX(62deg) rotateY(-3deg) rotateZ(-3deg) scale(1.14);
   }
 
-  72% {
-    transform: translate3d(0, -4px, -7px) rotateX(-4deg) rotateY(-2deg) rotateZ(-1deg) scale(0.99);
+  68% {
+    opacity: 1;
+    transform: translate3d(0, -10px, 22px) rotateX(-7deg) rotateY(3deg) rotateZ(1.5deg) scale(1.035);
+  }
+
+  82% {
+    transform: translate3d(0, 4px, -5px) rotateX(3deg) rotateY(-1deg) rotateZ(-0.5deg) scale(0.993);
   }
 
   100% {
@@ -1276,40 +1310,40 @@ body[data-game-screen="menu"]::before {
 }
 
 @keyframes purchase-mystery {
-  0% { opacity: 0; transform: translate3d(-50%, -70%, 210px) rotateX(58deg) rotateY(-42deg) rotateZ(-70deg) scale(0.32); }
-  34% { opacity: 1; transform: translate3d(-50%, -50%, 18px) rotateX(-7deg) rotateY(8deg) rotateZ(7deg) scale(1.08); }
-  68% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotateX(2deg) rotateY(-3deg) rotateZ(-3deg) scale(0.98); }
-  100% { opacity: 0; transform: translate3d(-50%, -50%, 110px) rotateX(-24deg) rotateY(20deg) rotateZ(18deg) scale(1.38); }
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 90px) rotateZ(-34deg) scale(0.38); }
+  34% { opacity: 1; transform: translate3d(-50%, -50%, 10px) rotateZ(5deg) scale(1.06); }
+  68% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotateZ(-2deg) scale(0.99); }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 55px) rotateZ(12deg) scale(1.24); }
 }
 
 @keyframes purchase-piece-art {
-  0% { opacity: 0; transform: translate3d(170px, -65px, 250px) rotateX(52deg) rotateY(64deg) rotateZ(20deg) scale(0.4); }
-  70% { opacity: 1; transform: translate3d(-5px, 2px, 12px) rotateX(-4deg) rotateY(-5deg) rotateZ(-2deg) scale(1.04); }
-  84% { transform: translate3d(3px, -1px, -4px) rotateX(2deg) rotateY(2deg) rotateZ(1deg) scale(0.99); }
+  0% { opacity: 0; transform: translate3d(135px, -20px, 80px) rotateY(35deg) rotateZ(10deg) scale(0.72); }
+  70% { opacity: 1; transform: translate3d(-4px, 1px, 8px) rotateY(-4deg) rotateZ(-1deg) scale(1.025); }
+  84% { transform: translate3d(2px, 0, -2px) rotateY(1deg) scale(0.995); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-cost {
-  0% { opacity: 0; transform: translate3d(-145px, -110px, 230px) rotateX(58deg) rotateY(-48deg) rotateZ(-150deg) scale(0.34); }
-  72% { opacity: 1; transform: translate3d(3px, 2px, 11px) rotateX(-5deg) rotateY(4deg) rotateZ(8deg) scale(1.08); }
+  0% { opacity: 0; transform: translate3d(-110px, -72px, 70px) rotateY(-28deg) rotateZ(-95deg) scale(0.58); }
+  72% { opacity: 1; transform: translate3d(2px, 1px, 7px) rotateY(3deg) rotateZ(6deg) scale(1.06); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-top {
-  0% { opacity: 0; transform: translate3d(34px, -105px, 190px) rotateX(66deg) rotateY(28deg) rotateZ(7deg) scale(0.55); }
-  72% { opacity: 1; transform: translate3d(-2px, 3px, 8px) rotateX(-4deg) rotateY(-2deg) rotateZ(-1deg) scale(1.04); }
+  0% { opacity: 0; transform: translate3d(20px, -62px, 55px) rotateX(32deg) rotateZ(4deg) scale(0.76); }
+  72% { opacity: 1; transform: translate3d(-1px, 2px, 5px) rotateX(-3deg) scale(1.025); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-title {
-  0% { opacity: 0; transform: translate3d(-175px, 20px, 215px) rotateX(-38deg) rotateY(-58deg) rotateZ(-7deg) scale(0.48); }
-  72% { opacity: 1; transform: translate3d(4px, -1px, 10px) rotateX(3deg) rotateY(4deg) rotateZ(1deg) scale(1.035); }
+  0% { opacity: 0; transform: translate3d(-125px, 12px, 65px) rotateY(-30deg) rotateZ(-4deg) scale(0.75); }
+  72% { opacity: 1; transform: translate3d(3px, 0, 6px) rotateY(3deg) rotateZ(1deg) scale(1.025); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-description {
-  0% { opacity: 0; transform: translate3d(95px, 125px, 180px) rotateX(-62deg) rotateY(24deg) rotateZ(5deg) scale(0.5); }
-  72% { opacity: 1; transform: translate3d(-2px, -3px, 8px) rotateX(4deg) rotateY(-3deg) rotateZ(-1deg) scale(1.035); }
+  0% { opacity: 0; transform: translate3d(70px, 72px, 55px) rotateX(-28deg) rotateY(14deg) rotateZ(3deg) scale(0.76); }
+  72% { opacity: 1; transform: translate3d(-1px, -2px, 5px) rotateX(3deg) rotateY(-2deg) scale(1.025); }
   100% { opacity: 1; transform: none; }
 }
 
@@ -1320,20 +1354,32 @@ body[data-game-screen="menu"]::before {
   100% { left: 118%; opacity: 0; }
 }
 
-@keyframes purchase-orbit-clockwise {
-  0% { opacity: 0; transform: translate3d(0, 28px, -260px) rotateX(72deg) rotateZ(-40deg) scale(0.16); }
-  8% { opacity: 1; transform: translate3d(0, 12px, -105px) rotateX(48deg) rotateZ(32deg) scale(0.62); }
-  20% { opacity: 0.92; transform: translate3d(0, 0, -34px) rotateX(18deg) rotateZ(112deg) scale(1.02); }
-  76% { opacity: 0.72; }
-  100% { opacity: 0; transform: translate3d(0, 0, -20px) rotateX(4deg) rotateZ(430deg) scale(1.34); }
+@keyframes purchase-orbit-grow-one {
+  0% { opacity: 0; transform: scale(0.06); }
+  12% { opacity: 1; transform: scale(0.52); }
+  24% { opacity: 0.92; transform: scale(0.9); }
+  38% { transform: scale(1.03); }
+  76% { opacity: 0.72; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.34); }
 }
 
-@keyframes purchase-orbit-counter {
-  0% { opacity: 0; transform: translate3d(0, -24px, -220px) rotateX(-68deg) rotateZ(210deg) scale(0.18); }
-  9% { opacity: 0.92; transform: translate3d(0, -10px, -90px) rotateX(-42deg) rotateZ(128deg) scale(0.68); }
-  22% { opacity: 0.86; transform: translate3d(0, 0, -28px) rotateX(-14deg) rotateZ(34deg) scale(1.08); }
-  78% { opacity: 0.62; }
-  100% { opacity: 0; transform: translate3d(0, 0, -16px) rotateX(-3deg) rotateZ(-390deg) scale(1.42); }
+@keyframes purchase-orbit-grow-two {
+  0% { opacity: 0; transform: scale(0.08); }
+  13% { opacity: 0.9; transform: scale(0.48); }
+  25% { opacity: 0.86; transform: scale(0.84); }
+  40% { transform: scale(1); }
+  78% { opacity: 0.62; transform: scale(1.18); }
+  100% { opacity: 0; transform: scale(1.38); }
+}
+
+@keyframes purchase-orbit-spin-clockwise {
+  from { transform: rotate(-35deg); }
+  to { transform: rotate(430deg); }
+}
+
+@keyframes purchase-orbit-spin-counter {
+  from { transform: rotate(205deg); }
+  to { transform: rotate(-390deg); }
 }
 
 @keyframes purchase-reveal-flare {
