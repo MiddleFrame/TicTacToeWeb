@@ -55,7 +55,7 @@ const RARITY_SETTINGS: Readonly<Record<CardRevealRarity, Pick<CardRevealProfile,
 };
 
 const BASE_CUES: readonly Omit<CardRevealCue, "strength">[] = [
-  { atMs: 930, sound: "dock" },
+  { atMs: 1400, sound: "dock" },
   { atMs: 2420, sound: "dock" },
   { atMs: 3000, sound: "dock" },
   { atMs: 3480, sound: "dock" },

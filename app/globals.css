@@ -825,6 +825,8 @@ body[data-game-screen="menu"]::before {
   display: grid;
   place-items: center;
   perspective: 900px;
+  perspective-origin: 50% 42%;
+  transform-style: preserve-3d;
   transform: scale(var(--reveal-scale, 1));
   transform-origin: center;
 }
@@ -841,14 +843,28 @@ body[data-game-screen="menu"]::before {
   grid-template-rows: auto minmax(80px, 1fr) auto auto;
   justify-items: center;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
+  backface-visibility: hidden;
+  border: 4px solid transparent;
+  border-radius: 17px;
+  background: transparent;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  animation: purchase-card-shell 1320ms cubic-bezier(0.16, 0.82, 0.22, 1) 620ms both;
+}
+
+.purchase-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -4px;
   border: 4px solid var(--ink);
   border-radius: 17px;
   background: var(--paper);
   box-shadow:
     9px 10px 0 var(--ink),
     0 0 54px rgb(var(--reveal-accent-rgb, 77 207 255) / var(--reveal-glow-alpha, 0.28));
-  animation: purchase-card-shell 1450ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
 }
 
 .purchase-card-cost {
@@ -866,7 +882,8 @@ body[data-game-screen="menu"]::before {
   color: var(--mana);
   font-weight: 700;
   opacity: 0;
-  animation: purchase-piece-cost 720ms cubic-bezier(0.16, 0.86, 0.22, 1.18) 2500ms both;
+  backface-visibility: hidden;
+  animation: purchase-piece-cost 720ms cubic-bezier(0.16, 0.86, 0.22, 1.18) 2480ms both;
 }
 
 .purchase-card-art {
@@ -878,13 +895,15 @@ body[data-game-screen="menu"]::before {
   background-repeat: no-repeat;
   background-size: contain;
   opacity: 0;
-  animation: purchase-piece-art 980ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 1750ms both;
+  backface-visibility: hidden;
+  animation: purchase-piece-art 980ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 1700ms both;
 }
 
 .purchase-card .eyebrow {
   grid-row: 1;
   opacity: 0;
-  animation: purchase-piece-top 680ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 3000ms both;
+  backface-visibility: hidden;
+  animation: purchase-piece-top 680ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 2990ms both;
 }
 
 .purchase-card h2 {
@@ -894,7 +913,8 @@ body[data-game-screen="menu"]::before {
   font-size: clamp(17px, 5vw, 28px);
   line-height: 1.02;
   opacity: 0;
-  animation: purchase-piece-title 760ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 3400ms both;
+  backface-visibility: hidden;
+  animation: purchase-piece-title 760ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 3380ms both;
 }
 
 .purchase-card p {
@@ -906,7 +926,8 @@ body[data-game-screen="menu"]::before {
   font-size: 10px;
   line-height: 1.3;
   opacity: 0;
-  animation: purchase-piece-description 740ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 3900ms both;
+  backface-visibility: hidden;
+  animation: purchase-piece-description 740ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 3890ms both;
 }
 
 .purchase-card-mystery {
@@ -924,7 +945,8 @@ body[data-game-screen="menu"]::before {
   background: var(--paper);
   font-size: 68px;
   font-weight: 700;
-  animation: purchase-mystery 1800ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+  backface-visibility: hidden;
+  animation: purchase-mystery 1600ms cubic-bezier(0.16, 0.82, 0.22, 1) 1050ms both;
 }
 
 .purchase-card-scan {
@@ -946,19 +968,22 @@ body[data-game-screen="menu"]::before {
   border: 3px dashed rgb(var(--reveal-accent-rgb, 84 211 255) / 76%);
   border-radius: 50%;
   opacity: 0;
+  filter: drop-shadow(0 0 8px rgb(var(--reveal-accent-rgb) / 58%));
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
 }
 
 .purchase-reveal-orbit.orbit-one {
   width: 286px;
   height: 286px;
-  animation: purchase-orbit-clockwise 4900ms ease-in-out both;
+  animation: purchase-orbit-clockwise 5200ms cubic-bezier(0.16, 0.78, 0.2, 1) both;
 }
 
 .purchase-reveal-orbit.orbit-two {
   width: 238px;
   height: 238px;
   border-style: dotted;
-  animation: purchase-orbit-counter 4700ms ease-in-out 180ms both;
+  animation: purchase-orbit-counter 5100ms cubic-bezier(0.16, 0.78, 0.2, 1) 70ms both;
 }
 
 .purchase-reveal-flare {
@@ -1232,16 +1257,16 @@ body[data-game-screen="menu"]::before {
 @keyframes purchase-card-shell {
   0% {
     opacity: 0;
-    transform: translateY(90px) rotateY(-34deg) rotateZ(-8deg) scale(0.42);
+    transform: translate3d(0, -170px, 310px) rotateX(-62deg) rotateY(-18deg) rotateZ(-7deg) scale(0.34);
   }
 
   58% {
     opacity: 1;
-    transform: translateY(-10px) rotateY(8deg) rotateZ(2deg) scale(1.04);
+    transform: translate3d(0, 11px, 26px) rotateX(9deg) rotateY(5deg) rotateZ(2deg) scale(1.045);
   }
 
   72% {
-    transform: translateY(4px) rotateY(-3deg) rotateZ(-1deg) scale(0.99);
+    transform: translate3d(0, -4px, -7px) rotateX(-4deg) rotateY(-2deg) rotateZ(-1deg) scale(0.99);
   }
 
   100% {
@@ -1251,40 +1276,40 @@ body[data-game-screen="menu"]::before {
 }
 
 @keyframes purchase-mystery {
-  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg) scale(0.3); }
-  32% { opacity: 1; transform: translate(-50%, -50%) rotate(8deg) scale(1.08); }
-  68% { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(0.98); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(24deg) scale(1.42); }
+  0% { opacity: 0; transform: translate3d(-50%, -70%, 210px) rotateX(58deg) rotateY(-42deg) rotateZ(-70deg) scale(0.32); }
+  34% { opacity: 1; transform: translate3d(-50%, -50%, 18px) rotateX(-7deg) rotateY(8deg) rotateZ(7deg) scale(1.08); }
+  68% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotateX(2deg) rotateY(-3deg) rotateZ(-3deg) scale(0.98); }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 110px) rotateX(-24deg) rotateY(20deg) rotateZ(18deg) scale(1.38); }
 }
 
 @keyframes purchase-piece-art {
-  0% { opacity: 0; transform: translateX(150px) rotate(24deg) scale(0.46); }
-  70% { opacity: 1; transform: translateX(-5px) rotate(-2deg) scale(1.04); }
-  84% { transform: translateX(3px) rotate(1deg) scale(0.99); }
+  0% { opacity: 0; transform: translate3d(170px, -65px, 250px) rotateX(52deg) rotateY(64deg) rotateZ(20deg) scale(0.4); }
+  70% { opacity: 1; transform: translate3d(-5px, 2px, 12px) rotateX(-4deg) rotateY(-5deg) rotateZ(-2deg) scale(1.04); }
+  84% { transform: translate3d(3px, -1px, -4px) rotateX(2deg) rotateY(2deg) rotateZ(1deg) scale(0.99); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-cost {
-  0% { opacity: 0; transform: translate(-120px, -90px) rotate(-160deg) scale(0.4); }
-  72% { opacity: 1; transform: translate(3px, 2px) rotate(8deg) scale(1.08); }
+  0% { opacity: 0; transform: translate3d(-145px, -110px, 230px) rotateX(58deg) rotateY(-48deg) rotateZ(-150deg) scale(0.34); }
+  72% { opacity: 1; transform: translate3d(3px, 2px, 11px) rotateX(-5deg) rotateY(4deg) rotateZ(8deg) scale(1.08); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-top {
-  0% { opacity: 0; transform: translateY(-72px) rotate(5deg); }
-  72% { opacity: 1; transform: translateY(3px) rotate(-1deg); }
+  0% { opacity: 0; transform: translate3d(34px, -105px, 190px) rotateX(66deg) rotateY(28deg) rotateZ(7deg) scale(0.55); }
+  72% { opacity: 1; transform: translate3d(-2px, 3px, 8px) rotateX(-4deg) rotateY(-2deg) rotateZ(-1deg) scale(1.04); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-title {
-  0% { opacity: 0; transform: translateX(-145px) rotate(-5deg); }
-  72% { opacity: 1; transform: translateX(4px) rotate(1deg); }
+  0% { opacity: 0; transform: translate3d(-175px, 20px, 215px) rotateX(-38deg) rotateY(-58deg) rotateZ(-7deg) scale(0.48); }
+  72% { opacity: 1; transform: translate3d(4px, -1px, 10px) rotateX(3deg) rotateY(4deg) rotateZ(1deg) scale(1.035); }
   100% { opacity: 1; transform: none; }
 }
 
 @keyframes purchase-piece-description {
-  0% { opacity: 0; transform: translateY(82px) rotate(3deg); }
-  72% { opacity: 1; transform: translateY(-3px) rotate(-1deg); }
+  0% { opacity: 0; transform: translate3d(95px, 125px, 180px) rotateX(-62deg) rotateY(24deg) rotateZ(5deg) scale(0.5); }
+  72% { opacity: 1; transform: translate3d(-2px, -3px, 8px) rotateX(4deg) rotateY(-3deg) rotateZ(-1deg) scale(1.035); }
   100% { opacity: 1; transform: none; }
 }
 
@@ -1296,17 +1321,19 @@ body[data-game-screen="menu"]::before {
 }
 
 @keyframes purchase-orbit-clockwise {
-  0% { opacity: 0; transform: rotate(0) scale(0.32); }
-  20% { opacity: 1; }
+  0% { opacity: 0; transform: translate3d(0, 28px, -260px) rotateX(72deg) rotateZ(-40deg) scale(0.16); }
+  8% { opacity: 1; transform: translate3d(0, 12px, -105px) rotateX(48deg) rotateZ(32deg) scale(0.62); }
+  20% { opacity: 0.92; transform: translate3d(0, 0, -34px) rotateX(18deg) rotateZ(112deg) scale(1.02); }
   76% { opacity: 0.72; }
-  100% { opacity: 0; transform: rotate(390deg) scale(1.25); }
+  100% { opacity: 0; transform: translate3d(0, 0, -20px) rotateX(4deg) rotateZ(430deg) scale(1.34); }
 }
 
 @keyframes purchase-orbit-counter {
-  0% { opacity: 0; transform: rotate(180deg) scale(0.42); }
-  22% { opacity: 0.9; }
-  78% { opacity: 0.64; }
-  100% { opacity: 0; transform: rotate(-320deg) scale(1.38); }
+  0% { opacity: 0; transform: translate3d(0, -24px, -220px) rotateX(-68deg) rotateZ(210deg) scale(0.18); }
+  9% { opacity: 0.92; transform: translate3d(0, -10px, -90px) rotateX(-42deg) rotateZ(128deg) scale(0.68); }
+  22% { opacity: 0.86; transform: translate3d(0, 0, -28px) rotateX(-14deg) rotateZ(34deg) scale(1.08); }
+  78% { opacity: 0.62; }
+  100% { opacity: 0; transform: translate3d(0, 0, -16px) rotateX(-3deg) rotateZ(-390deg) scale(1.42); }
 }
 
 @keyframes purchase-reveal-flare {
