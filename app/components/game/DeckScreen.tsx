@@ -9,6 +9,11 @@ type DeckScreenProps = {
   onSave: () => void;
 };
 
+const HIDDEN_CARD_COPY = {
+  name: "???",
+  description: "????????????",
+};
+
 export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onSave }: DeckScreenProps) {
   const { card, t } = useLocalization();
   const cardCount = selectedKinds.reduce((total, kind) => total + CARD_COUNTS[kind], 0);
@@ -32,9 +37,7 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
           const localized = card(kind);
           const selected = selectedKinds.includes(kind);
           const locked = !unlockedKinds.includes(kind);
-          const visibleCopy = locked
-            ? { name: t("lockedCard"), description: t("lockedCardDescription") }
-            : localized;
+          const visibleCopy = locked ? HIDDEN_CARD_COPY : localized;
           return (
             <button
               className={`collection-card ${selected ? "selected" : ""} ${locked ? "locked" : ""}`}
@@ -43,7 +46,7 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
               disabled={locked}
               aria-pressed={selected}
             >
-              <span className="collection-cost">{definition.cost}</span>
+              <span className="collection-cost">{locked ? "?" : definition.cost}</span>
               <span className="collection-art-circle">
                 <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />
               </span>

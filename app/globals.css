@@ -136,6 +136,10 @@
   filter: brightness(0);
 }
 
+:root[data-theme="dark"] .store-cart {
+  filter: invert(1);
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
