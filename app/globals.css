@@ -408,8 +408,9 @@ body[data-game-screen="menu"]::before {
   aspect-ratio: 5 / 7;
   padding: 18px 12px 35px;
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  justify-items: center;
   align-items: center;
   cursor: pointer;
   overflow: hidden;
