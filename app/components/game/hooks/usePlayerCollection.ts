@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS, type CardKind } from "../../../game/cards";
 import { cardPackCost, drawCardPack } from "../../../game/card-purchase";
+import { grantCoins, starterCollectionProgress, TEST_COIN_GRANT } from "../../../game/collection-progress";
 import type { PlaySound } from "./useGameAudio";
 
 function validKinds(value: unknown): CardKind[] {
@@ -74,16 +75,38 @@ export function usePlayerCollection(playSfx: PlaySound) {
     window.localStorage.setItem("tttp-deck", JSON.stringify(nextDeck));
   };
 
+  const addTestCoins = () => {
+    playSfx("click", 0.38);
+    setCoins((current) => {
+      const nextCoins = grantCoins(current);
+      window.localStorage.setItem("tttp-coins", String(nextCoins));
+      return nextCoins;
+    });
+  };
+
+  const resetCards = () => {
+    playSfx("click", 0.38);
+    const progress = starterCollectionProgress();
+    setSelectedKinds(progress.selectedKinds);
+    setUnlockedKinds(progress.unlockedKinds);
+    setPurchasedKinds([]);
+    window.localStorage.setItem("tttp-deck", JSON.stringify(progress.selectedKinds));
+    window.localStorage.setItem("tttp-unlocked", JSON.stringify(progress.unlockedKinds));
+  };
+
   return {
+    addTestCoins,
     buyCards,
     changeName,
     coins,
     lockedKinds: DECK_BUILDING_KINDS.filter((kind) => !unlockedKinds.includes(kind)),
     profileName,
     purchasedKinds,
+    resetCards,
     saveDeck,
     selectedKinds,
     setPurchasedKinds,
+    testCoinGrant: TEST_COIN_GRANT,
     toggleCard,
     unlockedKinds,
   };

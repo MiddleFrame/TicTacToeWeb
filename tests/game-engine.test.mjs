@@ -18,6 +18,7 @@ import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts"
 import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
 import { cardPackCost, drawCardPack } from "../app/game/card-purchase.ts";
+import { grantCoins, starterCollectionProgress, TEST_COIN_GRANT } from "../app/game/collection-progress.ts";
 import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
 import {
   chooseCardReward,
@@ -51,6 +52,14 @@ test("draws unique card packs of supported sizes", () => {
   });
   assert.equal(drawCardPack(["place", "freeze-cell"], 5).length, 2);
   assert.equal(cardPackCost(Number.NaN), 0);
+});
+
+test("provides deterministic collection testing controls", () => {
+  assert.equal(grantCoins(120), 120 + TEST_COIN_GRANT);
+  assert.equal(grantCoins(Number.NaN), TEST_COIN_GRANT);
+  const progress = starterCollectionProgress();
+  assert.deepEqual(progress.selectedKinds, progress.unlockedKinds);
+  assert.ok(progress.selectedKinds.length >= 5);
 });
 
 test("resolves card drops through target strategies", () => {

@@ -245,10 +245,14 @@ export function GameClient() {
   if (screen === "settings") {
     return (
       <SettingsScreen
+        coins={collection.coins}
         muted={muted}
         playerName={collection.profileName}
+        testCoinGrant={collection.testCoinGrant}
+        onAddCoins={collection.addTestCoins}
         onBack={() => setScreen("menu")}
         onNameChange={collection.changeName}
+        onResetCards={collection.resetCards}
         onToggleSound={() => {
           playSfx("click", 0.38);
           setMuted((current) => !current);
