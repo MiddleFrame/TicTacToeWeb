@@ -42,15 +42,17 @@ import { useOpponentTurns } from "./game/hooks/useOpponentTurns";
 import { usePhotonGame } from "./game/hooks/usePhotonGame";
 import { useTurnBanner } from "./game/hooks/useTurnBanner";
 import { useLocalization } from "../game/localization";
+import type { CardKind } from "../game/cards";
 
 const PHOTON_APP_ID = process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "";
 
 export function GameClient() {
   useScenePattern();
   const { action, t } = useLocalization();
-  const { muted, setMuted, playSfx, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
+  const { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
   const collection = usePlayerCollection(playSfx);
   const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "game">("menu");
+  const [deckFocusKind, setDeckFocusKind] = useState<CardKind | null>(null);
   const [mode, setMode] = useState<GameMode>("local");
   const [game, setGame] = useState(createGame);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -227,6 +229,7 @@ export function GameClient() {
   if (screen === "collection") {
     return (
       <DeckScreen
+        focusKind={deckFocusKind}
         selectedKinds={collection.selectedKinds}
         unlockedKinds={collection.unlockedKinds}
         onBack={() => setScreen("menu")}
@@ -259,14 +262,21 @@ export function GameClient() {
       <StoreScreen
         coins={collection.coins}
         lockedKinds={collection.lockedKinds}
-        purchasedKind={collection.purchasedKind}
+        purchasedKinds={collection.purchasedKinds}
+        selectedKinds={collection.selectedKinds}
+        unlockedKinds={collection.unlockedKinds}
         onAmbientSuspendedChange={setAmbientSuspended}
         onBack={() => {
-          collection.setPurchasedKind(null);
+          collection.setPurchasedKinds([]);
           setScreen("menu");
         }}
-        onBuy={collection.buyCard}
-        onCloseReveal={() => collection.setPurchasedKind(null)}
+        onBuy={collection.buyCards}
+        onCompleteReveal={(lastKind) => {
+          collection.setPurchasedKinds([]);
+          setDeckFocusKind(lastKind);
+          setScreen("collection");
+        }}
+        playDock={playRevealDock}
         startRevealAudio={startCardRevealAudio}
       />
     );
@@ -282,6 +292,7 @@ export function GameClient() {
         onStartOnline={startOnlineGame}
         onDeck={() => {
           playSfx("click", 0.38);
+          setDeckFocusKind(null);
           setScreen("collection");
         }}
         onStore={() => {

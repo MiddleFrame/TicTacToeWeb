@@ -1,5 +1,7 @@
-import { CARD_COUNTS, CARD_DEFINITIONS, DECK_BUILDING_KINDS, type CardKind } from "../../game/cards";
+import { useEffect, useRef } from "react";
+import { CARD_COUNTS, type CardKind } from "../../game/cards";
 import { useLocalization } from "../../game/localization";
+import { DeckCardGrid } from "./DeckCardGrid";
 
 type DeckScreenProps = {
   selectedKinds: CardKind[];
@@ -7,19 +9,22 @@ type DeckScreenProps = {
   onBack: () => void;
   onToggle: (kind: CardKind) => void;
   onSave: () => void;
+  focusKind?: CardKind | null;
 };
 
-const HIDDEN_CARD_COPY = {
-  name: "???",
-  description: "????????????",
-};
-
-export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onSave }: DeckScreenProps) {
-  const { card, t } = useLocalization();
+export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onSave, focusKind }: DeckScreenProps) {
+  const { t } = useLocalization();
+  const shellRef = useRef<HTMLElement | null>(null);
   const cardCount = selectedKinds.reduce((total, kind) => total + CARD_COUNTS[kind], 0);
 
+  useEffect(() => {
+    if (!focusKind) return;
+    shellRef.current?.querySelector<HTMLElement>(`[data-card-kind="${focusKind}"]`)
+      ?.scrollIntoView({ block: "center" });
+  }, [focusKind]);
+
   return (
-    <main className="collection-shell">
+    <main className="collection-shell" ref={shellRef}>
       <header className="collection-header">
         <button className="back-button" onClick={onBack} aria-label={t("back")}>←</button>
         <div>
@@ -31,35 +36,11 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
       <p className="collection-lead">
         {t("deckLead")}
       </p>
-      <section className="collection-grid">
-        {DECK_BUILDING_KINDS.map((kind) => {
-          const definition = CARD_DEFINITIONS[kind];
-          const localized = card(kind);
-          const selected = selectedKinds.includes(kind);
-          const locked = !unlockedKinds.includes(kind);
-          const visibleCopy = locked ? HIDDEN_CARD_COPY : localized;
-          return (
-            <button
-              className={`collection-card ${selected ? "selected" : ""} ${locked ? "locked" : ""}`}
-              key={kind}
-              onClick={() => onToggle(kind)}
-              disabled={locked}
-              aria-pressed={selected}
-            >
-              <span className="collection-cost">{locked ? "?" : definition.cost}</span>
-              <span className="collection-art-circle">
-                {locked
-                  ? <span className="collection-locked-art">?</span>
-                  : <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />}
-              </span>
-              <strong>{visibleCopy.name}</strong>
-              <small>{visibleCopy.description}</small>
-              {CARD_COUNTS[kind] > 1 && <span className="collection-count">×{CARD_COUNTS[kind]}</span>}
-              <span className="collection-check" aria-hidden="true">{locked ? "🔒" : selected ? "✓" : "+"}</span>
-            </button>
-          );
-        })}
-      </section>
+      <DeckCardGrid
+        onToggle={onToggle}
+        selectedKinds={selectedKinds}
+        unlockedKinds={unlockedKinds}
+      />
       <footer className="collection-footer">
         <span>{t("deckCopies")}: {cardCount}</span>
         <button className="primary-button" onClick={onSave}>{t("saveDeck")}</button>

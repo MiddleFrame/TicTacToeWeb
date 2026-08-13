@@ -1,24 +1,29 @@
 import Image from "next/image";
 import type { CardKind } from "../../game/cards";
+import { cardPackCost } from "../../game/card-purchase";
 import { useLocalization } from "../../game/localization";
-import type { StartCardRevealAudio } from "./hooks/useGameAudio";
-import { CardPurchaseReveal } from "./CardPurchaseReveal";
+import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
+import { CardPurchaseFlow } from "./CardPurchaseFlow";
 
 type StoreScreenProps = {
   coins: number;
   lockedKinds: CardKind[];
-  purchasedKind: CardKind | null;
+  purchasedKinds: CardKind[];
+  selectedKinds: CardKind[];
+  unlockedKinds: CardKind[];
   onAmbientSuspendedChange: (suspended: boolean) => void;
   onBack: () => void;
-  onBuy: () => void;
-  onCloseReveal: () => void;
+  onBuy: (count: number) => void;
+  onCompleteReveal: (lastKind: CardKind) => void;
+  playDock: PlayCardDock;
   startRevealAudio: StartCardRevealAudio;
 };
 
 export function StoreScreen(props: StoreScreenProps) {
   const { t } = useLocalization();
   const soldOut = props.lockedKinds.length === 0;
-  const canBuy = props.coins >= 50 && !soldOut;
+  const canBuyOne = props.coins >= cardPackCost(1) && props.lockedKinds.length >= 1;
+  const canBuyFive = props.coins >= cardPackCost(5) && props.lockedKinds.length >= 5;
   return (
     <main className="store-shell">
       <header className="section-screen-header">
@@ -37,18 +42,28 @@ export function StoreScreen(props: StoreScreenProps) {
         <span className="eyebrow">{t("randomCard")}</span>
         <h2>{soldOut ? t("collectionComplete") : t("openNewCard")}</h2>
         <p>{soldOut ? t("allUnlocked") : t("boughtToDeck")}</p>
-        <button className="primary-button store-buy-button" disabled={!canBuy} onClick={props.onBuy}>
-          {canBuy ? t("buy50") : soldOut ? t("soldOut") : t("notEnough")}
-          {!soldOut && <Image src="/game/menu/coin.png" alt="" width="24" height="24" unoptimized />}
-        </button>
+        <div className="store-buy-actions">
+          <button className="primary-button store-buy-button" disabled={!canBuyOne} onClick={() => props.onBuy(1)}>
+            {canBuyOne ? t("buy50") : soldOut ? t("soldOut") : t("notEnough")}
+            {!soldOut && <Image src="/game/menu/coin.png" alt="" width="24" height="24" unoptimized />}
+          </button>
+          <button className="secondary-button store-buy-button store-pack-button" disabled={!canBuyFive} onClick={() => props.onBuy(5)}>
+            {t("buyFive")}
+            <span>250</span>
+            <Image src="/game/menu/coin.png" alt="" width="22" height="22" unoptimized />
+          </button>
+        </div>
       </section>
-      {props.purchasedKind && (
-        <CardPurchaseReveal
-          key={props.purchasedKind}
-          kind={props.purchasedKind}
+      {props.purchasedKinds.length > 0 && (
+        <CardPurchaseFlow
+          key={props.purchasedKinds.join("-")}
+          kinds={props.purchasedKinds}
           onAmbientSuspendedChange={props.onAmbientSuspendedChange}
-          onClose={props.onCloseReveal}
+          onComplete={props.onCompleteReveal}
+          playDock={props.playDock}
+          selectedKinds={props.selectedKinds}
           startAudio={props.startRevealAudio}
+          unlockedKinds={props.unlockedKinds}
         />
       )}
     </main>

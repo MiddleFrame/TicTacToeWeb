@@ -6,13 +6,15 @@ import { useLocalization } from "../../game/localization";
 import type { StartCardRevealAudio } from "./hooks/useGameAudio";
 
 type CardPurchaseRevealProps = {
+  acceptLabel: string;
+  current: number;
   kind: CardKind;
-  onAmbientSuspendedChange: (suspended: boolean) => void;
-  onClose: () => void;
+  onAccept: () => void;
   startAudio: StartCardRevealAudio;
+  total: number;
 };
 
-export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, startAudio }: CardPurchaseRevealProps) {
+export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, startAudio, total }: CardPurchaseRevealProps) {
   const [complete, setComplete] = useState(false);
   const revealRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<CardRevealAudioController | null>(null);
@@ -23,7 +25,6 @@ export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, st
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    onAmbientSuspendedChange(true);
     audioRef.current = reducedMotion ? null : startAudio(profile);
     revealRef.current?.getAnimations({ subtree: true }).forEach((animation) => {
       animation.playbackRate = profile.playbackRate;
@@ -36,16 +37,14 @@ export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, st
       window.clearTimeout(timeout);
       audioRef.current?.stop();
       audioRef.current = null;
-      onAmbientSuspendedChange(false);
     };
-  }, [onAmbientSuspendedChange, profile, startAudio]);
+  }, [profile, startAudio]);
 
   useEffect(() => {
     if (!complete) return;
     audioRef.current?.stop();
     audioRef.current = null;
-    onAmbientSuspendedChange(false);
-  }, [complete, onAmbientSuspendedChange]);
+  }, [complete]);
 
   const accelerate = () => {
     revealRef.current?.getAnimations({ subtree: true }).forEach((animation) => {
@@ -69,6 +68,7 @@ export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, st
       onPointerDown={accelerate}
     >
       <section className="store-reveal-sequence" role="dialog" aria-modal="true" aria-labelledby="store-reveal-title">
+        <strong className="purchase-reveal-progress">{current}/{total}</strong>
         <div className="purchase-reveal-stage">
           <span className="purchase-reveal-orbit orbit-one" aria-hidden="true" />
           <span className="purchase-reveal-orbit orbit-two" aria-hidden="true" />
@@ -84,7 +84,7 @@ export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, st
           <span className="purchase-reveal-flare" aria-hidden="true" />
         </div>
         <span className="purchase-reveal-skip">{t("tapToAccelerate")}</span>
-        <button className="primary-button purchase-reveal-close" onAnimationEnd={() => setComplete(true)} onClick={onClose}>{t("toDeck")}</button>
+        <button className="primary-button purchase-reveal-close" onAnimationEnd={() => setComplete(true)} onClick={onAccept}>{acceptLabel}</button>
       </section>
     </div>
   );

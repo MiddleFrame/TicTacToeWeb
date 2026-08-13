@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createCardRevealSoundscape, type CardRevealAudioController } from "../../../game/card-reveal-audio";
-import type { CardRevealProfile } from "../../../game/card-reveal-profile";
+import { createCardRevealSoundscape, playCardDock, type CardRevealAudioController } from "../../../game/card-reveal-audio";
+import { cardRevealProfile, type CardRevealProfile } from "../../../game/card-reveal-profile";
+import type { CardKind } from "../../../game/cards";
 
 const paths = {
   click: ["/game/audio/ui-click-01.ogg", "/game/audio/ui-click-02.ogg"],
@@ -13,6 +14,7 @@ const paths = {
 export type SoundKind = keyof typeof paths;
 export type PlaySound = (kind: SoundKind, volume?: number) => void;
 export type StartCardRevealAudio = (profile: CardRevealProfile) => CardRevealAudioController;
+export type PlayCardDock = (kind: CardKind, strength?: number) => void;
 
 export function useGameAudio() {
   const [muted, setMuted] = useState(false);
@@ -47,6 +49,14 @@ export function useGameAudio() {
     if (!music) return;
     music.volume = 0;
     music.pause();
+  }, []);
+
+  const playRevealDock = useCallback<PlayCardDock>((kind, strength = 1) => {
+    if (mutedRef.current) return;
+    const context = audioContextRef.current ?? new AudioContext();
+    audioContextRef.current = context;
+    void context.resume().catch(() => undefined);
+    playCardDock(context, cardRevealProfile(kind), strength);
   }, []);
 
   useEffect(() => {
@@ -86,5 +96,5 @@ export function useGameAudio() {
     else void music.play().catch(() => undefined);
   }, [ambientSuspended, muted]);
 
-  return { muted, setMuted, playSfx, setAmbientSuspended, startCardRevealAudio };
+  return { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio };
 }

@@ -17,6 +17,7 @@ import { resolveCardDrop } from "../app/game/card-interaction.ts";
 import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts";
 import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
+import { cardPackCost, drawCardPack } from "../app/game/card-purchase.ts";
 import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
 import {
   chooseCardReward,
@@ -39,6 +40,17 @@ test("builds reveal profiles from rarity and mechanics", () => {
   assert.equal(cardRevealProfile("place-more").rarity, "legendary");
   assert.ok(cardRevealProfile("place-more").scale > cardRevealProfile("place").scale);
   assert.ok(profiles.every((profile) => profile.cues.at(-1)?.sound === "light"));
+});
+
+test("draws unique card packs of supported sizes", () => {
+  [1, 3, 5, 7, 10].forEach((size) => {
+    const pack = drawCardPack(Object.keys(CARD_DEFINITIONS), size, () => 0.99);
+    assert.equal(pack.length, size);
+    assert.equal(new Set(pack).size, size);
+    assert.equal(cardPackCost(size), size * 50);
+  });
+  assert.equal(drawCardPack(["place", "freeze-cell"], 5).length, 2);
+  assert.equal(cardPackCost(Number.NaN), 0);
 });
 
 test("resolves card drops through target strategies", () => {

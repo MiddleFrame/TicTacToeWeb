@@ -142,3 +142,16 @@ export function createCardRevealSoundscape(
     },
   };
 }
+
+export function playCardDock(
+  context: AudioContext | null,
+  profile: CardRevealProfile,
+  strength = 1,
+) {
+  if (!context) return;
+  const master = context.createGain();
+  master.gain.setValueAtTime(0.78, context.currentTime);
+  master.connect(context.destination);
+  dock(context, master, profile, { atMs: 0, sound: "dock", strength });
+  window.setTimeout(() => master.disconnect(), 600);
+}
