@@ -80,7 +80,7 @@
 }
 
 :root[data-theme="dark"] .unity-board .cell {
-  background: transparent;
+  background: var(--paper);
 }
 
 :root[data-theme="dark"] .unity-game-shell {
