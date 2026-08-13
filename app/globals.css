@@ -715,6 +715,8 @@ body[data-game-screen="menu"]::before {
   display: grid;
   place-items: center;
   perspective: 900px;
+  transform: scale(var(--reveal-scale, 1));
+  transform-origin: center;
 }
 
 .purchase-card {
@@ -734,7 +736,7 @@ body[data-game-screen="menu"]::before {
   background: var(--paper);
   box-shadow:
     9px 10px 0 var(--ink),
-    0 0 42px rgb(77 207 255 / 28%);
+    0 0 54px rgb(var(--reveal-accent-rgb, 77 207 255) / var(--reveal-glow-alpha, 0.28));
   animation: purchase-card-shell 1450ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
 }
 
@@ -822,7 +824,7 @@ body[data-game-screen="menu"]::before {
   top: -25%;
   left: -60%;
   transform: rotate(14deg);
-  background: linear-gradient(90deg, transparent, rgb(105 220 255 / 68%), transparent);
+  background: linear-gradient(90deg, transparent, rgb(var(--reveal-accent-rgb, 105 220 255) / 72%), transparent);
   opacity: 0;
   animation: purchase-card-scan 1050ms ease-in-out 4650ms both;
 }
@@ -830,7 +832,7 @@ body[data-game-screen="menu"]::before {
 .purchase-reveal-orbit {
   position: absolute;
   z-index: 1;
-  border: 3px dashed rgb(84 211 255 / 72%);
+  border: 3px dashed rgb(var(--reveal-accent-rgb, 84 211 255) / 76%);
   border-radius: 50%;
   opacity: 0;
 }
@@ -855,7 +857,7 @@ body[data-game-screen="menu"]::before {
   z-index: 2;
   border-radius: 50%;
   opacity: 0;
-  box-shadow: 0 0 90px 44px rgb(72 211 255 / 62%);
+  box-shadow: 0 0 100px 48px rgb(var(--reveal-accent-rgb, 72 211 255) / 66%);
   animation: purchase-reveal-flare 1050ms ease-out 4800ms both;
 }
 
@@ -874,6 +876,15 @@ body[data-game-screen="menu"]::before {
   opacity: 0;
   pointer-events: none;
   animation: purchase-reveal-action 420ms ease-out 5600ms both;
+}
+
+.store-reveal-backdrop.reveal-rare .purchase-reveal-orbit,
+.store-reveal-backdrop.reveal-legendary .purchase-reveal-orbit {
+  border-width: 4px;
+}
+
+.store-reveal-backdrop.reveal-legendary .purchase-reveal-orbit.orbit-two {
+  box-shadow: 0 0 26px rgb(var(--reveal-accent-rgb) / 55%);
 }
 
 .store-reveal-backdrop.complete .purchase-card,

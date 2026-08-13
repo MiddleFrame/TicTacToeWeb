@@ -48,7 +48,7 @@ const PHOTON_APP_ID = process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "";
 export function GameClient() {
   useScenePattern();
   const { action, t } = useLocalization();
-  const { muted, setMuted, playSfx } = useGameAudio();
+  const { muted, setMuted, playSfx, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
   const collection = usePlayerCollection(playSfx);
   const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "game">("menu");
   const [mode, setMode] = useState<GameMode>("local");
@@ -260,12 +260,14 @@ export function GameClient() {
         coins={collection.coins}
         lockedKinds={collection.lockedKinds}
         purchasedKind={collection.purchasedKind}
+        onAmbientSuspendedChange={setAmbientSuspended}
         onBack={() => {
           collection.setPurchasedKind(null);
           setScreen("menu");
         }}
         onBuy={collection.buyCard}
         onCloseReveal={() => collection.setPurchasedKind(null)}
+        startRevealAudio={startCardRevealAudio}
       />
     );
   }

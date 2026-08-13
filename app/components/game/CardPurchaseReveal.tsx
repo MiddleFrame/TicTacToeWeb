@@ -1,38 +1,71 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { CARD_DEFINITIONS, type CardKind } from "../../game/cards";
+import { cardRevealProfile } from "../../game/card-reveal-profile";
+import type { CardRevealAudioController } from "../../game/card-reveal-audio";
 import { useLocalization } from "../../game/localization";
-
-const REVEAL_DURATION_MS = 6200;
+import type { StartCardRevealAudio } from "./hooks/useGameAudio";
 
 type CardPurchaseRevealProps = {
   kind: CardKind;
+  onAmbientSuspendedChange: (suspended: boolean) => void;
   onClose: () => void;
+  startAudio: StartCardRevealAudio;
 };
 
-export function CardPurchaseReveal({ kind, onClose }: CardPurchaseRevealProps) {
+export function CardPurchaseReveal({ kind, onAmbientSuspendedChange, onClose, startAudio }: CardPurchaseRevealProps) {
   const [complete, setComplete] = useState(false);
   const revealRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<CardRevealAudioController | null>(null);
   const { card, t } = useLocalization();
   const definition = CARD_DEFINITIONS[kind];
   const localized = card(kind);
+  const profile = useMemo(() => cardRevealProfile(kind), [kind]);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timeout = window.setTimeout(() => setComplete(true), reducedMotion ? 0 : REVEAL_DURATION_MS);
-    return () => window.clearTimeout(timeout);
-  }, []);
+    onAmbientSuspendedChange(true);
+    audioRef.current = reducedMotion ? null : startAudio(profile);
+    revealRef.current?.getAnimations({ subtree: true }).forEach((animation) => {
+      animation.playbackRate = profile.playbackRate;
+    });
+    const timeout = window.setTimeout(
+      () => setComplete(true),
+      reducedMotion ? 0 : profile.durationMs / profile.playbackRate + 300,
+    );
+    return () => {
+      window.clearTimeout(timeout);
+      audioRef.current?.stop();
+      audioRef.current = null;
+      onAmbientSuspendedChange(false);
+    };
+  }, [onAmbientSuspendedChange, profile, startAudio]);
+
+  useEffect(() => {
+    if (!complete) return;
+    audioRef.current?.stop();
+    audioRef.current = null;
+    onAmbientSuspendedChange(false);
+  }, [complete, onAmbientSuspendedChange]);
 
   const accelerate = () => {
     revealRef.current?.getAnimations({ subtree: true }).forEach((animation) => {
-      animation.playbackRate = 5;
+      animation.playbackRate = profile.playbackRate * 5;
     });
+    audioRef.current?.accelerate(5);
   };
+
+  const revealStyle = {
+    "--reveal-accent-rgb": profile.accentRgb,
+    "--reveal-scale": profile.scale,
+    "--reveal-glow-alpha": profile.glowAlpha,
+  } as CSSProperties;
 
   return (
     <div
-      className={`modal-backdrop store-reveal-backdrop ${complete ? "complete" : "playing"}`}
+      className={`modal-backdrop store-reveal-backdrop reveal-${profile.rarity} reveal-${profile.accent} ${complete ? "complete" : "playing"}`}
       ref={revealRef}
       role="presentation"
+      style={revealStyle}
       onPointerDown={accelerate}
     >
       <section className="store-reveal-sequence" role="dialog" aria-modal="true" aria-labelledby="store-reveal-title">

@@ -1,15 +1,18 @@
 import Image from "next/image";
 import type { CardKind } from "../../game/cards";
 import { useLocalization } from "../../game/localization";
+import type { StartCardRevealAudio } from "./hooks/useGameAudio";
 import { CardPurchaseReveal } from "./CardPurchaseReveal";
 
 type StoreScreenProps = {
   coins: number;
   lockedKinds: CardKind[];
   purchasedKind: CardKind | null;
+  onAmbientSuspendedChange: (suspended: boolean) => void;
   onBack: () => void;
   onBuy: () => void;
   onCloseReveal: () => void;
+  startRevealAudio: StartCardRevealAudio;
 };
 
 export function StoreScreen(props: StoreScreenProps) {
@@ -43,7 +46,9 @@ export function StoreScreen(props: StoreScreenProps) {
         <CardPurchaseReveal
           key={props.purchasedKind}
           kind={props.purchasedKind}
+          onAmbientSuspendedChange={props.onAmbientSuspendedChange}
           onClose={props.onCloseReveal}
+          startAudio={props.startRevealAudio}
         />
       )}
     </main>
