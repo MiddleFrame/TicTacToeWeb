@@ -417,7 +417,7 @@ body[data-game-screen="menu"]::before {
   border-radius: 18px;
   background: var(--paper);
   color: var(--ink);
-  opacity: 0.72;
+  opacity: 1;
   transition: transform 120ms ease, border-color 120ms ease, opacity 120ms ease;
 }
 
@@ -433,31 +433,33 @@ body[data-game-screen="menu"]::before {
 }
 
 .collection-cost {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   position: absolute;
-  top: -4px;
-  left: -4px;
+  top: 9px;
+  left: 9px;
   display: grid;
   place-items: center;
-  border: 4px solid currentColor;
-  border-radius: 13px 0 14px 0;
+  border: 3px solid var(--mana);
+  border-radius: 50%;
   background: var(--paper);
+  color: var(--mana);
   font-weight: 700;
 }
 
 .collection-art-circle {
-  width: 91px;
-  height: 91px;
+  width: min(76%, 150px);
+  aspect-ratio: 1;
+  align-self: center;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--soft);
+  background: transparent;
 }
 
 .collection-art {
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  height: 100%;
   display: block;
   background-position: center;
   background-repeat: no-repeat;
@@ -477,16 +479,21 @@ body[data-game-screen="menu"]::before {
 }
 
 .collection-card > strong {
-  margin-top: 12px;
-  font-size: 12px;
+  max-width: 100%;
+  margin-top: 8px;
+  font-size: clamp(12px, 1.8vw, 17px);
   line-height: 1.05;
+  text-align: center;
 }
 
 .collection-card small {
-  margin-top: 7px;
+  max-width: 100%;
+  min-height: 2.36em;
+  margin-top: 6px;
   color: #4b4b4b;
-  font-size: 9px;
+  font-size: clamp(8px, 1.05vw, 10px);
   line-height: 1.18;
+  text-align: center;
 }
 
 .collection-count {
@@ -508,8 +515,11 @@ body[data-game-screen="menu"]::before {
   border: 3px solid var(--ink);
   border-radius: 50%;
   background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
   font-size: 14px;
   font-weight: 700;
+  padding: 0;
 }
 
 .collection-card.selected .collection-check {
@@ -543,6 +553,129 @@ body[data-game-screen="menu"]::before {
 
 .collection-footer .primary-button {
   margin: 0;
+}
+
+.deck-inspection-backdrop {
+  min-height: 100dvh;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
+  position: fixed;
+  z-index: 140;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: rgb(0 0 0 / 76%);
+  backdrop-filter: blur(7px);
+  animation: deck-inspection-dim 260ms ease both;
+}
+
+.deck-inspection-content {
+  width: min(470px, 100%);
+  max-height: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  pointer-events: none;
+}
+
+.deck-inspection-card {
+  width: min(320px, 78vw, 44dvh);
+  min-height: 0;
+  aspect-ratio: 5 / 7;
+  padding: 22px 20px 21px;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+  align-items: center;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 10px 12px 0 var(--ink), 0 24px 80px rgb(0 0 0 / 38%);
+  color: var(--ink);
+  pointer-events: auto;
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.deck-inspection-cost {
+  width: 38px;
+  height: 38px;
+  position: absolute;
+  z-index: 2;
+  top: 11px;
+  left: 11px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--mana);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--mana);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.deck-inspection-art {
+  width: min(190px, 54vw, 25dvh);
+  aspect-ratio: 1;
+  align-self: center;
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+:root[data-theme="dark"] .deck-inspection-art {
+  filter: invert(1);
+}
+
+.deck-inspection-card .eyebrow {
+  margin-bottom: 8px;
+}
+
+.deck-inspection-card h2 {
+  margin: 0;
+  max-width: 100%;
+  font-size: clamp(24px, 6vw, 34px);
+  line-height: 0.98;
+  text-align: center;
+}
+
+.deck-inspection-card p {
+  margin: 10px 0 0;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: clamp(11px, 2.7vw, 14px);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.card-mechanic-hints.deck-inspection-hints {
+  width: min(420px, 100%);
+  position: static;
+  transform: none;
+  pointer-events: auto;
+  animation: deck-inspection-hints-in 340ms ease 280ms both;
+}
+
+.deck-inspection-backdrop.closing .deck-inspection-hints {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+@keyframes deck-inspection-dim {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes deck-inspection-hints-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 .section-screen-header {
@@ -827,12 +960,10 @@ body[data-game-screen="menu"]::before {
   perspective: 900px;
   perspective-origin: 50% 42%;
   transform-style: preserve-3d;
-  transform: scale(var(--reveal-scale, 1));
-  transform-origin: center;
 }
 
 .purchase-card {
-  width: min(238px, 65vw, 37.8dvh);
+  width: min(var(--reveal-card-width, 238px), 65vw, 37.8dvh);
   height: auto;
   min-height: 0;
   aspect-ratio: 5 / 7;
@@ -3064,8 +3195,9 @@ body[data-game-screen="menu"]::before {
   padding: 15px 7px 8px;
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  justify-items: center;
   align-items: center;
   cursor: grab;
   overflow: hidden;

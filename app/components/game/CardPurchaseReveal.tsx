@@ -60,7 +60,7 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
 
   const revealStyle = {
     "--reveal-accent-rgb": profile.accentRgb,
-    "--reveal-scale": profile.scale,
+    "--reveal-card-width": `${238 * profile.scale}px`,
     "--reveal-glow-alpha": profile.glowAlpha,
   } as CSSProperties;
 
