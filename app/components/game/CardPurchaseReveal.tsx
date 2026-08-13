@@ -4,6 +4,7 @@ import { cardRevealProfile } from "../../game/card-reveal-profile";
 import type { CardRevealAudioController } from "../../game/card-reveal-audio";
 import { useLocalization } from "../../game/localization";
 import type { StartCardRevealAudio } from "./hooks/useGameAudio";
+import { CardRevealCover } from "./CardRevealCover";
 
 type CardPurchaseRevealProps = {
   acceptLabel: string;
@@ -78,7 +79,7 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
           <span className="purchase-reveal-orbit orbit-one" aria-hidden="true" />
           <span className="purchase-reveal-orbit orbit-two" aria-hidden="true" />
           <article className="purchase-card">
-            <span className="purchase-card-mystery" aria-hidden="true">?</span>
+            <CardRevealCover variant={profile.accent} />
             <span className="purchase-card-cost">{definition.cost}</span>
             <span className="purchase-card-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} aria-hidden="true" />
             <span className="eyebrow">{t("newCard")}</span>

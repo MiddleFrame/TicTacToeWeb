@@ -1020,7 +1020,7 @@ body[data-game-screen="menu"]::before {
   background-size: contain;
   opacity: 0;
   backface-visibility: hidden;
-  animation: purchase-piece-art 980ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 1700ms both;
+  animation: purchase-card-art-ready 1ms linear 2100ms forwards;
 }
 
 .purchase-card .eyebrow {
@@ -1054,24 +1054,167 @@ body[data-game-screen="menu"]::before {
   animation: purchase-piece-description 740ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 3890ms both;
 }
 
-.purchase-card-mystery {
-  width: 112px;
-  height: 112px;
+.purchase-card-cover {
+  width: min(184px, 53vw, 28dvh);
+  aspect-ratio: 1;
   position: absolute;
   z-index: 8;
   top: 50%;
   left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: center;
+  transform-style: preserve-3d;
+  will-change: opacity, transform;
+  animation: purchase-cover-land 720ms cubic-bezier(0.16, 0.78, 0.18, 1) 1450ms forwards;
+}
+
+.purchase-card-cover-face,
+.purchase-card-cover-cracks,
+.purchase-card-cover-fragments,
+.purchase-card-cover-fog {
+  position: absolute;
+  inset: 0;
+}
+
+.purchase-card-cover-face {
+  z-index: 1;
   display: grid;
   place-items: center;
-  transform: translate(-50%, -50%);
-  border: 5px solid var(--ink);
+  border: 6px solid var(--ink);
   border-radius: 50%;
   background: var(--paper);
-  font-size: 68px;
+  box-shadow: 0 12px 18px rgb(0 0 0 / 34%);
+  font-size: clamp(74px, 19vw, 108px);
   font-weight: 700;
+  line-height: 1;
   backface-visibility: hidden;
-  animation: purchase-mystery 1600ms cubic-bezier(0.16, 0.82, 0.22, 1) 1050ms both;
+  will-change: filter, opacity, transform;
 }
+
+.cover-white .purchase-card-cover-face {
+  animation: purchase-cover-fog-away 900ms ease-in 2700ms forwards;
+}
+
+.cover-ice .purchase-card-cover-face {
+  border-color: rgb(var(--reveal-accent-rgb));
+  background:
+    radial-gradient(circle at 36% 28%, rgb(255 255 255 / 24%), transparent 32%),
+    color-mix(in srgb, var(--paper) 88%, rgb(var(--reveal-accent-rgb)) 12%);
+  box-shadow:
+    0 12px 18px rgb(0 0 0 / 34%),
+    inset 0 0 28px rgb(var(--reveal-accent-rgb) / 25%);
+  animation: purchase-cover-ice-break 120ms linear 3240ms forwards;
+}
+
+.purchase-card-cover-cracks {
+  z-index: 2;
+  opacity: 0;
+}
+
+.purchase-card-cover-cracks > span {
+  width: var(--crack-length);
+  height: 3px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: 0 0 5px rgb(var(--reveal-accent-rgb) / 75%);
+  transform: rotate(var(--crack-angle)) scaleX(0);
+  transform-origin: left;
+}
+
+.purchase-card-cover-cracks > span::after {
+  content: "";
+  width: 48%;
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 58%;
+  border-radius: inherit;
+  background: inherit;
+  transform: rotate(var(--branch-angle));
+  transform-origin: left;
+}
+
+.cover-ice .purchase-card-cover-cracks {
+  opacity: 1;
+}
+
+.cover-ice .purchase-card-cover-cracks > span {
+  animation: purchase-cover-crack 440ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--crack-delay) forwards;
+}
+
+.purchase-card-cover-cracks > span:nth-child(1) { --crack-angle: 12deg; --crack-length: 44%; --branch-angle: 31deg; --crack-delay: 2600ms; }
+.purchase-card-cover-cracks > span:nth-child(2) { --crack-angle: 58deg; --crack-length: 38%; --branch-angle: -42deg; --crack-delay: 2640ms; }
+.purchase-card-cover-cracks > span:nth-child(3) { --crack-angle: 103deg; --crack-length: 43%; --branch-angle: 36deg; --crack-delay: 2680ms; }
+.purchase-card-cover-cracks > span:nth-child(4) { --crack-angle: 151deg; --crack-length: 40%; --branch-angle: -35deg; --crack-delay: 2720ms; }
+.purchase-card-cover-cracks > span:nth-child(5) { --crack-angle: 194deg; --crack-length: 45%; --branch-angle: 44deg; --crack-delay: 2760ms; }
+.purchase-card-cover-cracks > span:nth-child(6) { --crack-angle: 238deg; --crack-length: 39%; --branch-angle: -31deg; --crack-delay: 2800ms; }
+.purchase-card-cover-cracks > span:nth-child(7) { --crack-angle: 286deg; --crack-length: 42%; --branch-angle: 39deg; --crack-delay: 2840ms; }
+.purchase-card-cover-cracks > span:nth-child(8) { --crack-angle: 329deg; --crack-length: 41%; --branch-angle: -38deg; --crack-delay: 2880ms; }
+
+.purchase-card-cover-fragments {
+  z-index: 3;
+}
+
+.purchase-card-cover-fragments > span {
+  width: 58px;
+  height: 58px;
+  position: absolute;
+  top: calc(50% + var(--fragment-start-y));
+  left: calc(50% + var(--fragment-start-x));
+  opacity: 0;
+  border: 2px solid rgb(var(--reveal-accent-rgb));
+  background: color-mix(in srgb, var(--paper) 88%, rgb(var(--reveal-accent-rgb)) 12%);
+  clip-path: var(--fragment-shape);
+  transform: translate(-50%, -50%);
+}
+
+.cover-ice .purchase-card-cover-fragments > span {
+  animation: purchase-cover-fragment-burst 820ms cubic-bezier(0.18, 0.72, 0.2, 1) var(--fragment-delay) forwards;
+}
+
+.purchase-card-cover-fragments > span:nth-child(1) { --fragment-start-x: -42px; --fragment-start-y: -48px; --fragment-x: -142px; --fragment-y: -150px; --fragment-rotation: -124deg; --fragment-delay: 3240ms; --fragment-shape: polygon(12% 8%, 100% 22%, 72% 100%, 0 68%); }
+.purchase-card-cover-fragments > span:nth-child(2) { --fragment-start-x: 0px; --fragment-start-y: -58px; --fragment-x: -16px; --fragment-y: -178px; --fragment-rotation: 76deg; --fragment-delay: 3260ms; --fragment-shape: polygon(20% 0, 100% 14%, 82% 100%, 0 74%); }
+.purchase-card-cover-fragments > span:nth-child(3) { --fragment-start-x: 43px; --fragment-start-y: -43px; --fragment-x: 145px; --fragment-y: -136px; --fragment-rotation: 138deg; --fragment-delay: 3250ms; --fragment-shape: polygon(0 16%, 82% 0, 100% 72%, 28% 100%); }
+.purchase-card-cover-fragments > span:nth-child(4) { --fragment-start-x: -58px; --fragment-start-y: -5px; --fragment-x: -184px; --fragment-y: -30px; --fragment-rotation: -82deg; --fragment-delay: 3280ms; --fragment-shape: polygon(8% 0, 100% 28%, 76% 100%, 0 82%); }
+.purchase-card-cover-fragments > span:nth-child(5) { --fragment-start-x: 58px; --fragment-start-y: 2px; --fragment-x: 186px; --fragment-y: 18px; --fragment-rotation: 102deg; --fragment-delay: 3270ms; --fragment-shape: polygon(20% 0, 100% 20%, 86% 100%, 0 70%); }
+.purchase-card-cover-fragments > span:nth-child(6) { --fragment-start-x: -44px; --fragment-start-y: 42px; --fragment-x: -150px; --fragment-y: 142px; --fragment-rotation: -146deg; --fragment-delay: 3300ms; --fragment-shape: polygon(0 18%, 78% 0, 100% 84%, 24% 100%); }
+.purchase-card-cover-fragments > span:nth-child(7) { --fragment-start-x: 0px; --fragment-start-y: 58px; --fragment-x: 8px; --fragment-y: 184px; --fragment-rotation: 168deg; --fragment-delay: 3290ms; --fragment-shape: polygon(16% 0, 100% 30%, 72% 100%, 0 78%); }
+.purchase-card-cover-fragments > span:nth-child(8) { --fragment-start-x: 44px; --fragment-start-y: 43px; --fragment-x: 148px; --fragment-y: 150px; --fragment-rotation: 132deg; --fragment-delay: 3310ms; --fragment-shape: polygon(0 12%, 84% 0, 100% 76%, 32% 100%); }
+.purchase-card-cover-fragments > span:nth-child(9) { --fragment-start-x: -18px; --fragment-start-y: -8px; --fragment-x: -82px; --fragment-y: -92px; --fragment-rotation: -214deg; --fragment-delay: 3320ms; --fragment-shape: polygon(18% 0, 100% 18%, 76% 100%, 0 68%); }
+.purchase-card-cover-fragments > span:nth-child(10) { --fragment-start-x: 20px; --fragment-start-y: 12px; --fragment-x: 94px; --fragment-y: 104px; --fragment-rotation: 226deg; --fragment-delay: 3330ms; --fragment-shape: polygon(0 20%, 80% 0, 100% 72%, 26% 100%); }
+
+.purchase-card-cover-fog {
+  z-index: 4;
+}
+
+.purchase-card-cover-fog > span {
+  width: var(--fog-size);
+  aspect-ratio: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0;
+  border-radius: 50%;
+  background: rgb(var(--reveal-accent-rgb) / 36%);
+  filter: blur(12px);
+  transform: translate(-50%, -50%) scale(0.3);
+}
+
+.cover-white .purchase-card-cover-fog > span {
+  animation: purchase-cover-fog-cloud 950ms ease-out var(--fog-delay) forwards;
+}
+
+.purchase-card-cover-fog > span:nth-child(1) { --fog-size: 82px; --fog-x: -112px; --fog-y: -54px; --fog-delay: 2660ms; }
+.purchase-card-cover-fog > span:nth-child(2) { --fog-size: 68px; --fog-x: -72px; --fog-y: 82px; --fog-delay: 2700ms; }
+.purchase-card-cover-fog > span:nth-child(3) { --fog-size: 90px; --fog-x: 4px; --fog-y: -104px; --fog-delay: 2680ms; }
+.purchase-card-cover-fog > span:nth-child(4) { --fog-size: 74px; --fog-x: 96px; --fog-y: -56px; --fog-delay: 2740ms; }
+.purchase-card-cover-fog > span:nth-child(5) { --fog-size: 86px; --fog-x: 110px; --fog-y: 54px; --fog-delay: 2720ms; }
+.purchase-card-cover-fog > span:nth-child(6) { --fog-size: 70px; --fog-x: 34px; --fog-y: 106px; --fog-delay: 2760ms; }
+.purchase-card-cover-fog > span:nth-child(7) { --fog-size: 96px; --fog-x: -18px; --fog-y: 10px; --fog-delay: 2690ms; }
 
 .purchase-card-scan {
   width: 42%;
@@ -1188,7 +1331,7 @@ body[data-game-screen="menu"]::before {
   transform: none;
 }
 
-.store-reveal-backdrop.complete .purchase-card-mystery,
+.store-reveal-backdrop.complete .purchase-card-cover,
 .store-reveal-backdrop.complete .purchase-card-scan,
 .store-reveal-backdrop.complete .purchase-reveal-orbit,
 .store-reveal-backdrop.complete .purchase-reveal-flare,
@@ -1424,18 +1567,56 @@ body[data-game-screen="menu"]::before {
   }
 }
 
-@keyframes purchase-mystery {
-  0% { opacity: 0; transform: translate3d(-50%, -50%, 90px) rotateZ(-34deg) scale(0.38); }
-  34% { opacity: 1; transform: translate3d(-50%, -50%, 10px) rotateZ(5deg) scale(1.06); }
-  68% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotateZ(-2deg) scale(0.99); }
-  100% { opacity: 0; transform: translate3d(-50%, -50%, 55px) rotateZ(12deg) scale(1.24); }
+@keyframes purchase-cover-land {
+  0% {
+    opacity: 1;
+    transform: translate3d(-50%, calc(-50% - 78vh), 260px) rotateX(-62deg) rotateZ(-8deg) scale(1.2);
+  }
+  76% {
+    opacity: 1;
+    transform: translate3d(-50%, -54%, 18px) rotateX(7deg) rotateZ(2deg) scale(1.045);
+  }
+  88% {
+    transform: translate3d(-50%, -47%, -4px) rotateX(-3deg) rotateZ(-1deg) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) rotateX(0) rotateZ(0) scale(1);
+  }
 }
 
-@keyframes purchase-piece-art {
-  0% { opacity: 0; transform: translate3d(135px, -20px, 80px) rotateY(35deg) rotateZ(10deg) scale(0.72); }
-  70% { opacity: 1; transform: translate3d(-4px, 1px, 8px) rotateY(-4deg) rotateZ(-1deg) scale(1.025); }
-  84% { transform: translate3d(2px, 0, -2px) rotateY(1deg) scale(0.995); }
-  100% { opacity: 1; transform: none; }
+@keyframes purchase-card-art-ready {
+  to { opacity: 1; }
+}
+
+@keyframes purchase-cover-fog-away {
+  0% { opacity: 1; filter: blur(0); transform: scale(1); }
+  45% { opacity: 0.72; filter: blur(8px); transform: scale(1.035); }
+  100% { opacity: 0; filter: blur(24px); transform: scale(1.14); }
+}
+
+@keyframes purchase-cover-fog-cloud {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  34% { opacity: 0.72; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--fog-x)), calc(-50% + var(--fog-y))) scale(1.4); }
+}
+
+@keyframes purchase-cover-crack {
+  from { transform: rotate(var(--crack-angle)) scaleX(0); }
+  to { transform: rotate(var(--crack-angle)) scaleX(1); }
+}
+
+@keyframes purchase-cover-ice-break {
+  to { opacity: 0; transform: scale(1.06); }
+}
+
+@keyframes purchase-cover-fragment-burst {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+  70% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--fragment-x)), calc(-50% + var(--fragment-y))) rotate(var(--fragment-rotation)) scale(0.45);
+  }
 }
 
 @keyframes purchase-piece-cost {
