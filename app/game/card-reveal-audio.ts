@@ -10,7 +10,7 @@ const silentController: CardRevealAudioController = {
   stop: () => undefined,
 };
 
-function tone(
+function chipTone(
   context: AudioContext,
   output: AudioNode,
   frequency: number,
@@ -24,7 +24,7 @@ function tone(
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(gainValue, start + Math.min(0.08, duration * 0.2));
+  gain.gain.exponentialRampToValueAtTime(gainValue, start + Math.min(0.012, duration * 0.16));
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   oscillator.connect(gain).connect(output);
   oscillator.start(start);
@@ -36,30 +36,46 @@ function dock(context: AudioContext, output: AudioNode, profile: CardRevealProfi
   const strength = cue.strength;
   const body = context.createOscillator();
   const bodyGain = context.createGain();
-  body.type = "sine";
-  body.frequency.setValueAtTime(profile.rootFrequency * 0.62, now);
-  body.frequency.exponentialRampToValueAtTime(profile.rootFrequency * 0.22, now + 0.28);
-  bodyGain.gain.setValueAtTime(0.0001, now);
-  bodyGain.gain.exponentialRampToValueAtTime(0.12 * strength, now + 0.012);
-  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+  body.type = "square";
+  body.frequency.setValueAtTime(150, now);
+  body.frequency.exponentialRampToValueAtTime(68, now + 0.12);
+  bodyGain.gain.setValueAtTime(0.075 * strength, now);
+  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
   body.connect(bodyGain).connect(output);
   body.start(now);
-  body.stop(now + 0.36);
-  tone(context, output, profile.rootFrequency * 2.08, now + 0.008, 0.2, 0.04 * strength, "triangle");
-  tone(context, output, profile.rootFrequency * 3.01, now + 0.025, 0.13, 0.025 * strength, "sine");
+  body.stop(now + 0.14);
+
+  const sampleCount = Math.floor(context.sampleRate * 0.075);
+  const buffer = context.createBuffer(1, sampleCount, context.sampleRate);
+  const samples = buffer.getChannelData(0);
+  for (let index = 0; index < samples.length; index += 1) {
+    samples[index] = (Math.random() * 2 - 1) * (1 - index / samples.length);
+  }
+  const noise = context.createBufferSource();
+  const noiseFilter = context.createBiquadFilter();
+  const noiseGain = context.createGain();
+  noise.buffer = buffer;
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.setValueAtTime(820, now);
+  noiseFilter.Q.setValueAtTime(0.8, now);
+  noiseGain.gain.setValueAtTime(0.055 * strength, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+  noise.connect(noiseFilter).connect(noiseGain).connect(output);
+  noise.start(now);
+  chipTone(context, output, 920, now, 0.045, 0.028 * strength, "square");
 }
 
 function light(context: AudioContext, output: AudioNode, profile: CardRevealProfile, cue: CardRevealCue) {
   const now = context.currentTime;
-  [2, 2.5, 3, 4].forEach((ratio, index) => {
-    tone(
+  [2, 2.5, 3, 4, 5].forEach((ratio, index) => {
+    chipTone(
       context,
       output,
       profile.rootFrequency * ratio,
-      now + index * 0.085,
-      0.75 - index * 0.06,
-      (0.035 - index * 0.004) * cue.strength,
-      index % 2 === 0 ? "sine" : "triangle",
+      now + index * 0.075,
+      index === 4 ? 0.32 : 0.095,
+      (index === 4 ? 0.026 : 0.034) * cue.strength,
+      index === 4 ? "triangle" : "square",
     );
   });
 }
@@ -68,17 +84,21 @@ const cuePlayers: Readonly<Record<CardRevealCue["sound"], typeof dock>> = { dock
 
 function background(context: AudioContext, output: AudioNode, profile: CardRevealProfile) {
   const now = context.currentTime;
-  const duration = profile.durationMs / 1000 + 1.5;
-  [0.5, 0.75, 1].forEach((ratio, index) => {
-    tone(
-      context,
-      output,
-      profile.rootFrequency * ratio,
-      now,
-      duration,
-      0.018 - index * 0.003,
-      index === 1 ? "triangle" : "sine",
-    );
+  const motif = [1, 1.25, 1.5, 2];
+  const motifDuration = 0.92;
+  const repeats = Math.ceil(profile.durationMs / 1000 / motifDuration);
+  Array.from({ length: repeats }, (_, repeat) => repeat).forEach((repeat) => {
+    motif.forEach((ratio, index) => {
+      chipTone(
+        context,
+        output,
+        profile.rootFrequency * ratio,
+        now + repeat * motifDuration + index * 0.105,
+        0.07,
+        0.008,
+        "square",
+      );
+    });
   });
 }
 
@@ -88,7 +108,7 @@ export function createCardRevealSoundscape(
 ): CardRevealAudioController {
   if (!context) return silentController;
   const master = context.createGain();
-  master.gain.setValueAtTime(0.72, context.currentTime);
+  master.gain.setValueAtTime(0.58, context.currentTime);
   master.connect(context.destination);
   background(context, master, profile);
   let timelineMs = 0;
@@ -150,7 +170,7 @@ export function playCardDock(
 ) {
   if (!context) return;
   const master = context.createGain();
-  master.gain.setValueAtTime(0.78, context.currentTime);
+  master.gain.setValueAtTime(0.62, context.currentTime);
   master.connect(context.destination);
   dock(context, master, profile, { atMs: 0, sound: "dock", strength });
   window.setTimeout(() => master.disconnect(), 600);

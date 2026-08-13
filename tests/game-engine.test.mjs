@@ -17,6 +17,7 @@ import { resolveCardDrop } from "../app/game/card-interaction.ts";
 import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts";
 import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
+import { cardTransferSlot } from "../app/game/card-transfer-layout.ts";
 import { cardPackCost, drawCardPack } from "../app/game/card-purchase.ts";
 import { grantCoins, starterCollectionProgress, TEST_COIN_GRANT } from "../app/game/collection-progress.ts";
 import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
@@ -44,6 +45,12 @@ test("builds reveal profiles from rarity and mechanics", () => {
   assert.equal(cardRevealProfile("place-more").rarity, "legendary");
   assert.ok(cardRevealProfile("place-more").scale > cardRevealProfile("place").scale);
   assert.ok(profiles.every((profile) => profile.cues.at(-1)?.sound === "light"));
+});
+
+test("scatters purchased cards horizontally in alternating directions", () => {
+  const slots = Array.from({ length: 10 }, (_, index) => cardTransferSlot(index));
+  assert.deepEqual(slots.map((slot) => slot.direction), [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1]);
+  assert.ok(slots.every((slot) => slot.insetPx >= 0));
 });
 
 test("draws unique card packs of supported sizes", () => {

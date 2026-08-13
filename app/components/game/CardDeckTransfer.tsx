@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { cardTransferSlot } from "../../game/card-transfer-layout";
 import type { CardKind } from "../../game/cards";
 import { useLocalization } from "../../game/localization";
 import type { PlayCardDock } from "./hooks/useGameAudio";
@@ -14,23 +15,18 @@ type CardDeckTransferProps = {
 };
 
 type EdgePosition = CSSProperties & {
+  "--flight-x": string;
   "--flight-rotation": string;
 };
 
-function edgePosition(index: number, total: number): EdgePosition {
-  const side = index % 4;
-  const sideCount = Math.ceil(total / 4);
-  const slot = Math.floor(index / 4) + 1;
-  const offset = `${10 + (slot / (sideCount + 1)) * 80}%`;
-  const positions = [
-    { left: "2%", top: offset },
-    { right: "2%", top: offset },
-    { left: offset, top: "2%" },
-    { left: offset, bottom: "2%" },
-  ];
+function edgePosition(index: number): EdgePosition {
+  const slot = cardTransferSlot(index);
+  const distance = slot.direction < 0
+    ? `calc(-38vw + ${slot.insetPx}px)`
+    : `calc(38vw - ${slot.insetPx}px)`;
   return {
-    ...positions[side],
-    "--flight-rotation": `${(index % 2 === 0 ? -1 : 1) * (5 + index % 4)}deg`,
+    "--flight-x": distance,
+    "--flight-rotation": `${slot.rotationDeg}deg`,
   };
 }
 
@@ -84,8 +80,10 @@ export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, u
       }
       await wait(30);
       if (cancelled) return;
-      setScattered(true);
-      await wait(460);
+      if (kinds.length > 1) {
+        setScattered(true);
+        await wait(460);
+      }
       const duration = kinds.length === 1 ? 1000 : Math.max(280, 620 - kinds.length * 26);
       for (const kind of kinds) {
         if (cancelled) return;
@@ -120,7 +118,7 @@ export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, u
   }, [kinds, playDock]);
 
   return (
-    <div className={`purchase-deck-transfer ${scattered ? "scattered" : "gathered"}`} ref={rootRef}>
+    <div className={`purchase-deck-transfer ${kinds.length === 1 ? "single-card" : "multi-card"} ${scattered ? "scattered" : "gathered"}`} ref={rootRef}>
       <div className="purchase-deck-scroll">
         <header className="collection-header purchase-deck-header">
           <span aria-hidden="true" />
@@ -147,7 +145,7 @@ export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, u
               if (node) flightRefs.current.set(kind, node);
               else flightRefs.current.delete(kind);
             }}
-            style={edgePosition(index, kinds.length)}
+            style={edgePosition(index)}
           >
             <PurchaseCardFace kind={kind} />
           </div>

@@ -53,6 +53,11 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
     audioRef.current?.accelerate(5);
   };
 
+  const accept = () => {
+    setComplete(false);
+    onAccept();
+  };
+
   const revealStyle = {
     "--reveal-accent-rgb": profile.accentRgb,
     "--reveal-scale": profile.scale,
@@ -67,7 +72,7 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
       style={revealStyle}
       onPointerDown={accelerate}
     >
-      <section className="store-reveal-sequence" role="dialog" aria-modal="true" aria-labelledby="store-reveal-title">
+      <section className="store-reveal-sequence" key={`${current}-${kind}`} role="dialog" aria-modal="true" aria-labelledby="store-reveal-title">
         <strong className="purchase-reveal-progress">{current}/{total}</strong>
         <div className="purchase-reveal-stage">
           <span className="purchase-reveal-orbit orbit-one" aria-hidden="true" />
@@ -84,7 +89,7 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
           <span className="purchase-reveal-flare" aria-hidden="true" />
         </div>
         <span className="purchase-reveal-skip">{t("tapToAccelerate")}</span>
-        <button className="primary-button purchase-reveal-close" onAnimationEnd={() => setComplete(true)} onClick={onAccept}>{acceptLabel}</button>
+        <button className="primary-button purchase-reveal-close" onAnimationEnd={() => setComplete(true)} onClick={accept}>{acceptLabel}</button>
       </section>
     </div>
   );

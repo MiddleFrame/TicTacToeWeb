@@ -69,7 +69,6 @@ export function CardPurchaseFlow({
     <CardPurchaseReveal
       acceptLabel={acceptLabel}
       current={index + 1}
-      key={`${index}-${kinds[index]}`}
       kind={kinds[index]}
       onAccept={acceptReveal}
       startAudio={startAudio}

@@ -791,6 +791,10 @@ body[data-game-screen="menu"]::before {
   overflow: hidden;
 }
 
+:root[data-theme="light"] .store-reveal-backdrop.reveal-white {
+  --reveal-accent-rgb: 142 142 142 !important;
+}
+
 .store-reveal-sequence {
   width: min(430px, 100%);
   position: relative;
@@ -1188,13 +1192,7 @@ body[data-game-screen="menu"]::before {
   position: fixed;
   left: 50%;
   top: 50%;
-  transition:
-    left 380ms cubic-bezier(0.2, 0.78, 0.18, 1),
-    top 380ms cubic-bezier(0.2, 0.78, 0.18, 1),
-    right 380ms cubic-bezier(0.2, 0.78, 0.18, 1),
-    bottom 380ms cubic-bezier(0.2, 0.78, 0.18, 1),
-    transform 380ms cubic-bezier(0.2, 0.78, 0.18, 1),
-    opacity 120ms ease;
+  transition: transform 420ms cubic-bezier(0.2, 0.78, 0.18, 1), opacity 120ms ease;
 }
 
 .purchase-deck-transfer.gathered .purchase-transfer-card {
@@ -1202,11 +1200,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .purchase-deck-transfer.scattered .purchase-transfer-card {
-  right: var(--flight-right);
-  bottom: var(--flight-bottom);
-  left: var(--flight-left);
-  top: var(--flight-top);
-  transform: translate(-50%, -50%) rotate(var(--flight-rotation));
+  transform: translate(calc(-50% + var(--flight-x)), -50%) rotate(var(--flight-rotation));
 }
 
 .purchase-transfer-card .purchase-mini-card {
