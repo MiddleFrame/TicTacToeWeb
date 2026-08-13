@@ -13,6 +13,9 @@ import {
 } from "../app/game/engine.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
 import { chooseRandomTarget } from "../app/game/bot-player.ts";
+import { resolveCardDrop } from "../app/game/card-interaction.ts";
+import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts";
+import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
 import {
   chooseCardReward,
@@ -21,6 +24,18 @@ import {
   getRoguelikeStage,
   resolveRoguelikeResult,
 } from "../app/game/roguelike.ts";
+
+test("describes mechanics for every card kind", () => {
+  assert.deepEqual(Object.keys(CARD_MECHANICS).sort(), Object.keys(CARD_DEFINITIONS).sort());
+  assert.ok(mechanicsForCard("freeze-cell").includes("ice"));
+  assert.ok(mechanicsForCard("place-draw").includes("draw"));
+});
+
+test("resolves card drops through target strategies", () => {
+  assert.deepEqual(resolveCardDrop("none", { overField: true, hoverIndex: null }), { type: "play" });
+  assert.deepEqual(resolveCardDrop("empty", { overField: true, hoverIndex: 4 }), { type: "play", targetIndex: 4 });
+  assert.deepEqual(resolveCardDrop("ally", { overField: false, hoverIndex: 4 }), { type: "cancel" });
+});
 
 test("chooses random targets through an injected random source", () => {
   const game = { ...createGame(), board: [1, null, null, 2, 1, 2, 1, 2, 1] };

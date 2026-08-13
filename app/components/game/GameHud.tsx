@@ -3,6 +3,7 @@ import type { CSSProperties, PointerEvent, RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../game/cards";
 import { cardCost, type GameState, type Player } from "../../game/engine";
 import { useLocalization } from "../../game/localization";
+import { CardMechanicHints } from "./CardMechanicHints";
 import { Figure } from "./Primitives";
 import type { DamageFlight, DragState } from "./types";
 
@@ -142,6 +143,10 @@ type HandProps = {
 export function GameHand(props: HandProps) {
   const { card: localizeCard, t } = useLocalization();
   const hand = props.game.hands[props.player];
+  const fanCenter = (hand.length - 1) / 2;
+  const draggedCard = props.drag
+    ? hand.find((card) => card.id === props.drag?.cardId) ?? null
+    : null;
   return (
     <section className="unity-hand-zone" aria-label={t("hand")}>
       <div className="unity-hand-cards">
@@ -152,31 +157,39 @@ export function GameHand(props: HandProps) {
           const unavailable = props.disabled || props.player !== props.game.turn || cost > props.game.mana || props.game.phase !== "playing";
           const dragging = props.drag?.cardId === card.id;
           const previewingCell = dragging && props.drag?.hoverIndex !== null && definition.target !== "none";
+          const fanAngle = (index - fanCenter) * 4;
           return (
-            <button
-              className={`unity-hand-card ${dragging ? "dragging" : ""} ${previewingCell ? "cell-preview-active" : ""} ${dragging && props.drag?.returning ? "returning" : ""} ${unavailable ? "unavailable" : ""}`}
-              disabled={unavailable}
+            <div
+              className="unity-hand-card-slot"
               key={card.id}
-              onPointerDown={(event) => props.onPointerDown(event, card.id)}
-              onPointerMove={(event) => props.onPointerMove(event, card.id)}
-              onPointerUp={(event) => props.onPointerUp(event, card.id)}
-              onPointerCancel={() => props.onPointerCancel(card.id)}
               style={{
                 "--fan-index": index,
-                "--fan-center": (hand.length - 1) / 2,
-                "--fan-depth": Math.abs(index - (hand.length - 1) / 2),
+                "--fan-center": fanCenter,
+                "--fan-depth": Math.abs(index - fanCenter),
+                "--home-rotation": `${props.drag?.homeRotation ?? fanAngle}deg`,
                 "--drag-x": props.drag ? `${props.drag.x}px` : undefined,
                 "--drag-y": props.drag ? `${props.drag.y}px` : undefined,
               } as CSSProperties}
-              aria-label={`${localized.name}. ${t("cost")} ${cost}. ${t("dragCard")}. ${localized.description}`}
             >
-              <span className="unity-card-cost">{cost}</span>
-              <span className="unity-card-art" style={{ backgroundImage: `url("${definition.image[props.player]}")` }} aria-hidden="true" />
-              <small>{localized.description}</small>
-            </button>
+              <button
+                className={`unity-hand-card ${dragging ? `dragging ${props.drag?.phase}` : ""} ${previewingCell ? "cell-preview-active" : ""} ${unavailable ? "unavailable" : ""}`}
+                data-fan-angle={fanAngle}
+                disabled={unavailable}
+                onPointerDown={(event) => props.onPointerDown(event, card.id)}
+                onPointerMove={(event) => props.onPointerMove(event, card.id)}
+                onPointerUp={(event) => props.onPointerUp(event, card.id)}
+                onPointerCancel={() => props.onPointerCancel(card.id)}
+                aria-label={`${localized.name}. ${t("cost")} ${cost}. ${t("dragCard")}. ${localized.description}`}
+              >
+                <span className="unity-card-cost">{cost}</span>
+                <span className="unity-card-art" style={{ backgroundImage: `url("${definition.image[props.player]}")` }} aria-hidden="true" />
+                <small>{localized.description}</small>
+              </button>
+            </div>
           );
         })}
       </div>
+      <CardMechanicHints kind={draggedCard?.kind ?? null} visible={Boolean(props.drag?.showMechanics)} />
     </section>
   );
 }

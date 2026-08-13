@@ -132,6 +132,10 @@
   color: #bbb;
 }
 
+:root[data-theme="dark"] .store-buy-button img {
+  filter: brightness(0);
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -2344,7 +2348,7 @@ body[data-game-screen="menu"]::before {
   touch-action: none;
 }
 
-.unity-hand-card {
+.unity-hand-card-slot {
   --fan-index: 0;
   --fan-center: 0;
   --fan-depth: 0;
@@ -2355,6 +2359,14 @@ body[data-game-screen="menu"]::before {
   position: relative;
   z-index: calc(5 + var(--fan-index));
   flex: 0 0 auto;
+}
+
+.unity-hand-card {
+  width: 102px;
+  height: 139px;
+  padding: 15px 7px 8px;
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2569,15 +2581,12 @@ body[data-game-screen="menu"]::before {
 }
 
 .unity-hand-card.dragging {
-  width: 112px;
-  height: 153px;
-  margin: 0;
   position: fixed;
   z-index: 50;
+  inset: auto;
   left: var(--drag-x);
   top: var(--drag-y);
   pointer-events: none;
-  transform: translate(-50%, -50%) rotate(0) scale(1.04);
   cursor: grabbing;
   opacity: 1;
   filter: none;
@@ -2587,19 +2596,94 @@ body[data-game-screen="menu"]::before {
   transition: none;
 }
 
+.unity-hand-card.dragging.holding {
+  animation: unity-card-hold-grow 1200ms cubic-bezier(0.2, 0.72, 0.24, 1) both;
+}
+
 .unity-hand-card.dragging.cell-preview-active {
   opacity: 0.38;
 }
 
 .unity-hand-card.dragging.returning {
+  animation: none;
   transform:
     translate(-50%, -50%)
-    rotate(calc((var(--fan-index) - var(--fan-center)) * 4deg))
+    rotate(var(--home-rotation))
     scale(0.92);
   transition:
-    left 200ms cubic-bezier(0.22, 0.8, 0.25, 1),
-    top 200ms cubic-bezier(0.22, 0.8, 0.25, 1),
-    transform 200ms cubic-bezier(0.22, 0.8, 0.25, 1);
+    left 650ms cubic-bezier(0.22, 0.8, 0.25, 1),
+    top 650ms cubic-bezier(0.22, 0.8, 0.25, 1),
+    transform 650ms cubic-bezier(0.22, 0.8, 0.25, 1),
+    box-shadow 650ms ease;
+  box-shadow: 0 3px 7px rgb(0 0 0 / 14%);
+}
+
+@keyframes unity-card-hold-grow {
+  from {
+    transform: translate(-50%, -50%) rotate(0) scale(0.92);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(0) scale(1.18);
+  }
+}
+
+.card-mechanic-hints {
+  width: min(440px, calc(100% - 28px));
+  padding: 13px;
+  position: fixed;
+  z-index: 70;
+  right: 50%;
+  bottom: max(172px, calc(env(safe-area-inset-bottom) + 164px));
+  transform: translateX(50%);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 96%);
+  color: var(--ink);
+  box-shadow: 6px 7px 0 var(--ink);
+  pointer-events: none;
+  animation: card-mechanic-hints-in 220ms ease-out both;
+}
+
+:root[data-theme="dark"] .card-mechanic-hints {
+  background: rgb(23 23 23 / 97%);
+}
+
+.card-mechanic-hints > strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.card-mechanic-hints > div {
+  display: grid;
+  gap: 6px;
+}
+
+.card-mechanic-hints section {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.35fr) 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
+.card-mechanic-hints b {
+  font-size: 11px;
+}
+
+.card-mechanic-hints span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+@keyframes card-mechanic-hints-in {
+  from {
+    opacity: 0;
+    transform: translateX(50%) translateY(8px) scale(0.98);
+  }
 }
 
 .unity-card-cost {

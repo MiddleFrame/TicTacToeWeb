@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { CARD_DEFINITIONS, type CardKind } from "./cards";
+import type { CardMechanic } from "./card-mechanics";
 
 export type Language = "ru" | "en";
 export type Theme = "light" | "dark";
@@ -11,7 +12,7 @@ const text = {
     back: "Назад в меню", settings: "Настройки", options: "Параметры", playerName: "Имя игрока", language: "Язык", russian: "Русский", english: "English", sound: "Звук", soundOn: "Включён", soundOff: "Выключен", theme: "Тема", classic: "Светлая", dark: "Тёмная",
     friends: "Друзья", inDevelopment: "в разработке", bot: "Игра с ботом", roguelike: "Рогалик", multiplayer: "Мультиплеер", local: "Игра с другом", guide: "Руководство", deck: "Колода", store: "Магазин",
     newCards: "Новые карты", randomCard: "Случайная карта", collectionComplete: "Коллекция собрана", openNewCard: "Откройте новую карту", allUnlocked: "Все доступные карты уже открыты.", boughtToDeck: "Купленная карта сразу попадёт в вашу колоду.", buy50: "Купить за 50", soldOut: "Всё куплено", notEnough: "Недостаточно монет", newCard: "Новая карта", toDeck: "В колоду",
-    buildDeck: "Соберите свою колоду", deckLead: "Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.", deckCopies: "В колоде экземпляров", saveDeck: "Сохранить колоду",
+    buildDeck: "Соберите свою колоду", deckLead: "Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.", deckCopies: "В колоде экземпляров", saveDeck: "Сохранить колоду", lockedCard: "Не открыто", lockedCardDescription: "Купите карту в магазине, чтобы увидеть её свойства.", mechanics: "Механики карты",
     turn: "Ход", endTurn: "Конец хода", replaceCard: "Заменить карту", hand: "Карты в руке", pause: "Пауза", resume: "Продолжить", toMenu: "В меню", mainMenu: "В главное меню", newMatch: "Новый матч", nextRound: "Следующий раунд", matchComplete: "Матч завершён", round: "Раунд", scoreByRounds: "Итог по раундам", nextBoard: "Следующее поле", mana: "мана",
     rules: "Правила", rulesTitle: "Собирайте линии картами", close: "Закрыть", health: "Здоровье игрока", board: "Игровое поле", cost: "Стоимость", dragCard: "Перетащите карту на поле",
     thawing: "Лёд разбивается", line: "Линия", roundDraw: "Раунд завершён вничью", matchDraw: "Матч завершён вничью", crosses: "Крестики", circles: "Нолики", wonMatch: "выиграли матч", wonRound: "Раунд за",
@@ -21,7 +22,7 @@ const text = {
     back: "Back to menu", settings: "Settings", options: "Options", playerName: "Player name", language: "Language", russian: "Русский", english: "English", sound: "Sound", soundOn: "On", soundOff: "Off", theme: "Theme", classic: "Light", dark: "Dark",
     friends: "Friends", inDevelopment: "in development", bot: "Play with bot", roguelike: "Roguelike", multiplayer: "Multiplayer", local: "Local game", guide: "How to play", deck: "Deck", store: "Store",
     newCards: "New cards", randomCard: "Random card", collectionComplete: "Collection complete", openNewCard: "Unlock a new card", allUnlocked: "Every available card is already unlocked.", boughtToDeck: "The purchased card is added directly to your deck.", buy50: "Buy for 50", soldOut: "Sold out", notEnough: "Not enough coins", newCard: "New card", toDeck: "Add to deck",
-    buildDeck: "Build your deck", deckLead: "Choose at least 5 card types. The basic Place Figure card adds five copies.", deckCopies: "Cards in deck", saveDeck: "Save deck",
+    buildDeck: "Build your deck", deckLead: "Choose at least 5 card types. The basic Place Figure card adds five copies.", deckCopies: "Cards in deck", saveDeck: "Save deck", lockedCard: "Not unlocked", lockedCardDescription: "Buy this card in the store to reveal its properties.", mechanics: "Card mechanics",
     turn: "Turn", endTurn: "End turn", replaceCard: "Replace card", hand: "Cards in hand", pause: "Pause", resume: "Continue", toMenu: "Menu", mainMenu: "Main menu", newMatch: "New match", nextRound: "Next round", matchComplete: "Match complete", round: "Round", scoreByRounds: "Round score", nextBoard: "Next board", mana: "mana",
     rules: "Rules", rulesTitle: "Build lines with cards", close: "Close", health: "Player health", board: "Game board", cost: "Cost", dragCard: "Drag the card onto the board",
     thawing: "Ice is breaking", line: "Line", roundDraw: "Round ended in a draw", matchDraw: "Match ended in a draw", crosses: "Crosses", circles: "Circles", wonMatch: "won the match", wonRound: "Round won by",
@@ -46,6 +47,29 @@ const englishCards: Record<CardKind, { name: string; description: string }> = {
   "place-more": { name: "Figures for mana", description: "Spends all remaining mana to place one figure per point" },
   shortage: { name: "Draw two", description: "Draws two cards" },
   "surrounded-by-ice": { name: "Break nearby ice", description: "Breaks ice around your figure" },
+};
+
+const mechanicText: Record<Language, Record<CardMechanic, { name: string; description: string }>> = {
+  ru: {
+    area: { name: "Область", description: "Эффект применяется к нескольким соседним клеткам." },
+    delayed: { name: "Отложенный эффект", description: "Эффект срабатывает в начале следующих ходов." },
+    destruction: { name: "Разрушение", description: "Убирает созданные ранее объекты или эффекты с поля." },
+    draw: { name: "Добор", description: "Добавляет новые карты из колоды в руку." },
+    ice: { name: "Лёд", description: "Замороженная клетка временно недоступна, а после оттаивания превращается в фигуру владельца льда." },
+    mana: { name: "Мана", description: "Сила эффекта зависит от оставшейся маны или расходует её." },
+    placement: { name: "Размещение", description: "Добавляет одну или несколько фигур на игровое поле." },
+    random: { name: "Случайность", description: "Цели эффекта выбираются случайно среди доступных клеток." },
+  },
+  en: {
+    area: { name: "Area", description: "The effect applies to several neighbouring cells." },
+    delayed: { name: "Delayed effect", description: "The effect triggers at the start of later turns." },
+    destruction: { name: "Destruction", description: "Removes previously created objects or effects from the board." },
+    draw: { name: "Draw", description: "Adds new cards from the deck to your hand." },
+    ice: { name: "Ice", description: "A frozen cell is temporarily unavailable and becomes its ice owner's figure when it thaws." },
+    mana: { name: "Mana", description: "The effect consumes or scales with your remaining mana." },
+    placement: { name: "Placement", description: "Adds one or more figures to the game board." },
+    random: { name: "Random", description: "Targets are selected randomly from available cells." },
+  },
 };
 
 const englishActions: Record<string, string> = {
@@ -95,6 +119,7 @@ type LocalizationValue = {
   setTheme: (theme: Theme) => void;
   t: (key: TranslationKey) => string;
   card: (kind: CardKind) => { name: string; description: string };
+  mechanic: (mechanic: CardMechanic) => { name: string; description: string };
   action: (value: string) => string;
 };
 
@@ -132,6 +157,7 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
     },
     t: (key) => text[language][key],
     card: (kind) => language === "en" ? englishCards[kind] : CARD_DEFINITIONS[kind],
+    mechanic: (mechanic) => mechanicText[language][mechanic],
     action: (source) => localizeAction(source, language),
   }), [language, theme]);
 

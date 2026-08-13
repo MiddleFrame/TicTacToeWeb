@@ -1,10 +1,15 @@
-import { useCallback, useState, type PointerEvent, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../../game/cards";
+import { resolveCardDrop, type CardDrop } from "../../../game/card-interaction";
 import { cardCost, type GameState } from "../../../game/engine";
 import type { DragState } from "../types";
 import type { PlaySound } from "./useGameAudio";
 
 type PlayCard = (cardId: string, targetIndex?: number) => void;
+
+const CARD_GROW_DURATION_MS = 1200;
+const MECHANIC_HINT_DELAY_MS = 1000;
+const CARD_RETURN_DURATION_MS = 680;
 
 export function useCardDrag(
   game: GameState,
@@ -15,6 +20,18 @@ export function useCardDrag(
   playSfx: PlaySound,
 ) {
   const [drag, setDrag] = useState<DragState | null>(null);
+  const mechanicTimer = useRef<number | null>(null);
+  const returnTimer = useRef<number | null>(null);
+
+  const clearTimer = (timer: typeof mechanicTimer) => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+    timer.current = null;
+  };
+
+  const clearTimers = useCallback(() => {
+    clearTimer(mechanicTimer);
+    clearTimer(returnTimer);
+  }, []);
 
   const locate = (cardId: string, x: number, y: number) => {
     const board = boardRef.current?.getBoundingClientRect();
@@ -32,6 +49,7 @@ export function useCardDrag(
     if (!isEnabled) return;
     const card = game.hands[game.turn].find((item) => item.id === cardId);
     if (!card || cardCost(game, card) > game.mana) return;
+    clearTimers();
     playSfx("click", 0.25);
     event.currentTarget.setPointerCapture(event.pointerId);
     const rect = event.currentTarget.getBoundingClientRect();
@@ -43,24 +61,36 @@ export function useCardDrag(
       y: homeY,
       homeX,
       homeY,
+      homeRotation: Number(event.currentTarget.dataset.fanAngle ?? 0),
       pointerOffsetX: event.clientX - homeX,
       pointerOffsetY: event.clientY - homeY,
-      returning: false,
+      phase: "holding",
+      showMechanics: false,
       ...locate(cardId, event.clientX, event.clientY),
     });
+    mechanicTimer.current = window.setTimeout(() => {
+      setDrag((current) => current?.cardId === cardId && current.phase === "holding"
+        ? { ...current, showMechanics: true }
+        : current);
+      mechanicTimer.current = null;
+    }, CARD_GROW_DURATION_MS + MECHANIC_HINT_DELAY_MS);
   };
 
   const move = (event: PointerEvent<HTMLButtonElement>, cardId: string) => {
-    if (drag?.cardId !== cardId) return;
-    setDrag({
-      ...drag,
-      x: event.clientX - drag.pointerOffsetX,
-      y: event.clientY - drag.pointerOffsetY,
-      ...locate(cardId, event.clientX, event.clientY),
-    });
+    const location = locate(cardId, event.clientX, event.clientY);
+    setDrag((current) => current?.cardId === cardId && current.phase === "holding"
+      ? {
+          ...current,
+          x: event.clientX - current.pointerOffsetX,
+          y: event.clientY - current.pointerOffsetY,
+          ...location,
+        }
+      : current);
   };
 
   const cancel = (cardId: string) => {
+    clearTimer(mechanicTimer);
+    clearTimer(returnTimer);
     setDrag((current) => current?.cardId === cardId
       ? {
           ...current,
@@ -68,33 +98,40 @@ export function useCardDrag(
           y: current.homeY,
           hoverIndex: null,
           overField: false,
-          returning: true,
+          phase: "returning",
+          showMechanics: false,
         }
       : current);
-    window.setTimeout(() => {
-      setDrag((current) => current?.cardId === cardId && current.returning ? null : current);
-    }, 205);
+    returnTimer.current = window.setTimeout(() => {
+      setDrag((current) => current?.cardId === cardId && current.phase === "returning" ? null : current);
+      returnTimer.current = null;
+    }, CARD_RETURN_DURATION_MS);
   };
 
   const finish = (event: PointerEvent<HTMLButtonElement>, cardId: string) => {
-    if (drag?.cardId !== cardId) return;
+    if (drag?.cardId !== cardId || drag.phase !== "holding") return;
     const card = game.hands[game.turn].find((item) => item.id === cardId);
-    const target = card ? CARD_DEFINITIONS[card.kind].target : null;
     const location = locate(cardId, event.clientX, event.clientY);
-    if (!target || !location.overField) return cancel(cardId);
-    if (target === "none") {
-      setDrag(null);
-      playCard(cardId);
-      return;
-    }
-    if (location.hoverIndex !== null) {
-      setDrag(null);
-      playCard(cardId, location.hoverIndex);
-      return;
-    }
-    cancel(cardId);
+    const drop: CardDrop = card
+      ? resolveCardDrop(CARD_DEFINITIONS[card.kind].target, location)
+      : { type: "cancel" };
+    const handlers: Record<CardDrop["type"], () => void> = {
+      cancel: () => cancel(cardId),
+      play: () => {
+        clearTimers();
+        setDrag(null);
+        playCard(cardId, drop.type === "play" ? drop.targetIndex : undefined);
+      },
+    };
+    handlers[drop.type]();
   };
 
-  const clearDrag = useCallback(() => setDrag(null), []);
+  const clearDrag = useCallback(() => {
+    clearTimers();
+    setDrag(null);
+  }, [clearTimers]);
+
+  useEffect(() => clearTimers, [clearTimers]);
+
   return { drag, begin, move, finish, cancel, clearDrag };
 }

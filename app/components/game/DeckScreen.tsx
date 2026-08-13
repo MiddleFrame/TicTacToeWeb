@@ -32,6 +32,9 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
           const localized = card(kind);
           const selected = selectedKinds.includes(kind);
           const locked = !unlockedKinds.includes(kind);
+          const visibleCopy = locked
+            ? { name: t("lockedCard"), description: t("lockedCardDescription") }
+            : localized;
           return (
             <button
               className={`collection-card ${selected ? "selected" : ""} ${locked ? "locked" : ""}`}
@@ -44,8 +47,8 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
               <span className="collection-art-circle">
                 <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />
               </span>
-              <strong>{localized.name}</strong>
-              <small>{localized.description}</small>
+              <strong>{visibleCopy.name}</strong>
+              <small>{visibleCopy.description}</small>
               {CARD_COUNTS[kind] > 1 && <span className="collection-count">×{CARD_COUNTS[kind]}</span>}
               <span className="collection-check" aria-hidden="true">{locked ? "🔒" : selected ? "✓" : "+"}</span>
             </button>

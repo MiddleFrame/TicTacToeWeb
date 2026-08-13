@@ -33,7 +33,7 @@ export function StoreScreen(props: StoreScreenProps) {
         <Image className="store-cart" src="/game/menu/store.png" alt="" width="128" height="112" unoptimized />
         <span className="eyebrow">{t("randomCard")}</span>
         <h2>{soldOut ? t("collectionComplete") : t("openNewCard")}</h2>
-        <p>{soldOut ? t("allUnlocked") : `${props.lockedKinds.length} · ${t("boughtToDeck")}`}</p>
+        <p>{soldOut ? t("allUnlocked") : t("boughtToDeck")}</p>
         <button className="primary-button store-buy-button" disabled={!canBuy} onClick={props.onBuy}>
           {canBuy ? t("buy50") : soldOut ? t("soldOut") : t("notEnough")}
           {!soldOut && <Image src="/game/menu/coin.png" alt="" width="24" height="24" unoptimized />}

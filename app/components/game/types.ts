@@ -4,15 +4,17 @@ export type { GameMode } from "../../game/game-mode";
 
 export type DragState = {
   cardId: string;
+  phase: "holding" | "returning";
+  showMechanics: boolean;
   x: number;
   y: number;
   homeX: number;
   homeY: number;
+  homeRotation: number;
   pointerOffsetX: number;
   pointerOffsetY: number;
   hoverIndex: number | null;
   overField: boolean;
-  returning: boolean;
 };
 
 export type DamageFlight = {
