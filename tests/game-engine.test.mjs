@@ -38,6 +38,9 @@ test("builds reveal profiles from rarity and mechanics", () => {
   const profiles = Object.keys(CARD_DEFINITIONS).map((kind) => cardRevealProfile(kind));
   assert.ok(profiles.every((profile) => profile.durationMs >= 5000 && profile.durationMs <= 10000));
   assert.equal(cardRevealProfile("freeze-cell").accent, "ice");
+  assert.equal(cardRevealProfile("destroy-freeze").accent, "ice");
+  assert.equal(cardRevealProfile("place-more").accent, "white");
+  assert.equal(cardRevealProfile("place-more").accentRgb, "255 255 255");
   assert.equal(cardRevealProfile("place-more").rarity, "legendary");
   assert.ok(cardRevealProfile("place-more").scale > cardRevealProfile("place").scale);
   assert.ok(profiles.every((profile) => profile.cues.at(-1)?.sound === "light"));

@@ -1,8 +1,8 @@
 import type { CardKind } from "./cards.ts";
-import { mechanicsForCard, type CardMechanic } from "./card-mechanics.ts";
+import { mechanicsForCard } from "./card-mechanics.ts";
 
 export type CardRevealRarity = "common" | "uncommon" | "rare" | "legendary";
-export type CardRevealAccent = "neutral" | "ice" | "mana" | "creation" | "destruction";
+export type CardRevealAccent = "white" | "ice";
 export type CardRevealSound = "dock" | "light";
 
 export type CardRevealCue = {
@@ -42,21 +42,9 @@ const CARD_RARITIES: Readonly<Record<CardKind, CardRevealRarity>> = {
   "surrounded-by-ice": "legendary",
 };
 
-const ACCENT_BY_MECHANIC: Readonly<Partial<Record<CardMechanic, CardRevealAccent>>> = {
-  destruction: "destruction",
-  ice: "ice",
-  mana: "mana",
-  placement: "creation",
-};
-
-const ACCENT_PRIORITY: readonly CardMechanic[] = ["destruction", "ice", "mana", "placement"];
-
 const ACCENT_SETTINGS: Readonly<Record<CardRevealAccent, { rgb: string; rootFrequency: number }>> = {
-  neutral: { rgb: "245 197 76", rootFrequency: 220 },
+  white: { rgb: "255 255 255", rootFrequency: 246.94 },
   ice: { rgb: "110 211 255", rootFrequency: 293.66 },
-  mana: { rgb: "199 131 255", rootFrequency: 261.63 },
-  creation: { rgb: "255 204 89", rootFrequency: 246.94 },
-  destruction: { rgb: "255 126 92", rootFrequency: 196 },
 };
 
 const RARITY_SETTINGS: Readonly<Record<CardRevealRarity, Pick<CardRevealProfile, "playbackRate" | "scale" | "glowAlpha"> & { soundStrength: number }>> = {
@@ -77,9 +65,7 @@ const BASE_CUES: readonly Omit<CardRevealCue, "strength">[] = [
 ];
 
 function accentForCard(kind: CardKind): CardRevealAccent {
-  const mechanics = mechanicsForCard(kind);
-  return ACCENT_PRIORITY.map((mechanic) => mechanics.includes(mechanic) ? ACCENT_BY_MECHANIC[mechanic] : undefined)
-    .find((accent): accent is CardRevealAccent => Boolean(accent)) ?? "neutral";
+  return mechanicsForCard(kind).includes("ice") ? "ice" : "white";
 }
 
 export function cardRevealProfile(kind: CardKind): CardRevealProfile {
