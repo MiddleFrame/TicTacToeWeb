@@ -88,7 +88,7 @@
 }
 
 :root[data-theme="dark"] .collection-art,
-:root[data-theme="dark"] .store-reveal-art,
+:root[data-theme="dark"] .purchase-card-art,
 :root[data-theme="dark"] .roguelike-card-art {
   filter: invert(1);
 }
@@ -128,7 +128,7 @@
 :root[data-theme="dark"] .collection-lead,
 :root[data-theme="dark"] .collection-card small,
 :root[data-theme="dark"] .store-card-panel p,
-:root[data-theme="dark"] .store-reveal p {
+:root[data-theme="dark"] .purchase-card p {
   color: #bbb;
 }
 
@@ -459,6 +459,18 @@ body[data-game-screen="menu"]::before {
   background-size: contain;
 }
 
+.collection-locked-art {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .collection-card > strong {
   margin-top: 12px;
   font-size: 12px;
@@ -656,14 +668,12 @@ body[data-game-screen="menu"]::before {
   filter: brightness(0);
 }
 
-.store-card-panel h2,
-.store-reveal h2 {
+.store-card-panel h2 {
   margin: 9px 0;
   font-size: clamp(23px, 5vw, 34px);
 }
 
-.store-card-panel p,
-.store-reveal p {
+.store-card-panel p {
   max-width: 420px;
   margin: 0;
   color: #555;
@@ -686,32 +696,210 @@ body[data-game-screen="menu"]::before {
 
 .store-reveal-backdrop {
   z-index: 120;
+  overflow: hidden;
 }
 
-.store-reveal {
-  width: min(360px, calc(100% - 32px));
-  padding: 26px 24px;
-  border: 4px solid var(--ink);
-  border-radius: 18px;
-  background: var(--paper);
-  box-shadow: 8px 9px 0 var(--ink);
+.store-reveal-sequence {
+  width: min(430px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--ink);
   text-align: center;
-  animation: store-card-reveal 460ms cubic-bezier(0.18, 0.9, 0.25, 1) both;
 }
 
-.store-reveal-art {
-  width: 150px;
-  height: 150px;
-  margin: 14px auto 5px;
+.purchase-reveal-stage {
+  width: min(320px, 86vw);
+  height: min(440px, 68dvh);
+  position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.purchase-card {
+  width: min(238px, 65vw);
+  height: min(342px, 53dvh);
+  min-height: 300px;
+  padding: 19px 17px 17px;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: auto minmax(125px, 1fr) auto auto;
+  justify-items: center;
+  align-items: center;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  border-radius: 17px;
+  background: var(--paper);
+  box-shadow:
+    9px 10px 0 var(--ink),
+    0 0 42px rgb(77 207 255 / 28%);
+  animation: purchase-card-shell 1450ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+}
+
+.purchase-card-cost {
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  z-index: 6;
+  top: 9px;
+  left: 9px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--mana);
   border-radius: 50%;
-  background-color: var(--soft);
+  background: var(--paper);
+  color: var(--mana);
+  font-weight: 700;
+  opacity: 0;
+  animation: purchase-piece-cost 720ms cubic-bezier(0.16, 0.86, 0.22, 1.18) 2500ms both;
+}
+
+.purchase-card-art {
+  width: min(150px, 41vw);
+  height: min(150px, 23dvh);
+  grid-row: 2;
+  display: block;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 82%;
+  background-size: contain;
+  opacity: 0;
+  animation: purchase-piece-art 980ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 1750ms both;
 }
 
-.store-reveal .primary-button {
-  margin-top: 22px;
+.purchase-card .eyebrow {
+  grid-row: 1;
+  opacity: 0;
+  animation: purchase-piece-top 680ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 3000ms both;
+}
+
+.purchase-card h2 {
+  max-width: 100%;
+  margin: 8px 0 5px;
+  grid-row: 3;
+  font-size: clamp(20px, 5vw, 28px);
+  line-height: 1.02;
+  opacity: 0;
+  animation: purchase-piece-title 760ms cubic-bezier(0.16, 0.86, 0.22, 1.1) 3400ms both;
+}
+
+.purchase-card p {
+  max-width: 100%;
+  margin: 0;
+  grid-row: 4;
+  align-self: start;
+  color: #555;
+  font-size: 10px;
+  line-height: 1.3;
+  opacity: 0;
+  animation: purchase-piece-description 740ms cubic-bezier(0.16, 0.86, 0.22, 1.08) 3900ms both;
+}
+
+.purchase-card-mystery {
+  width: 112px;
+  height: 112px;
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 68px;
+  font-weight: 700;
+  animation: purchase-mystery 1800ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+}
+
+.purchase-card-scan {
+  width: 42%;
+  height: 150%;
+  position: absolute;
+  z-index: 9;
+  top: -25%;
+  left: -60%;
+  transform: rotate(14deg);
+  background: linear-gradient(90deg, transparent, rgb(105 220 255 / 68%), transparent);
+  opacity: 0;
+  animation: purchase-card-scan 1050ms ease-in-out 4650ms both;
+}
+
+.purchase-reveal-orbit {
+  position: absolute;
+  z-index: 1;
+  border: 3px dashed rgb(84 211 255 / 72%);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.purchase-reveal-orbit.orbit-one {
+  width: 286px;
+  height: 286px;
+  animation: purchase-orbit-clockwise 4900ms ease-in-out both;
+}
+
+.purchase-reveal-orbit.orbit-two {
+  width: 238px;
+  height: 238px;
+  border-style: dotted;
+  animation: purchase-orbit-counter 4700ms ease-in-out 180ms both;
+}
+
+.purchase-reveal-flare {
+  width: 120px;
+  height: 120px;
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 90px 44px rgb(72 211 255 / 62%);
+  animation: purchase-reveal-flare 1050ms ease-out 4800ms both;
+}
+
+.purchase-reveal-skip {
+  min-height: 18px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: purchase-skip-note 6200ms ease both;
+}
+
+.purchase-reveal-close {
+  margin-top: 0;
+  padding-inline: 24px;
+  opacity: 0;
+  pointer-events: none;
+  animation: purchase-reveal-action 420ms ease-out 5600ms both;
+}
+
+.store-reveal-backdrop.complete .purchase-card,
+.store-reveal-backdrop.complete .purchase-card-cost,
+.store-reveal-backdrop.complete .purchase-card-art,
+.store-reveal-backdrop.complete .purchase-card .eyebrow,
+.store-reveal-backdrop.complete .purchase-card h2,
+.store-reveal-backdrop.complete .purchase-card p,
+.store-reveal-backdrop.complete .purchase-reveal-close {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.store-reveal-backdrop.complete .purchase-card-mystery,
+.store-reveal-backdrop.complete .purchase-card-scan,
+.store-reveal-backdrop.complete .purchase-reveal-orbit,
+.store-reveal-backdrop.complete .purchase-reveal-flare,
+.store-reveal-backdrop.complete .purchase-reveal-skip {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.store-reveal-backdrop.complete .purchase-reveal-close {
+  pointer-events: auto;
 }
 
 .collection-card.locked {
@@ -725,19 +913,101 @@ body[data-game-screen="menu"]::before {
   opacity: 0.33;
 }
 
-@keyframes store-card-reveal {
+@keyframes purchase-card-shell {
   0% {
     opacity: 0;
-    transform: translateY(34px) rotate(-7deg) scale(0.55);
+    transform: translateY(90px) rotateY(-34deg) rotateZ(-8deg) scale(0.42);
   }
-  72% {
+
+  58% {
     opacity: 1;
-    transform: translateY(-4px) rotate(2deg) scale(1.06);
+    transform: translateY(-10px) rotateY(8deg) rotateZ(2deg) scale(1.04);
   }
+
+  72% {
+    transform: translateY(4px) rotateY(-3deg) rotateZ(-1deg) scale(0.99);
+  }
+
   100% {
     opacity: 1;
-    transform: translateY(0) rotate(0) scale(1);
+    transform: none;
   }
+}
+
+@keyframes purchase-mystery {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg) scale(0.3); }
+  32% { opacity: 1; transform: translate(-50%, -50%) rotate(8deg) scale(1.08); }
+  68% { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(0.98); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(24deg) scale(1.42); }
+}
+
+@keyframes purchase-piece-art {
+  0% { opacity: 0; transform: translateX(150px) rotate(24deg) scale(0.46); }
+  70% { opacity: 1; transform: translateX(-5px) rotate(-2deg) scale(1.04); }
+  84% { transform: translateX(3px) rotate(1deg) scale(0.99); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-piece-cost {
+  0% { opacity: 0; transform: translate(-120px, -90px) rotate(-160deg) scale(0.4); }
+  72% { opacity: 1; transform: translate(3px, 2px) rotate(8deg) scale(1.08); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-piece-top {
+  0% { opacity: 0; transform: translateY(-72px) rotate(5deg); }
+  72% { opacity: 1; transform: translateY(3px) rotate(-1deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-piece-title {
+  0% { opacity: 0; transform: translateX(-145px) rotate(-5deg); }
+  72% { opacity: 1; transform: translateX(4px) rotate(1deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-piece-description {
+  0% { opacity: 0; transform: translateY(82px) rotate(3deg); }
+  72% { opacity: 1; transform: translateY(-3px) rotate(-1deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-card-scan {
+  0% { left: -60%; opacity: 0; }
+  18% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { left: 118%; opacity: 0; }
+}
+
+@keyframes purchase-orbit-clockwise {
+  0% { opacity: 0; transform: rotate(0) scale(0.32); }
+  20% { opacity: 1; }
+  76% { opacity: 0.72; }
+  100% { opacity: 0; transform: rotate(390deg) scale(1.25); }
+}
+
+@keyframes purchase-orbit-counter {
+  0% { opacity: 0; transform: rotate(180deg) scale(0.42); }
+  22% { opacity: 0.9; }
+  78% { opacity: 0.64; }
+  100% { opacity: 0; transform: rotate(-320deg) scale(1.38); }
+}
+
+@keyframes purchase-reveal-flare {
+  0% { opacity: 0; transform: scale(0.3); }
+  40% { opacity: 0.85; }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+@keyframes purchase-skip-note {
+  0%, 8% { opacity: 0; }
+  14%, 76% { opacity: 1; }
+  92%, 100% { opacity: 0; }
+}
+
+@keyframes purchase-reveal-action {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; pointer-events: auto; }
 }
 
 .game-shell {

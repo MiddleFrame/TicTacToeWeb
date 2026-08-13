@@ -48,7 +48,9 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
             >
               <span className="collection-cost">{locked ? "?" : definition.cost}</span>
               <span className="collection-art-circle">
-                <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />
+                {locked
+                  ? <span className="collection-locked-art">?</span>
+                  : <span className="collection-art" style={{ backgroundImage: `url("${definition.image[1]}")` }} />}
               </span>
               <strong>{visibleCopy.name}</strong>
               <small>{visibleCopy.description}</small>
