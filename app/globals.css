@@ -1055,11 +1055,11 @@ body[data-game-screen="menu"]::before {
 }
 
 .purchase-card-cover {
-  width: min(184px, 53vw, 28dvh);
+  width: min(204px, 58vw, 30dvh);
   aspect-ratio: 1;
   position: absolute;
   z-index: 8;
-  top: 50%;
+  top: 48.5%;
   left: 50%;
   opacity: 0;
   pointer-events: none;
@@ -1140,6 +1140,7 @@ body[data-game-screen="menu"]::before {
 
 .cover-ice .purchase-card-cover-cracks {
   opacity: 1;
+  animation: purchase-cover-cracks-break 120ms linear 3240ms forwards;
 }
 
 .cover-ice .purchase-card-cover-cracks > span {
@@ -1160,14 +1161,15 @@ body[data-game-screen="menu"]::before {
 }
 
 .purchase-card-cover-fragments > span {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 68px;
   position: absolute;
   top: calc(50% + var(--fragment-start-y));
   left: calc(50% + var(--fragment-start-x));
   opacity: 0;
-  border: 2px solid rgb(var(--reveal-accent-rgb));
-  background: color-mix(in srgb, var(--paper) 88%, rgb(var(--reveal-accent-rgb)) 12%);
+  border: 1px solid rgb(190 238 255 / 88%);
+  background: linear-gradient(145deg, rgb(225 247 255 / 78%), rgb(var(--reveal-accent-rgb) / 32%));
+  box-shadow: 0 0 12px rgb(var(--reveal-accent-rgb) / 58%);
   clip-path: var(--fragment-shape);
   transform: translate(-50%, -50%);
 }
@@ -1176,16 +1178,16 @@ body[data-game-screen="menu"]::before {
   animation: purchase-cover-fragment-burst 820ms cubic-bezier(0.18, 0.72, 0.2, 1) var(--fragment-delay) forwards;
 }
 
-.purchase-card-cover-fragments > span:nth-child(1) { --fragment-start-x: -42px; --fragment-start-y: -48px; --fragment-x: -142px; --fragment-y: -150px; --fragment-rotation: -124deg; --fragment-delay: 3240ms; --fragment-shape: polygon(12% 8%, 100% 22%, 72% 100%, 0 68%); }
-.purchase-card-cover-fragments > span:nth-child(2) { --fragment-start-x: 0px; --fragment-start-y: -58px; --fragment-x: -16px; --fragment-y: -178px; --fragment-rotation: 76deg; --fragment-delay: 3260ms; --fragment-shape: polygon(20% 0, 100% 14%, 82% 100%, 0 74%); }
-.purchase-card-cover-fragments > span:nth-child(3) { --fragment-start-x: 43px; --fragment-start-y: -43px; --fragment-x: 145px; --fragment-y: -136px; --fragment-rotation: 138deg; --fragment-delay: 3250ms; --fragment-shape: polygon(0 16%, 82% 0, 100% 72%, 28% 100%); }
-.purchase-card-cover-fragments > span:nth-child(4) { --fragment-start-x: -58px; --fragment-start-y: -5px; --fragment-x: -184px; --fragment-y: -30px; --fragment-rotation: -82deg; --fragment-delay: 3280ms; --fragment-shape: polygon(8% 0, 100% 28%, 76% 100%, 0 82%); }
-.purchase-card-cover-fragments > span:nth-child(5) { --fragment-start-x: 58px; --fragment-start-y: 2px; --fragment-x: 186px; --fragment-y: 18px; --fragment-rotation: 102deg; --fragment-delay: 3270ms; --fragment-shape: polygon(20% 0, 100% 20%, 86% 100%, 0 70%); }
-.purchase-card-cover-fragments > span:nth-child(6) { --fragment-start-x: -44px; --fragment-start-y: 42px; --fragment-x: -150px; --fragment-y: 142px; --fragment-rotation: -146deg; --fragment-delay: 3300ms; --fragment-shape: polygon(0 18%, 78% 0, 100% 84%, 24% 100%); }
-.purchase-card-cover-fragments > span:nth-child(7) { --fragment-start-x: 0px; --fragment-start-y: 58px; --fragment-x: 8px; --fragment-y: 184px; --fragment-rotation: 168deg; --fragment-delay: 3290ms; --fragment-shape: polygon(16% 0, 100% 30%, 72% 100%, 0 78%); }
-.purchase-card-cover-fragments > span:nth-child(8) { --fragment-start-x: 44px; --fragment-start-y: 43px; --fragment-x: 148px; --fragment-y: 150px; --fragment-rotation: 132deg; --fragment-delay: 3310ms; --fragment-shape: polygon(0 12%, 84% 0, 100% 76%, 32% 100%); }
-.purchase-card-cover-fragments > span:nth-child(9) { --fragment-start-x: -18px; --fragment-start-y: -8px; --fragment-x: -82px; --fragment-y: -92px; --fragment-rotation: -214deg; --fragment-delay: 3320ms; --fragment-shape: polygon(18% 0, 100% 18%, 76% 100%, 0 68%); }
-.purchase-card-cover-fragments > span:nth-child(10) { --fragment-start-x: 20px; --fragment-start-y: 12px; --fragment-x: 94px; --fragment-y: 104px; --fragment-rotation: 226deg; --fragment-delay: 3330ms; --fragment-shape: polygon(0 20%, 80% 0, 100% 72%, 26% 100%); }
+.purchase-card-cover-fragments > span:nth-child(1) { --fragment-start-x: -42px; --fragment-start-y: -48px; --fragment-x: -142px; --fragment-y: -150px; --fragment-rotation: -124deg; --fragment-delay: 3240ms; --fragment-shape: polygon(8% 4%, 100% 34%, 26% 100%); }
+.purchase-card-cover-fragments > span:nth-child(2) { --fragment-start-x: 0px; --fragment-start-y: -58px; --fragment-x: -16px; --fragment-y: -178px; --fragment-rotation: 76deg; --fragment-delay: 3260ms; --fragment-shape: polygon(42% 0, 100% 100%, 0 72%); }
+.purchase-card-cover-fragments > span:nth-child(3) { --fragment-start-x: 43px; --fragment-start-y: -43px; --fragment-x: 145px; --fragment-y: -136px; --fragment-rotation: 138deg; --fragment-delay: 3250ms; --fragment-shape: polygon(0 24%, 100% 0, 68% 100%); }
+.purchase-card-cover-fragments > span:nth-child(4) { --fragment-start-x: -58px; --fragment-start-y: -5px; --fragment-x: -184px; --fragment-y: -30px; --fragment-rotation: -82deg; --fragment-delay: 3280ms; --fragment-shape: polygon(0 0, 100% 44%, 18% 100%); }
+.purchase-card-cover-fragments > span:nth-child(5) { --fragment-start-x: 58px; --fragment-start-y: 2px; --fragment-x: 186px; --fragment-y: 18px; --fragment-rotation: 102deg; --fragment-delay: 3270ms; --fragment-shape: polygon(32% 0, 100% 20%, 0 100%); }
+.purchase-card-cover-fragments > span:nth-child(6) { --fragment-start-x: -44px; --fragment-start-y: 42px; --fragment-x: -150px; --fragment-y: 142px; --fragment-rotation: -146deg; --fragment-delay: 3300ms; --fragment-shape: polygon(0 28%, 88% 0, 100% 100%); }
+.purchase-card-cover-fragments > span:nth-child(7) { --fragment-start-x: 0px; --fragment-start-y: 58px; --fragment-x: 8px; --fragment-y: 184px; --fragment-rotation: 168deg; --fragment-delay: 3290ms; --fragment-shape: polygon(24% 0, 100% 70%, 0 100%); }
+.purchase-card-cover-fragments > span:nth-child(8) { --fragment-start-x: 44px; --fragment-start-y: 43px; --fragment-x: 148px; --fragment-y: 150px; --fragment-rotation: 132deg; --fragment-delay: 3310ms; --fragment-shape: polygon(0 8%, 100% 42%, 34% 100%); }
+.purchase-card-cover-fragments > span:nth-child(9) { --fragment-start-x: -18px; --fragment-start-y: -8px; --fragment-x: -82px; --fragment-y: -92px; --fragment-rotation: -214deg; --fragment-delay: 3320ms; --fragment-shape: polygon(18% 0, 100% 100%, 0 66%); }
+.purchase-card-cover-fragments > span:nth-child(10) { --fragment-start-x: 20px; --fragment-start-y: 12px; --fragment-x: 94px; --fragment-y: 104px; --fragment-rotation: 226deg; --fragment-delay: 3330ms; --fragment-shape: polygon(0 30%, 92% 0, 100% 100%); }
 
 .purchase-card-cover-fog {
   z-index: 4;
@@ -1604,6 +1606,10 @@ body[data-game-screen="menu"]::before {
 @keyframes purchase-cover-crack {
   from { transform: rotate(var(--crack-angle)) scaleX(0); }
   to { transform: rotate(var(--crack-angle)) scaleX(1); }
+}
+
+@keyframes purchase-cover-cracks-break {
+  to { opacity: 0; }
 }
 
 @keyframes purchase-cover-ice-break {
