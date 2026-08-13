@@ -28,6 +28,7 @@ export function DeckCardGrid({
   const { card } = useLocalization();
   const holdTimer = useRef<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
+  const suppressClick = useRef(false);
 
   const clearHold = () => {
     if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
@@ -50,28 +51,22 @@ export function DeckCardGrid({
   };
 
   const beginInspection = (event: PointerEvent<HTMLElement>, kind: CardKind) => {
-    if (!onInspect) return;
+    if (!onInspect || event.button !== 0) return;
     clearHold();
+    suppressClick.current = false;
     pointerStart.current = { x: event.clientX, y: event.clientY };
-    if (event.pointerType === "touch" || event.pointerType === "pen") {
-      const element = event.currentTarget;
-      holdTimer.current = window.setTimeout(() => {
-        inspect(kind, element);
-        clearHold();
-      }, 520);
-    }
+    const element = event.currentTarget;
+    holdTimer.current = window.setTimeout(() => {
+      suppressClick.current = true;
+      inspect(kind, element);
+      clearHold();
+    }, 520);
   };
 
   const moveInspection = (event: PointerEvent<HTMLElement>) => {
     const start = pointerStart.current;
     if (!start || Math.hypot(event.clientX - start.x, event.clientY - start.y) <= 12) return;
-    clearHold();
-  };
-
-  const finishInspection = (event: PointerEvent<HTMLElement>, kind: CardKind) => {
-    if (event.pointerType === "mouse" && event.button === 0 && pointerStart.current) {
-      inspect(kind, event.currentTarget);
-    }
+    suppressClick.current = true;
     clearHold();
   };
 
@@ -90,24 +85,44 @@ export function DeckCardGrid({
             className={`collection-card ${selected ? "selected" : ""} ${locked ? "locked" : ""} ${arriving ? "awaiting-arrival" : ""} ${landed ? "arrival-landed" : ""}`}
             data-card-kind={kind}
             key={kind}
-            onContextMenu={(event) => {
-              if (onInspect && !locked) event.preventDefault();
+            onClick={() => {
+              if (locked || !onToggle) return;
+              if (suppressClick.current) {
+                suppressClick.current = false;
+                return;
+              }
+              onToggle(kind);
             }}
-            onKeyDown={(event) => {
-              if (!onInspect || locked || (event.key !== "Enter" && event.key !== " ")) return;
+            onContextMenu={(event) => {
+              if (!onInspect || locked) return;
               event.preventDefault();
               inspect(kind, event.currentTarget);
             }}
-            onPointerCancel={clearHold}
+            onKeyDown={(event) => {
+              if (locked) return;
+              if (onInspect && (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10"))) {
+                event.preventDefault();
+                inspect(kind, event.currentTarget);
+                return;
+              }
+              if (onToggle && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                onToggle(kind);
+              }
+            }}
+            onPointerCancel={() => {
+              suppressClick.current = true;
+              clearHold();
+            }}
             onPointerDown={(event) => {
               if (!locked) beginInspection(event, kind);
             }}
             onPointerMove={moveInspection}
-            onPointerUp={(event) => {
-              if (!locked) finishInspection(event, kind);
-            }}
-            tabIndex={!locked && onInspect ? 0 : -1}
-            aria-label={!locked && onInspect ? localized.name : undefined}
+            onPointerUp={clearHold}
+            role={!locked && onToggle ? "button" : undefined}
+            tabIndex={!locked && (onToggle || onInspect) ? 0 : -1}
+            aria-label={!locked && (onToggle || onInspect) ? localized.name : undefined}
+            aria-pressed={!locked && onToggle ? selected : undefined}
           >
             <span className="collection-cost">{locked ? "?" : definition.cost}</span>
             <span className="collection-art-circle">
@@ -118,22 +133,7 @@ export function DeckCardGrid({
             <strong>{visibleCopy.name}</strong>
             <small>{visibleCopy.description}</small>
             {CARD_COUNTS[kind] > 1 && <span className="collection-count">×{CARD_COUNTS[kind]}</span>}
-            {onToggle && !locked ? (
-              <button
-                className="collection-check"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onToggle(kind);
-                }}
-                onPointerDown={(event) => event.stopPropagation()}
-                aria-label={localized.name}
-                aria-pressed={selected}
-              >
-                {selected ? "✓" : "+"}
-              </button>
-            ) : (
-              <span className="collection-check" aria-hidden="true">{locked ? "🔒" : selected ? "✓" : "+"}</span>
-            )}
+            <span className="collection-check" aria-hidden="true">{locked ? "🔒" : selected ? "✓" : "+"}</span>
           </article>
         );
       })}
