@@ -1,4 +1,5 @@
 import { ROUNDS_TO_WIN, type GameState, type Player } from "../../game/engine";
+import { getRoundResult, type ResultTone } from "../../game/game-presentation";
 import type { PhotonSnapshot } from "../../game/photon";
 import { Figure } from "./Primitives";
 import { useLocalization } from "../../game/localization";
@@ -36,15 +37,21 @@ type ResultModalProps = {
   onMenu: () => void;
 };
 
-function ResultAnimation({ winner }: { winner: Player | null }) {
+function ResultAnimation({ tone, winner }: { tone: ResultTone; winner: Player | null }) {
   return (
-    <div className={`result-animation ${winner ? `winner-${winner}` : "draw"}`} aria-hidden="true">
+    <div className={`result-animation result-${tone} ${winner ? `winner-${winner}` : "draw"}`} aria-hidden="true">
       <div className="result-rays">{Array.from({ length: 10 }, (_, index) => <span key={index} />)}</div>
       <div className="result-confetti">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
       <div className="result-duel">
-        <span className="result-impact">{winner ? "✦" : "="}</span>
+        {winner && <span className="result-impact">✦</span>}
         <Figure player={1} className="result-figure result-figure-x" />
         <Figure player={2} className="result-figure result-figure-o" />
+        {!winner && (
+          <span className="result-hybrid">
+            <Figure player={1} className="result-hybrid-x" />
+            <Figure player={2} className="result-hybrid-o" />
+          </span>
+        )}
       </div>
     </div>
   );
@@ -73,20 +80,20 @@ function RoundProgress({ game }: { game: GameState }) {
 export function ResultModal({ game, status, viewer, onContinue, onMenu }: ResultModalProps) {
   const { t } = useLocalization();
   if (game.phase !== "round-over" && game.phase !== "game-over") return null;
-  const winner = game.phase === "game-over" ? game.gameWinner : game.roundWinner;
-  const headline = viewer && winner
-    ? winner === viewer
-      ? game.phase === "game-over" ? t("victory") : t("roundVictory")
-      : game.phase === "game-over" ? t("defeat") : t("roundDefeat")
-    : status;
+  const result = getRoundResult(game, viewer, t);
   return (
-    <div className={`modal-backdrop result-backdrop ${winner ? `winner-${winner}` : "draw"}`} role="presentation">
+    <div className={`modal-backdrop result-backdrop result-${result.tone} ${result.winner ? `winner-${result.winner}` : "draw"}`} role="presentation">
       <section className="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
-        <span className="eyebrow">{game.phase === "game-over" ? t("matchComplete") : `${t("round")} ${game.completedRounds}`}</span>
-        <ResultAnimation winner={winner} />
-        <h2 id="result-title">{headline}</h2>
-        {headline !== status && <p className="result-verdict-detail">{status}</p>}
+        <span className="eyebrow">{t("roundComplete")}</span>
+        <ResultAnimation tone={result.tone} winner={result.winner} />
+        <h2 id="result-title">{result.headline}</h2>
         <RoundProgress game={game} />
+        {game.phase === "game-over" && (
+          <div className="result-match-summary">
+            <span>{t("matchComplete")}</span>
+            <strong>{status}</strong>
+          </div>
+        )}
         {game.phase === "round-over" && <p className="result-next-round">{t("nextChallenge")}: {3 + game.completedRounds}×{3 + game.completedRounds}, {t("mana")} — {3 + game.completedRounds}</p>}
         <div className="result-actions">
           <button className="primary-button" onClick={onContinue}>{game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>

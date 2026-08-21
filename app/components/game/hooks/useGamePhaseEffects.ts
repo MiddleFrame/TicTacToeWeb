@@ -19,8 +19,7 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
 
   useEffect(() => {
     if (game.phase !== "round-over" && game.phase !== "game-over") return;
-    const winner = game.phase === "game-over" ? game.gameWinner : game.roundWinner;
-    const cues = winner
+    const cues = game.roundWinner
       ? [
           window.setTimeout(() => playSfx("placeFill", 0.42), 180),
           window.setTimeout(() => playSfx("impact", 0.58), 700),
@@ -31,7 +30,7 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
           window.setTimeout(() => playSfx("placeScale", 0.42), 910),
         ];
     return () => cues.forEach((cue) => window.clearTimeout(cue));
-  }, [game.gameWinner, game.phase, game.roundWinner, playSfx]);
+  }, [game.phase, game.roundWinner, playSfx]);
 
   useEffect(() => {
     if (

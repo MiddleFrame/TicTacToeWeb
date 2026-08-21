@@ -9,9 +9,13 @@ type StatusKey =
   | "line"
   | "matchDraw"
   | "roundDraw"
+  | "roundDefeat"
+  | "roundVictory"
   | "thawing"
   | "wonMatch"
   | "wonRound";
+
+export type ResultTone = "victory" | "defeat" | "draw";
 
 export function getGamePlayers(
   mode: GameMode,
@@ -80,4 +84,28 @@ export function getGameStatus(
       : translate("matchDraw");
   }
   return translateAction(game.lastAction);
+}
+
+export function getRoundResult(
+  game: GameState,
+  viewer: Player | null,
+  translate: (key: StatusKey) => string,
+): { headline: string; tone: ResultTone; winner: Player | null } {
+  const winner = game.roundWinner;
+  if (winner === null) {
+    return { headline: translate("roundDraw"), tone: "draw", winner };
+  }
+  if (viewer === null) {
+    const side = winner === 1 ? translate("crosses") : translate("circles");
+    return {
+      headline: `${translate("wonRound")} ${side.toLowerCase()}`,
+      tone: "victory",
+      winner,
+    };
+  }
+  return {
+    headline: translate(winner === viewer ? "roundVictory" : "roundDefeat"),
+    tone: winner === viewer ? "victory" : "defeat",
+    winner,
+  };
 }

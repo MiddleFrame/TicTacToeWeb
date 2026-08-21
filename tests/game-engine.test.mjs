@@ -20,7 +20,7 @@ import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
 import { cardTransferSlot } from "../app/game/card-transfer-layout.ts";
 import { cardPackCost, drawCardPack } from "../app/game/card-purchase.ts";
 import { grantCoins, starterCollectionProgress, TEST_COIN_GRANT } from "../app/game/collection-progress.ts";
-import { canTargetCard, getGamePlayers } from "../app/game/game-presentation.ts";
+import { canTargetCard, getGamePlayers, getRoundResult } from "../app/game/game-presentation.ts";
 import {
   chooseCardReward,
   createRoguelikeGame,
@@ -105,6 +105,23 @@ test("derives player placement without UI state", () => {
     bottomPlayer: 2,
     displayedPlayer: 2,
     topPlayer: 1,
+  });
+});
+
+test("keeps the round result separate from a drawn match result", () => {
+  const game = {
+    ...createGame(),
+    phase: "game-over",
+    completedRounds: 3,
+    roundWinner: 2,
+    gameWinner: null,
+    roundWins: { 1: 1, 2: 1 },
+  };
+
+  assert.deepEqual(getRoundResult(game, 1, (key) => key), {
+    headline: "roundDefeat",
+    tone: "defeat",
+    winner: 2,
   });
 });
 
