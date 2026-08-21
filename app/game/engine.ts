@@ -215,9 +215,13 @@ function enabledCellCount(state: GameState): number {
   );
 }
 
-function winnerByScore(state: GameState): Player | null {
-  if (state.scores[1] === state.scores[2]) return null;
-  return state.scores[1] > state.scores[2] ? 1 : 2;
+function winnerByRemainingHealth(state: GameState): Player | null {
+  const health = {
+    1: Math.max(0, state.scoreToWin - state.scores[2]),
+    2: Math.max(0, state.scoreToWin - state.scores[1]),
+  };
+  if (health[1] === health[2]) return null;
+  return health[1] > health[2] ? 1 : 2;
 }
 
 function prepareScoring(state: GameState, action: string): GameState {
@@ -240,7 +244,7 @@ function prepareScoring(state: GameState, action: string): GameState {
 
   const next = { ...state, lastGain: 0, lastAction: action };
   return enabledCellCount(next) === 0
-    ? finishRound(next, winnerByScore(next))
+    ? finishRound(next, winnerByRemainingHealth(next))
     : next;
 }
 
@@ -293,7 +297,7 @@ export function settleClear(state: GameState): GameState {
     return finishRound(nextState, state.turn);
   }
   if (enabledCellCount(nextState) === 0) {
-    return finishRound(nextState, winnerByScore(nextState));
+    return finishRound(nextState, winnerByRemainingHealth(nextState));
   }
   return nextState;
 }
@@ -394,7 +398,7 @@ function placeRandomFigures(
         : "Нет свободных клеток";
   next = { ...next, lastAction: action };
   return enabledCellCount(next) === 0
-    ? finishRound(next, winnerByScore(next))
+    ? finishRound(next, winnerByRemainingHealth(next))
     : next;
 }
 
@@ -531,7 +535,7 @@ export function playCard(
   });
 
   if (next.phase === "playing" && enabledCellCount(next) === 0) {
-    return finishRound(next, winnerByScore(next));
+    return finishRound(next, winnerByRemainingHealth(next));
   }
   return next;
 }

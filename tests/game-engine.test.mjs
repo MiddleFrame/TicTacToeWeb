@@ -154,6 +154,30 @@ test("clears a completed line without ending the turn", () => {
   assert.equal(game.turn, 1);
 });
 
+test("a full board is won by the player with more remaining health", () => {
+  const game = placeFigure({
+    ...createGame(),
+    board: [1, 2, 1, 1, 2, 2, 2, 1, null],
+    scores: { 1: 6, 2: 3 },
+  }, 8);
+
+  assert.equal(game.phase, "round-over");
+  assert.equal(game.roundWinner, 1);
+  assert.equal(game.roundWins[1], 1);
+});
+
+test("a full board is a draw when both players have equal health", () => {
+  const game = placeFigure({
+    ...createGame(),
+    board: [1, 2, 1, 1, 2, 2, 2, 1, null],
+    scores: { 1: 4, 2: 4 },
+  }, 8);
+
+  assert.equal(game.phase, "round-over");
+  assert.equal(game.roundWinner, null);
+  assert.deepEqual(game.roundWins, { 1: 0, 2: 0 });
+});
+
 test("draws two cards and restores mana when the turn ends", () => {
   let game = createGame();
   assert.equal(game.hands[1].length, 2);

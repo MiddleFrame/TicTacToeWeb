@@ -15,7 +15,7 @@ const text = {
     buildDeck: "Соберите свою колоду", deckLead: "Выберите минимум 5 видов карт. Базовая карта «Поставить фигуру» добавляется в пяти экземплярах.", deckCopies: "В колоде экземпляров", saveDeck: "Сохранить колоду", mechanics: "Механики карты",
     turn: "Ход", endTurn: "Конец хода", replaceCard: "Заменить карту", hand: "Карты в руке", pause: "Пауза", resume: "Продолжить", toMenu: "В меню", mainMenu: "В главное меню", newMatch: "Новый матч", nextRound: "Следующий раунд", matchComplete: "Матч завершён", round: "Раунд", scoreByRounds: "Итог по раундам", nextBoard: "Следующее поле", mana: "мана",
     rules: "Правила", rulesTitle: "Собирайте линии картами", close: "Закрыть", health: "Здоровье игрока", board: "Игровое поле", cost: "Стоимость", dragCard: "Перетащите карту на поле",
-    thawing: "Лёд разбивается", line: "Линия", roundDraw: "Раунд завершён вничью", matchDraw: "Матч завершён вничью", crosses: "Крестики", circles: "Нолики", wonMatch: "выиграли матч", wonRound: "Раунд за",
+    thawing: "Лёд разбивается", line: "Линия", roundDraw: "Раунд завершён вничью", matchDraw: "Матч завершён вничью", crosses: "Крестики", circles: "Нолики", wonMatch: "выиграли матч", wonRound: "Раунд за", victory: "Победа!", defeat: "Поражение", roundVictory: "Раунд выигран!", roundDefeat: "Раунд проигран", wonCount: "выиграно", of: "из", nextChallenge: "Следующий раунд будет сложнее",
     connectFailed: "Не удалось подключиться", waitingOpponent: "Ждём соперника", connecting: "Подключаемся к Photon", roomCreated: "Комната создана. Матч начнётся, когда войдёт второй игрок.", searchingMatch: "Ищем свободный матч в европейском регионе.", returnMenu: "Вернуться в меню",
   },
   en: {
@@ -25,7 +25,7 @@ const text = {
     buildDeck: "Build your deck", deckLead: "Choose at least 5 card types. The basic Place Figure card adds five copies.", deckCopies: "Cards in deck", saveDeck: "Save deck", mechanics: "Card mechanics",
     turn: "Turn", endTurn: "End turn", replaceCard: "Replace card", hand: "Cards in hand", pause: "Pause", resume: "Continue", toMenu: "Menu", mainMenu: "Main menu", newMatch: "New match", nextRound: "Next round", matchComplete: "Match complete", round: "Round", scoreByRounds: "Round score", nextBoard: "Next board", mana: "mana",
     rules: "Rules", rulesTitle: "Build lines with cards", close: "Close", health: "Player health", board: "Game board", cost: "Cost", dragCard: "Drag the card onto the board",
-    thawing: "Ice is breaking", line: "Line", roundDraw: "Round ended in a draw", matchDraw: "Match ended in a draw", crosses: "Crosses", circles: "Circles", wonMatch: "won the match", wonRound: "Round won by",
+    thawing: "Ice is breaking", line: "Line", roundDraw: "Round ended in a draw", matchDraw: "Match ended in a draw", crosses: "Crosses", circles: "Circles", wonMatch: "won the match", wonRound: "Round won by", victory: "Victory!", defeat: "Defeat", roundVictory: "Round won!", roundDefeat: "Round lost", wonCount: "won", of: "of", nextChallenge: "The next round will be tougher",
     connectFailed: "Connection failed", waitingOpponent: "Waiting for an opponent", connecting: "Connecting to Photon", roomCreated: "Room created. The match starts when another player joins.", searchingMatch: "Searching for a match in the European region.", returnMenu: "Return to menu",
   },
 } as const;

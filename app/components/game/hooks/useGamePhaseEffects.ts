@@ -18,6 +18,22 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
   const { game, mode, networkSide, playSfx, roguelike, setGame, setRoguelike } = options;
 
   useEffect(() => {
+    if (game.phase !== "round-over" && game.phase !== "game-over") return;
+    const winner = game.phase === "game-over" ? game.gameWinner : game.roundWinner;
+    const cues = winner
+      ? [
+          window.setTimeout(() => playSfx("placeFill", 0.42), 180),
+          window.setTimeout(() => playSfx("impact", 0.58), 700),
+          window.setTimeout(() => playSfx("placeScale", 0.55), 930),
+        ]
+      : [
+          window.setTimeout(() => playSfx("impact", 0.36), 520),
+          window.setTimeout(() => playSfx("placeScale", 0.42), 910),
+        ];
+    return () => cues.forEach((cue) => window.clearTimeout(cue));
+  }, [game.gameWinner, game.phase, game.roundWinner, playSfx]);
+
+  useEffect(() => {
     if (
       mode !== "roguelike" ||
       game.phase !== "game-over" ||

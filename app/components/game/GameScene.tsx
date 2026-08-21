@@ -62,7 +62,7 @@ export function GameScene(props: GameSceneProps) {
       </section>
 
       {props.mode === "online" && <NetworkOverlay network={props.network} onMenu={props.onMenu} />}
-      {props.mode !== "roguelike" && <ResultModal game={game} status={props.status} onContinue={props.onContinue} onMenu={props.onMenu} />}
+      {props.mode !== "roguelike" && <ResultModal game={game} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
       {props.mode === "roguelike" && props.roguelike && (
         <RoguelikeOverlay
           run={props.roguelike}
