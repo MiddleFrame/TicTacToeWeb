@@ -24,7 +24,7 @@ export function RulesModal({ open, onClose }: { open: boolean; onClose: () => vo
             <li>Можно разыграть несколько карт, пока хватает маны. Цена повторно пришедшей карты растёт до конца хода.</li>
             <li>Линия из трёх и более фигур приносит очко за каждую уникальную клетку, после чего фигуры исчезают.</li>
             <li>Лёд блокирует линии на два ваших хода, а затем превращается в вашу фигуру.</li>
-            <li>Раунд заканчивается при 20 очках. Матч выигрывает тот, кто первым возьмёт два раунда.</li>
+            <li>Раунды идут до 10, 15 и 20 очков соответственно. Матч выигрывает тот, кто первым возьмёт два раунда.</li>
           </ol>
         ) : (
           <ol>
@@ -32,7 +32,7 @@ export function RulesModal({ open, onClose }: { open: boolean; onClose: () => vo
             <li>Play as many cards as your mana allows. A replayed card becomes more expensive until the turn ends.</li>
             <li>A line of three or more figures deals one damage per unique cell, then those figures disappear.</li>
             <li>Ice blocks lines for two of your turns, then becomes your figure.</li>
-            <li>A round ends at 20 damage. The first player to win two rounds wins the match.</li>
+            <li>Rounds end at 10, 15, and 20 damage respectively. The first player to win two rounds wins the match.</li>
           </ol>
         )}
       </section>

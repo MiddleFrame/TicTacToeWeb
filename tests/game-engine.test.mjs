@@ -10,6 +10,7 @@ import {
   rechangeRandomCard,
   settleClear,
   settleThaw,
+  startNextRound,
 } from "../app/game/engine.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
 import { isPhotonConfigured, PHOTON_GAME_CONFIG } from "../app/game/photon-config.ts";
@@ -176,6 +177,17 @@ test("clears a completed line without ending the turn", () => {
   assert.equal(game.scores[1], 3);
   assert.deepEqual(game.board.slice(0, 3), [null, null, null]);
   assert.equal(game.turn, 1);
+});
+
+test("normal matches increase the round target from 10 to 15 to 20", () => {
+  let game = createGame();
+  assert.equal(game.scoreToWin, 10);
+
+  game = startNextRound({ ...game, phase: "round-over", completedRounds: 1 });
+  assert.equal(game.scoreToWin, 15);
+
+  game = startNextRound({ ...game, phase: "round-over", completedRounds: 2 });
+  assert.equal(game.scoreToWin, 20);
 });
 
 test("a full board is won by the player with more remaining health", () => {

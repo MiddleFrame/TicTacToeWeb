@@ -14,7 +14,8 @@ export type Player = 1 | 2;
 export type Cell = Player | null;
 export type Phase = "playing" | "thawing" | "clearing" | "round-over" | "game-over";
 
-export const SCORE_TO_WIN = 20;
+export const ROUND_SCORE_TARGETS = [10, 15, 20] as const;
+export const SCORE_TO_WIN = ROUND_SCORE_TARGETS[ROUND_SCORE_TARGETS.length - 1];
 export const ROUNDS_TO_WIN = 2;
 export const MAX_ROUNDS = 3;
 export const MAX_HAND_SIZE = 5;
@@ -99,12 +100,15 @@ function createRoundState(
 ): GameState {
   const size = base.size ?? 3 + base.completedRounds;
   const maxMana = base.maxMana ?? 3 + base.completedRounds;
+  const roundScoreTarget = ROUND_SCORE_TARGETS[
+    Math.min(base.completedRounds, ROUND_SCORE_TARGETS.length - 1)
+  ];
   const state: GameState = {
     size,
     board: emptyBoard(size),
     turn: 1,
     scores: { 1: 0, 2: 0 },
-    scoreToWin: base.scoreToWin ?? SCORE_TO_WIN,
+    scoreToWin: base.scoreToWin ?? roundScoreTarget,
     roundWins: { ...base.roundWins },
     completedRounds: base.completedRounds,
     singleRound: base.singleRound ?? false,
