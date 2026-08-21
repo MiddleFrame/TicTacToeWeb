@@ -1,6 +1,5 @@
 import { ROUNDS_TO_WIN, type GameState, type Player } from "../../game/engine";
 import { getRoundResult, type ResultTone } from "../../game/game-presentation";
-import type { PhotonSnapshot } from "../../game/photon";
 import { Figure } from "./Primitives";
 import { useLocalization } from "../../game/localization";
 
@@ -99,22 +98,6 @@ export function ResultModal({ game, status, viewer, onContinue, onMenu }: Result
           <button className="primary-button" onClick={onContinue}>{game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>
           <button className="secondary-button menu-return-button" onClick={onMenu}>{t("mainMenu")}</button>
         </div>
-      </section>
-    </div>
-  );
-}
-
-export function NetworkOverlay({ network, onMenu }: { network: PhotonSnapshot; onMenu: () => void }) {
-  const { t } = useLocalization();
-  if (network.phase === "ready") return null;
-  return (
-    <div className="network-backdrop">
-      <section className="network-card" aria-live="polite">
-        {network.phase !== "error" && <span className="network-spinner" aria-hidden="true" />}
-        <h2>{network.phase === "error" ? t("connectFailed") : network.phase === "waiting" ? t("waitingOpponent") : t("connecting")}</h2>
-        <p>{network.error || (network.phase === "waiting" ? t("roomCreated") : t("searchingMatch"))}</p>
-        {network.roomName && <code>{network.roomName}</code>}
-        <button className="secondary-button" onClick={onMenu}>{t("returnMenu")}</button>
       </section>
     </div>
   );

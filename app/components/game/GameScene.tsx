@@ -1,10 +1,9 @@
 import type { PointerEvent, RefObject } from "react";
 import type { CardKind } from "../../game/cards";
 import type { GameState, Player } from "../../game/engine";
-import type { PhotonSnapshot } from "../../game/photon";
 import type { RoguelikeRun } from "../../game/roguelike";
 import { RulesModal } from "../game/RulesModal";
-import { NetworkOverlay, PauseModal, ResultModal, TurnBanner } from "./GameOverlays";
+import { PauseModal, ResultModal, TurnBanner } from "./GameOverlays";
 import { GameBoard, GameControls, GameHand, HealthBar, PauseButton } from "./GameHud";
 import { RoguelikeOverlay } from "./RoguelikeOverlays";
 import type { DamageFlight, DragState, GameMode } from "./types";
@@ -12,7 +11,6 @@ import type { DamageFlight, DragState, GameMode } from "./types";
 type GameSceneProps = {
   mode: GameMode;
   game: GameState;
-  network: PhotonSnapshot;
   networkIntentPending: boolean;
   isHumanTurn: boolean;
   topPlayer: Player;
@@ -61,7 +59,6 @@ export function GameScene(props: GameSceneProps) {
         <TurnBanner player={props.turnBanner} turn={game.turn} />
       </section>
 
-      {props.mode === "online" && <NetworkOverlay network={props.network} onMenu={props.onMenu} />}
       {props.mode !== "roguelike" && <ResultModal game={game} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
       {props.mode === "roguelike" && props.roguelike && (
         <RoguelikeOverlay

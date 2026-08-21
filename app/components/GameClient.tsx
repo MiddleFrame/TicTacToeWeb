@@ -28,6 +28,7 @@ import {
 } from "../game/roguelike";
 import { DeckScreen } from "./game/DeckScreen";
 import { GameScene } from "./game/GameScene";
+import { MatchmakingScreen } from "./game/MatchmakingScreen";
 import { MenuScreen } from "./game/MenuScreen";
 import { SettingsScreen } from "./game/SettingsScreen";
 import { StoreScreen } from "./game/StoreScreen";
@@ -50,7 +51,7 @@ export function GameClient() {
   const { action, t } = useLocalization();
   const { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
   const collection = usePlayerCollection(playSfx);
-  const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "game">("menu");
+  const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "matchmaking" | "game">("menu");
   const [deckFocusKind, setDeckFocusKind] = useState<CardKind | null>(null);
   const [mode, setMode] = useState<GameMode>("local");
   const [game, setGame] = useState(createGame);
@@ -95,6 +96,16 @@ export function GameClient() {
       delete document.body.dataset.gameScreen;
     };
   }, [screen]);
+
+  useEffect(() => {
+    if (screen !== "matchmaking" || network.phase !== "ready") return;
+    const timeout = window.setTimeout(() => {
+      previousTurnRef.current = game.turn;
+      showTurnBanner(game.turn);
+      setScreen("game");
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [game.turn, network.phase, screen, showTurnBanner]);
 
   const isHumanTurn = isHumanGameTurn(mode, game, network);
   const { bottomPlayer, displayedPlayer, topPlayer } = getGamePlayers(mode, game.turn, network.side);
@@ -171,10 +182,15 @@ export function GameClient() {
     setMode("online");
     setGame(next);
     previousTurnRef.current = next.turn;
-    showTurnBanner(next.turn);
+    hideTurnBanner();
     setPauseOpen(false);
-    setScreen("game");
+    setScreen("matchmaking");
     void online.connect(PHOTON_GAME_CONFIG);
+  };
+
+  const startBotFromMatchmaking = () => {
+    online.disconnect();
+    startGame("bot");
   };
 
   const leaveToMenu = () => {
@@ -315,11 +331,20 @@ export function GameClient() {
     );
   }
 
+  if (screen === "matchmaking") {
+    return (
+      <MatchmakingScreen
+        network={network}
+        onBot={startBotFromMatchmaking}
+        onMenu={leaveToMenu}
+      />
+    );
+  }
+
   return (
     <GameScene
       mode={mode}
       game={game}
-      network={network}
       networkIntentPending={networkIntentPending}
       isHumanTurn={isHumanTurn}
       topPlayer={topPlayer}

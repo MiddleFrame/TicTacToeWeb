@@ -109,9 +109,16 @@
   background: rgb(23 23 23 / 92%);
 }
 
-:root[data-theme="dark"] .modal-backdrop,
-:root[data-theme="dark"] .network-backdrop {
+:root[data-theme="dark"] .modal-backdrop {
   background: rgb(0 0 0 / 78%);
+}
+
+:root[data-theme="dark"] .matchmaking-screen {
+  background: rgb(12 12 12 / 94%);
+}
+
+:root[data-theme="dark"] .matchmaking-token {
+  background: #171717;
 }
 
 :root[data-theme="dark"] .settings-row {
@@ -2371,51 +2378,227 @@ body[data-game-screen="menu"]::before {
   animation: fade-in 160ms ease;
 }
 
-.network-backdrop {
-  position: fixed;
-  z-index: 18;
-  inset: 0;
-  padding: 20px;
+.matchmaking-screen {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(18px, 4vh, 38px) 18px;
   display: grid;
   place-items: center;
-  background: rgb(255 255 255 / 88%);
-  backdrop-filter: blur(7px);
+  overflow: hidden;
+  background: rgb(255 255 255 / 94%);
 }
 
-.network-card {
-  width: min(390px, 100%);
-  padding: 30px;
+.matchmaking-panel {
+  width: min(680px, 100%);
+  min-height: calc(100svh - clamp(36px, 8vh, 76px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  border: 5px solid var(--ink);
-  border-radius: 24px;
-  background: var(--paper);
-  box-shadow: 9px 10px 0 var(--ink);
 }
 
-.network-card h2 {
-  margin: 16px 0 7px;
-}
-
-.network-card p {
-  margin: 0;
+.matchmaking-eyebrow {
   color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.matchmaking-animation {
+  width: min(62vmin, 520px);
+  min-width: 260px;
+  aspect-ratio: 1;
+  position: relative;
+  margin: clamp(12px, 2.5vh, 24px) 0 clamp(9px, 1.6vh, 16px);
+}
+
+.matchmaking-radar,
+.matchmaking-radar i {
+  position: absolute;
+  inset: 50%;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.matchmaking-radar {
+  width: 68%;
+  height: 68%;
+  border-width: 1px;
+  opacity: 0.16;
+}
+
+.matchmaking-radar i {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: matchmaking-radar 7.2s ease-out infinite;
+}
+
+.matchmaking-radar i:nth-child(2) {
+  animation-delay: 2.4s;
+}
+
+.matchmaking-radar i:nth-child(3) {
+  animation-delay: 4.8s;
+}
+
+.matchmaking-board {
+  position: absolute;
+  inset: 10%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.matchmaking-cell {
+  display: grid;
+  place-items: center;
+  border-right: 2px solid rgb(127 127 127 / 22%);
+  border-bottom: 2px solid rgb(127 127 127 / 22%);
+  color: var(--ink);
+  font-size: clamp(28px, 6vmin, 52px);
+  font-weight: 500;
+  opacity: 0.08;
+}
+
+.matchmaking-cell:nth-child(3n) {
+  border-right: 0;
+}
+
+.matchmaking-cell:nth-child(n + 7) {
+  border-bottom: 0;
+}
+
+.matchmaking-token {
+  width: 27%;
+  aspect-ratio: 1;
+  position: absolute;
+  left: 3.25%;
+  top: 3.25%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border: clamp(3px, 0.55vmin, 5px) solid var(--ink);
+  border-radius: 22%;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 9px 20px rgb(0 0 0 / 20%);
+  font-size: clamp(50px, 10vmin, 88px);
+  font-weight: 500;
+  line-height: 0.75;
+  will-change: transform;
+}
+
+.matchmaking-token-x {
+  animation: matchmaking-x-route 7.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.matchmaking-token-o {
+  animation: matchmaking-o-route 7.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.matchmaking-target {
+  width: 32%;
+  aspect-ratio: 1;
+  position: absolute;
+  left: 34%;
+  top: 34%;
+  border: 2px solid var(--ink);
+  border-radius: 28%;
+  opacity: 0;
+  animation: matchmaking-target 7.2s ease-in-out infinite;
+}
+
+.matchmaking-animation.is-paused .matchmaking-token,
+.matchmaking-animation.is-paused .matchmaking-radar i,
+.matchmaking-animation.is-paused .matchmaking-target {
+  animation-play-state: paused;
+}
+
+.matchmaking-copy {
+  min-height: 74px;
+}
+
+.matchmaking-copy h1 {
+  margin: 0;
+  font-size: clamp(25px, 4.6vw, 38px);
+  line-height: 1;
+}
+
+.matchmaking-copy p {
+  max-width: 460px;
+  margin: 9px auto 0;
+  color: var(--muted);
+  font-size: 13px;
   line-height: 1.4;
 }
 
-.network-card code {
-  margin-top: 13px;
-  display: block;
-  font-size: 10px;
+.matchmaking-actions {
+  margin-top: clamp(13px, 2.5vh, 24px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
 }
 
-.network-spinner {
-  width: 42px;
-  height: 42px;
-  display: inline-block;
-  border: 5px solid var(--soft);
-  border-top-color: var(--mana);
-  border-radius: 50%;
-  animation: network-spin 850ms linear infinite;
+.matchmaking-action {
+  min-width: 150px;
+  padding: 9px 16px;
+  border: 2px solid rgb(127 127 127 / 36%);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.matchmaking-action:hover,
+.matchmaking-action:focus-visible {
+  border-color: var(--ink);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+@media (max-height: 520px) and (min-width: 600px) {
+  .matchmaking-screen {
+    padding-block: 12px;
+  }
+
+  .matchmaking-panel {
+    min-height: calc(100svh - 24px);
+    display: grid;
+    grid-template-columns: minmax(250px, 0.9fr) minmax(280px, 1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: 28px;
+  }
+
+  .matchmaking-eyebrow,
+  .matchmaking-copy,
+  .matchmaking-actions {
+    grid-column: 2;
+  }
+
+  .matchmaking-animation {
+    width: min(76vh, 340px);
+    min-width: 0;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    margin: 0;
+  }
+
+  .matchmaking-copy {
+    min-height: 0;
+  }
+
+  .matchmaking-actions {
+    margin-top: 16px;
+  }
 }
 
 .result-modal,
@@ -3028,10 +3211,31 @@ body[data-game-screen="menu"]::before {
   100% { transform: scale(1); }
 }
 
-@keyframes network-spin {
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes matchmaking-radar {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.38); }
+  18% { opacity: 0.24; }
+  72%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.62); }
+}
+
+@keyframes matchmaking-x-route {
+  0%, 8%, 100% { transform: translate(0, 0) rotate(-5deg) scale(0.92); }
+  20%, 28% { transform: translate(124%, 124%) rotate(3deg) scale(1.08); }
+  40%, 48% { transform: translate(248%, 0) rotate(-2deg) scale(0.96); }
+  60%, 68% { transform: translate(248%, 248%) rotate(4deg) scale(1.02); }
+  80%, 88% { transform: translate(0, 248%) rotate(-4deg) scale(0.96); }
+}
+
+@keyframes matchmaking-o-route {
+  0%, 8%, 100% { transform: translate(248%, 248%) rotate(4deg) scale(0.92); }
+  20%, 28% { transform: translate(248%, 0) rotate(-3deg) scale(1.02); }
+  40%, 48% { transform: translate(0, 248%) rotate(3deg) scale(0.96); }
+  60%, 68% { transform: translate(124%, 124%) rotate(-2deg) scale(1.08); }
+  80%, 88% { transform: translate(0, 0) rotate(4deg) scale(0.96); }
+}
+
+@keyframes matchmaking-target {
+  0%, 15%, 33%, 53%, 73%, 93%, 100% { opacity: 0; transform: scale(0.72) rotate(0); }
+  22%, 42%, 62%, 82% { opacity: 0.28; transform: scale(1.08) rotate(45deg); }
 }
 
 @media (max-width: 760px) {
