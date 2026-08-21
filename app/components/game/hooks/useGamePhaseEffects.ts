@@ -26,7 +26,7 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
           window.setTimeout(() => playSfx("placeScale", 0.55), 3300),
         ]
       : [
-          window.setTimeout(() => playSfx("impact", 0.36), 2550),
+          window.setTimeout(() => playSfx("impact", 0.46), 2780),
           window.setTimeout(() => playSfx("placeScale", 0.42), 3500),
         ];
     return () => cues.forEach((cue) => window.clearTimeout(cue));

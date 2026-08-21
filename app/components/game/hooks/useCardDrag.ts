@@ -106,11 +106,13 @@ export function useCardDrag(
 
   const move = (event: PointerEvent<HTMLButtonElement>, cardId: string) => {
     const location = locate(cardId, event.clientX, event.clientY);
+    if (location.overField) clearTimer(mechanicTimer);
     setDrag((current) => current?.cardId === cardId && current.phase === "holding"
       ? {
           ...current,
           x: event.clientX - current.pointerOffsetX,
           y: event.clientY - current.pointerOffsetY,
+          showMechanics: location.overField ? false : current.showMechanics,
           ...location,
         }
       : current);

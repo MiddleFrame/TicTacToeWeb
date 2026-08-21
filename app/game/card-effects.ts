@@ -103,6 +103,17 @@ function drawTwo(state: GameState, context: CardEffectContext) {
   return { ...next, lastAction: "Добраны две карты" };
 }
 
+function spendRemainingMana(state: GameState) {
+  return {
+    ...state,
+    mana: 0,
+    manaByPlayer: {
+      ...state.manaByPlayer,
+      [state.turn]: 0,
+    },
+  };
+}
+
 export function applyCardEffect(
   state: GameState,
   card: CardInstance,
@@ -119,7 +130,7 @@ export function applyCardEffect(
     case "destroy-freeze": return destroyIce(state, context);
     case "freeze-effect": return addTimedIce(state);
     case "freeze-6-figures": return freezeOwnFigures(state);
-    case "freeze-all-mana": return context.freezeEmpty({ ...state, mana: 0 }, state.mana * 2, "Создано льдин");
+    case "freeze-all-mana": return context.freezeEmpty(spendRemainingMana(state), state.mana * 2, "Создано льдин");
     case "freeze-cell": return {
       ...state,
       frozen: { ...state.frozen, [target]: { owner: state.turn, turns: 2 } },
@@ -128,7 +139,7 @@ export function applyCardEffect(
     case "full-house": return fillHand(state, context);
     case "ice-encirclement": return freezeAroundFigure(state, target, context);
     case "place-around-freeze": return spreadIce(state, context);
-    case "place-more": return context.placeRandom({ ...state, mana: 0 }, state.mana, false);
+    case "place-more": return context.placeRandom(spendRemainingMana(state), state.mana, false);
     case "shortage": return drawTwo(state, context);
     case "surrounded-by-ice": {
       const adjacent = context.neighbours(target, state.size)

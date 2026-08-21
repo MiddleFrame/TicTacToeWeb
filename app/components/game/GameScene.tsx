@@ -16,6 +16,7 @@ type GameSceneProps = {
   topPlayer: Player;
   bottomPlayer: Player;
   displayedPlayer: Player;
+  visibleMana: number;
   drag: DragState | null;
   damageFlights: DamageFlight[];
   turnBanner: Player | null;
@@ -54,7 +55,7 @@ export function GameScene(props: GameSceneProps) {
         <HealthBar game={game} player={props.topPlayer} placement="enemy" remaining={props.remainingHealth(props.topPlayer)} trackRef={(node) => props.setHealthRef(props.topPlayer, node)} />
         <GameBoard game={game} drag={props.drag} boardRef={props.boardRef} setCellRef={props.setCellRef} canTarget={props.canTarget} flights={props.damageFlights} />
         <HealthBar game={game} player={props.bottomPlayer} placement="player" remaining={props.remainingHealth(props.bottomPlayer)} trackRef={(node) => props.setHealthRef(props.bottomPlayer, node)} />
-        <GameControls game={game} disabled={!props.isHumanTurn || props.networkIntentPending} onEndTurn={props.onEndTurn} />
+        <GameControls game={game} visibleMana={props.visibleMana} disabled={!props.isHumanTurn || props.networkIntentPending} onEndTurn={props.onEndTurn} />
         <GameHand game={game} player={props.displayedPlayer} disabled={!props.isHumanTurn || props.networkIntentPending} drag={props.drag} onPointerDown={props.onCardDown} onPointerMove={props.onCardMove} onPointerUp={props.onCardUp} onPointerCancel={props.onCardCancel} />
         <TurnBanner player={props.turnBanner} turn={game.turn} />
       </section>

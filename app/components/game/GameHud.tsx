@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { CSSProperties, PointerEvent, RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../game/cards";
-import { cardCost, type GameState, type Player } from "../../game/engine";
+import { cardCostForPlayer, type GameState, type Player } from "../../game/engine";
 import { useLocalization } from "../../game/localization";
 import { CardMechanicHints } from "./CardMechanicHints";
 import { Figure } from "./Primitives";
@@ -110,18 +110,19 @@ export function GameBoard({ game, drag, boardRef, setCellRef, canTarget, flights
 
 type ControlsProps = {
   game: GameState;
+  visibleMana: number;
   disabled: boolean;
   onEndTurn: () => void;
 };
 
-export function GameControls({ game, disabled, onEndTurn }: ControlsProps) {
+export function GameControls({ game, visibleMana, disabled, onEndTurn }: ControlsProps) {
   const { t } = useLocalization();
   return (
     <section className="unity-controls">
       <div className="unity-mana">
-        <strong>{game.mana}/{game.maxMana}</strong>
-        <div aria-label={`Мана: ${game.mana} из ${game.maxMana}`}>
-          {Array.from({ length: game.maxMana }, (_, index) => <span className={index < game.mana ? "filled" : ""} key={index} />)}
+        <strong>{visibleMana}/{game.maxMana}</strong>
+        <div aria-label={`Мана: ${visibleMana} из ${game.maxMana}`}>
+          {Array.from({ length: game.maxMana }, (_, index) => <span className={index < visibleMana ? "filled" : ""} key={index} />)}
         </div>
       </div>
       <button className="unity-end-turn" disabled={disabled || game.phase !== "playing"} onClick={onEndTurn}>{t("endTurn")}</button>
@@ -153,7 +154,7 @@ export function GameHand(props: HandProps) {
         {hand.map((card, index) => {
           const definition = CARD_DEFINITIONS[card.kind];
           const localized = localizeCard(card.kind);
-          const cost = cardCost(props.game, card);
+          const cost = cardCostForPlayer(props.game, card, props.player);
           const unavailable = props.disabled || props.player !== props.game.turn || cost > props.game.mana || props.game.phase !== "playing";
           const dragging = props.drag?.cardId === card.id;
           const previewingCell = dragging && props.drag?.hoverIndex !== null && definition.target !== "none";
@@ -172,7 +173,7 @@ export function GameHand(props: HandProps) {
               } as CSSProperties}
             >
               <button
-                className={`unity-hand-card ${dragging ? `dragging ${props.drag?.phase}` : ""} ${previewingCell ? "cell-preview-active" : ""} ${unavailable ? "unavailable" : ""}`}
+                className={`unity-hand-card ${dragging ? `dragging ${props.drag?.phase} ${props.drag?.overField ? "over-field" : "hand-inspection"}` : ""} ${previewingCell ? "cell-preview-active" : ""} ${unavailable ? "unavailable" : ""}`}
                 data-fan-angle={fanAngle}
                 disabled={unavailable}
                 onPointerDown={(event) => props.onPointerDown(event, card.id)}

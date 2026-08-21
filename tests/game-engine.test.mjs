@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cardCost,
+  cardCostForPlayer,
   createGame,
   endTurn,
   findScoringCells,
@@ -142,6 +143,20 @@ test("validates card targets outside the component", () => {
   assert.equal(canTargetCard(game, card.id, 0, false), false);
 });
 
+test("keeps displayed card costs tied to the hand owner", () => {
+  const initial = createGame();
+  const card = initial.hands[1].find((item) => item.kind === "place");
+  assert.ok(card);
+  const game = {
+    ...initial,
+    turn: 2,
+    basePlacementCosts: { 1: 2, 2: 0 },
+  };
+
+  assert.equal(cardCostForPlayer(game, card, 1), CARD_DEFINITIONS.place.cost + 2);
+  assert.equal(cardCost(game, card), CARD_DEFINITIONS.place.cost);
+});
+
 test("finds a horizontal line of three", () => {
   const board = [1, 1, 1, null, 2, null, 2, null, null];
   assert.deepEqual(findScoringCells(board, 3, 1), [0, 1, 2]);
@@ -278,8 +293,13 @@ test("spends mana and freezes three cells with the freeze card", () => {
 
   game = playCard(game, "1-freeze-test");
   assert.equal(game.mana, 1);
+  assert.equal(game.manaByPlayer[1], 1);
   assert.equal(Object.keys(game.frozen).length, 3);
   assert.equal(game.hands[1].length, 0);
+
+  game = endTurn(game);
+  assert.equal(game.manaByPlayer[1], 1);
+  assert.equal(game.manaByPlayer[2], game.maxMana);
 });
 
 test("keeps an activated random-figure effect for three turns", () => {
@@ -368,6 +388,7 @@ test("freeze all mana converts every remaining point into two ice", () => {
 
   game = playCard(game, "1-freeze-mana-test");
   assert.equal(game.mana, 0);
+  assert.equal(game.manaByPlayer[1], 0);
   assert.equal(Object.keys(game.frozen).length, 4);
 });
 

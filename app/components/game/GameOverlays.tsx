@@ -45,12 +45,6 @@ function ResultAnimation({ tone, winner }: { tone: ResultTone; winner: Player | 
         {winner && <span className="result-impact">✦</span>}
         <Figure player={1} className="result-figure result-figure-x" />
         <Figure player={2} className="result-figure result-figure-o" />
-        {!winner && (
-          <span className="result-hybrid">
-            <Figure player={1} className="result-hybrid-x" />
-            <Figure player={2} className="result-hybrid-o" />
-          </span>
-        )}
       </div>
     </div>
   );

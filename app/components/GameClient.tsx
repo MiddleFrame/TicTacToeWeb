@@ -109,6 +109,7 @@ export function GameClient() {
 
   const isHumanTurn = isHumanGameTurn(mode, game, network);
   const { bottomPlayer, displayedPlayer, topPlayer } = getGamePlayers(mode, game.turn, network.side);
+  const visibleMana = game.manaByPlayer[displayedPlayer];
   const status = getGameStatus(game, t, action);
 
   const canCardTargetCell = (cardId: string, index: number) => {
@@ -350,6 +351,7 @@ export function GameClient() {
       topPlayer={topPlayer}
       bottomPlayer={bottomPlayer}
       displayedPlayer={displayedPlayer}
+      visibleMana={visibleMana}
       drag={cardDrag.drag}
       damageFlights={damage.flights}
       turnBanner={turnBanner}

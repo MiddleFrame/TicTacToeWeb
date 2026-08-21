@@ -42,6 +42,7 @@ export interface GameState {
   roundWinner: Player | null;
   gameWinner: Player | null;
   mana: number;
+  manaByPlayer: Record<Player, number>;
   maxMana: number;
   deckKinds: CardKind[];
   hands: Record<Player, CardInstance[]>;
@@ -119,6 +120,7 @@ function createRoundState(
     roundWinner: null,
     gameWinner: null,
     mana: maxMana,
+    manaByPlayer: { 1: maxMana, 2: maxMana },
     maxMana,
     deckKinds: [...base.deckKinds],
     hands: { 1: [], 2: [] },
@@ -451,11 +453,19 @@ function thawToCurrentFigures(
   };
 }
 
-export function cardCost(state: GameState, card: CardInstance): number {
+export function cardCostForPlayer(
+  state: GameState,
+  card: CardInstance,
+  player: Player,
+): number {
   const bonus = card.kind === "place"
-    ? state.basePlacementCosts[state.turn]
-    : state.bonusCosts[`${state.turn}:${card.kind}`] ?? 0;
+    ? state.basePlacementCosts[player]
+    : state.bonusCosts[`${player}:${card.kind}`] ?? 0;
   return CARD_DEFINITIONS[card.kind].cost + bonus;
+}
+
+export function cardCost(state: GameState, card: CardInstance): number {
+  return cardCostForPlayer(state, card, state.turn);
 }
 
 function consumeCard(
@@ -463,9 +473,14 @@ function consumeCard(
   card: CardInstance,
   cost: number,
 ): GameState {
+  const mana = state.mana - cost;
   return {
     ...state,
-    mana: state.mana - cost,
+    mana,
+    manaByPlayer: {
+      ...state.manaByPlayer,
+      [state.turn]: mana,
+    },
     hands: {
       ...state.hands,
       [state.turn]: state.hands[state.turn].filter(
@@ -635,6 +650,10 @@ export function endTurn(state: GameState): GameState {
     ...cloneCardPools(state),
     turn: nextPlayer,
     mana: state.maxMana,
+    manaByPlayer: {
+      ...state.manaByPlayer,
+      [nextPlayer]: state.maxMana,
+    },
     bonusCosts: resetPlayerBonusCosts(state.bonusCosts, state.turn),
     basePlacementCosts: {
       ...state.basePlacementCosts,
