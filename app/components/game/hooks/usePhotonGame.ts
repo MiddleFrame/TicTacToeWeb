@@ -9,6 +9,7 @@ import {
   type PhotonSnapshot,
 } from "../../../game/photon";
 import type { GameState } from "../../../game/engine";
+import type { PhotonGameConfig } from "../../../game/photon-config";
 import type { GameMode } from "../types";
 
 export function usePhotonGame(
@@ -60,9 +61,9 @@ export function usePhotonGame(
 
   useEffect(() => () => sessionRef.current?.disconnect(), []);
 
-  const connect = useCallback((appId: string) => {
+  const connect = useCallback((config: PhotonGameConfig) => {
     setIntentPending(false);
-    return sessionRef.current?.connect(appId) ?? Promise.resolve();
+    return sessionRef.current?.connect(config) ?? Promise.resolve();
   }, []);
 
   const disconnect = useCallback(() => {

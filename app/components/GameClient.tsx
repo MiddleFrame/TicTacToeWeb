@@ -43,8 +43,7 @@ import { usePhotonGame } from "./game/hooks/usePhotonGame";
 import { useTurnBanner } from "./game/hooks/useTurnBanner";
 import { useLocalization } from "../game/localization";
 import type { CardKind } from "../game/cards";
-
-const PHOTON_APP_ID = process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "";
+import { isPhotonConfigured, PHOTON_GAME_CONFIG } from "../game/photon-config";
 
 export function GameClient() {
   useScenePattern();
@@ -166,7 +165,7 @@ export function GameClient() {
   };
 
   const startOnlineGame = () => {
-    if (!PHOTON_APP_ID) return;
+    if (!isPhotonConfigured(PHOTON_GAME_CONFIG)) return;
     playSfx("click", 0.38);
     const next = createGame(collection.selectedKinds);
     setMode("online");
@@ -175,7 +174,7 @@ export function GameClient() {
     showTurnBanner(next.turn);
     setPauseOpen(false);
     setScreen("game");
-    void online.connect(PHOTON_APP_ID);
+    void online.connect(PHOTON_GAME_CONFIG);
   };
 
   const leaveToMenu = () => {
@@ -290,7 +289,7 @@ export function GameClient() {
     return (
       <MenuScreen
         coins={collection.coins}
-        photonAvailable={Boolean(PHOTON_APP_ID)}
+        photonAvailable={isPhotonConfigured(PHOTON_GAME_CONFIG)}
         rulesOpen={rulesOpen}
         onStart={startGame}
         onStartOnline={startOnlineGame}

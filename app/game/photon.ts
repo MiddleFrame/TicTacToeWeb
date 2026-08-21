@@ -7,6 +7,7 @@ import {
   type GameState,
   type Player,
 } from "./engine.ts";
+import type { PhotonGameConfig } from "./photon-config.ts";
 
 export type NetworkIntent =
   | { type: "play"; cardId: string; targetIndex?: number }
@@ -87,7 +88,7 @@ export interface PhotonCallbacks {
 
 export interface PhotonSession {
   updateCallbacks: (callbacks: PhotonCallbacks) => void;
-  connect: (appId: string) => Promise<void>;
+  connect: (config: PhotonGameConfig) => Promise<void>;
   broadcastState: (state: GameState) => void;
   sendIntent: (intent: NetworkIntent) => void;
   disconnect: () => void;
@@ -153,8 +154,8 @@ export class PhotonGameSession {
     this.callbacks.onSnapshot(this.snapshot);
   }
 
-  async connect(appId: string): Promise<void> {
-    if (!appId || this.snapshot.phase === "connecting") return;
+  async connect(config: PhotonGameConfig): Promise<void> {
+    if (!config.appId || this.snapshot.phase === "connecting") return;
     this.disconnect();
     this.emit({ ...INITIAL_PHOTON_SNAPSHOT, phase: "connecting" });
 
@@ -167,8 +168,8 @@ export class PhotonGameSession {
       const Client = photon.LoadBalancing.LoadBalancingClient;
       const client = new Client(
         photon.ConnectionProtocol.Wss,
-        appId,
-        "tttp-web-1",
+        config.appId,
+        config.appVersion,
       );
       client.autoJoinLobby = true;
       this.client = client;
@@ -235,7 +236,7 @@ export class PhotonGameSession {
       };
 
       photon.setOnLoad(() => {
-        if (this.client === client) client.connectToRegionMaster("EU");
+        if (this.client === client) client.connectToRegionMaster(config.region);
       });
     } catch (error) {
       console.error("Photon startup failed", error);

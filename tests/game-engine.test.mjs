@@ -12,6 +12,7 @@ import {
   settleThaw,
 } from "../app/game/engine.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
+import { isPhotonConfigured, PHOTON_GAME_CONFIG } from "../app/game/photon-config.ts";
 import { chooseRandomTarget } from "../app/game/bot-player.ts";
 import { findClosestCardTarget, resolveCardDrop } from "../app/game/card-interaction.ts";
 import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts";
@@ -33,6 +34,12 @@ test("describes mechanics for every card kind", () => {
   assert.deepEqual(Object.keys(CARD_MECHANICS).sort(), Object.keys(CARD_DEFINITIONS).sort());
   assert.ok(mechanicsForCard("freeze-cell").includes("ice"));
   assert.ok(mechanicsForCard("place-draw").includes("draw"));
+});
+
+test("uses one shared Photon region for global matchmaking", () => {
+  assert.equal(isPhotonConfigured(PHOTON_GAME_CONFIG), true);
+  assert.equal(PHOTON_GAME_CONFIG.region, "EU");
+  assert.equal(PHOTON_GAME_CONFIG.appVersion, "tttp-web-1");
 });
 
 test("builds reveal profiles from rarity and mechanics", () => {
