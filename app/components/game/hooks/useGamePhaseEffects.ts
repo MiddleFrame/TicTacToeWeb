@@ -21,13 +21,13 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
     if (game.phase !== "round-over" && game.phase !== "game-over") return;
     const cues = game.roundWinner
       ? [
-          window.setTimeout(() => playSfx("placeFill", 0.42), 180),
-          window.setTimeout(() => playSfx("impact", 0.58), 700),
-          window.setTimeout(() => playSfx("placeScale", 0.55), 930),
+          window.setTimeout(() => playSfx("placeFill", 0.42), 850),
+          window.setTimeout(() => playSfx("impact", 0.58), 2500),
+          window.setTimeout(() => playSfx("placeScale", 0.55), 3300),
         ]
       : [
-          window.setTimeout(() => playSfx("impact", 0.36), 520),
-          window.setTimeout(() => playSfx("placeScale", 0.42), 910),
+          window.setTimeout(() => playSfx("impact", 0.36), 2550),
+          window.setTimeout(() => playSfx("placeScale", 0.42), 3500),
         ];
     return () => cues.forEach((cue) => window.clearTimeout(cue));
   }, [game.phase, game.roundWinner, playSfx]);
