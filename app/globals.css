@@ -3241,16 +3241,26 @@ body[data-game-screen="menu"]::before {
 .board.unity-board {
   width: min(calc(100% - 18px), calc(100dvh - 335px), 510px);
   padding: 0;
+  position: relative;
   gap: clamp(5px, 1.2vmin, 9px);
   border-radius: 0;
   overflow: visible;
   background: var(--ink);
-  box-shadow: 0 0 0 0 rgb(126 193 255 / 0%);
-  transition: box-shadow 250ms ease;
 }
 
-.unity-board-wrap.drag-over .board.unity-board {
-  box-shadow: 0 0 0 7px rgb(126 193 255 / 50%);
+.board.unity-board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: rgb(126 193 255 / 50%);
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+.unity-board-wrap.drag-over .board.unity-board::after {
+  opacity: 1;
 }
 
 .unity-board .cell.targetable::after {

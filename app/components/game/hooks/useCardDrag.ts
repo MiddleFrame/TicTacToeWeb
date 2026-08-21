@@ -1,21 +1,44 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../../game/cards";
-import { resolveCardDrop, type CardDrop } from "../../../game/card-interaction";
+import { findClosestCardTarget, resolveCardDrop, type CardDrop } from "../../../game/card-interaction";
 import { cardCost, type GameState } from "../../../game/engine";
 import type { DragState } from "../types";
 import type { PlaySound } from "./useGameAudio";
 
 type PlayCard = (cardId: string, targetIndex?: number) => void;
+type CanTarget = (cardId: string, index: number) => boolean;
 
 const CARD_GROW_DURATION_MS = 1200;
 const MECHANIC_HINT_DELAY_MS = 1000;
 const CARD_RETURN_DURATION_MS = 680;
 
+const closestTarget = (
+  board: HTMLDivElement | null,
+  cardId: string,
+  x: number,
+  y: number,
+  canTarget: CanTarget,
+) => {
+  const areas = Array.from(board?.querySelectorAll<HTMLElement>("[data-cell-index]") ?? [])
+    .map((cell) => {
+      const rect = cell.getBoundingClientRect();
+      return {
+        index: Number(cell.dataset.cellIndex),
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+      };
+    })
+    .filter((area) => canTarget(cardId, area.index));
+  return findClosestCardTarget(x, y, areas);
+};
+
 export function useCardDrag(
   game: GameState,
   isEnabled: boolean,
   boardRef: RefObject<HTMLDivElement | null>,
-  canTarget: (cardId: string, index: number) => boolean,
+  canTarget: CanTarget,
   playCard: PlayCard,
   playSfx: PlaySound,
 ) {
@@ -34,14 +57,19 @@ export function useCardDrag(
   }, []);
 
   const locate = (cardId: string, x: number, y: number) => {
-    const board = boardRef.current?.getBoundingClientRect();
+    const boardElement = boardRef.current;
+    const board = boardElement?.getBoundingClientRect();
     const overField = Boolean(
       board && x >= board.left && x <= board.right && y >= board.top && y <= board.bottom,
     );
     const element = document.elementFromPoint(x, y);
     const cell = element?.closest<HTMLElement>("[data-cell-index]");
     const index = cell?.dataset.cellIndex ? Number(cell.dataset.cellIndex) : null;
-    const hoverIndex = index !== null && canTarget(cardId, index) ? index : null;
+    const directTarget = index !== null && canTarget(cardId, index) ? index : null;
+    const gapTarget = index === null && overField
+      ? closestTarget(boardElement, cardId, x, y, canTarget)
+      : null;
+    const hoverIndex = directTarget ?? gapTarget;
     return { overField, hoverIndex };
   };
 

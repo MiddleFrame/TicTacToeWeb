@@ -13,7 +13,7 @@ import {
 } from "../app/game/engine.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
 import { chooseRandomTarget } from "../app/game/bot-player.ts";
-import { resolveCardDrop } from "../app/game/card-interaction.ts";
+import { findClosestCardTarget, resolveCardDrop } from "../app/game/card-interaction.ts";
 import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts";
 import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
@@ -76,6 +76,17 @@ test("resolves card drops through target strategies", () => {
   assert.deepEqual(resolveCardDrop("none", { overField: true, hoverIndex: null }), { type: "play" });
   assert.deepEqual(resolveCardDrop("empty", { overField: true, hoverIndex: 4 }), { type: "play", targetIndex: 4 });
   assert.deepEqual(resolveCardDrop("ally", { overField: false, hoverIndex: 4 }), { type: "cancel" });
+});
+
+test("resolves board gaps to the closest valid card target", () => {
+  const areas = [
+    { index: 0, left: 0, right: 40, top: 0, bottom: 40 },
+    { index: 1, left: 50, right: 90, top: 0, bottom: 40 },
+  ];
+  assert.equal(findClosestCardTarget(47, 20, areas), 1);
+  assert.equal(findClosestCardTarget(45, 20, areas), 0);
+  assert.equal(findClosestCardTarget(45, 20, [areas[1]]), 1);
+  assert.equal(findClosestCardTarget(45, 20, []), null);
 });
 
 test("chooses random targets through an injected random source", () => {
