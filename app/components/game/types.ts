@@ -2,6 +2,14 @@ import type { Player } from "../../game/engine";
 
 export type { GameMode } from "../../game/game-mode";
 
+export type GameScreen =
+  | "menu"
+  | "collection"
+  | "settings"
+  | "store"
+  | "matchmaking"
+  | "game";
+
 export type DragState = {
   cardId: string;
   phase: "holding" | "returning";

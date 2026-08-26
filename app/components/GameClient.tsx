@@ -27,13 +27,9 @@ import {
   restartDrawnStage,
   type RoguelikeRun,
 } from "../game/roguelike";
-import { DeckScreen } from "./game/DeckScreen";
+import { GameNavigation } from "./game/GameNavigation";
 import { GameScene } from "./game/GameScene";
-import { MatchmakingScreen } from "./game/MatchmakingScreen";
-import { MenuScreen } from "./game/MenuScreen";
-import { SettingsScreen } from "./game/SettingsScreen";
-import { StoreScreen } from "./game/StoreScreen";
-import type { GameMode } from "./game/types";
+import type { GameMode, GameScreen } from "./game/types";
 import { useDamageSequence } from "./game/hooks/useDamageSequence";
 import { useCardDrag } from "./game/hooks/useCardDrag";
 import { useGameAudio } from "./game/hooks/useGameAudio";
@@ -52,7 +48,7 @@ export function GameClient() {
   const { action, t } = useLocalization();
   const { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
   const collection = usePlayerCollection(playSfx);
-  const [screen, setScreen] = useState<"menu" | "collection" | "settings" | "store" | "matchmaking" | "game">("menu");
+  const [screen, setScreen] = useState<GameScreen>("menu");
   const [deckFocusKind, setDeckFocusKind] = useState<CardKind | null>(null);
   const [mode, setMode] = useState<GameMode>("local");
   const [game, setGame] = useState(createGame);
@@ -245,102 +241,25 @@ export function GameClient() {
     setGame(next);
   };
 
-  if (screen === "collection") {
+  if (screen !== "game") {
     return (
-      <DeckScreen
-        focusKind={deckFocusKind}
-        selectedKinds={collection.selectedKinds}
-        unlockedKinds={collection.unlockedKinds}
-        onBack={() => setScreen("menu")}
-        onToggle={collection.toggleCard}
-        onSave={() => {
-          collection.saveDeck();
-          setScreen("menu");
-        }}
-      />
-    );
-  }
-
-  if (screen === "settings") {
-    return (
-      <SettingsScreen
-        coins={collection.coins}
+      <GameNavigation
+        audio={{ playRevealDock, playSfx, setAmbientSuspended, startCardRevealAudio }}
+        collection={collection}
+        deckFocusKind={deckFocusKind}
         muted={muted}
-        playerName={collection.profileName}
-        testCoinGrant={collection.testCoinGrant}
-        onAddCoins={collection.addTestCoins}
-        onBack={() => setScreen("menu")}
-        onNameChange={collection.changeName}
-        onResetCards={collection.resetCards}
-        onToggleSound={() => {
-          playSfx("click", 0.38);
-          setMuted((current) => !current);
-        }}
-      />
-    );
-  }
-
-  if (screen === "store") {
-    return (
-      <StoreScreen
-        coins={collection.coins}
-        lockedKinds={collection.lockedKinds}
-        purchasedKinds={collection.purchasedKinds}
-        selectedKinds={collection.selectedKinds}
-        unlockedKinds={collection.unlockedKinds}
-        onAmbientSuspendedChange={setAmbientSuspended}
-        onBack={() => {
-          collection.setPurchasedKinds([]);
-          setScreen("menu");
-        }}
-        onBuy={collection.buyCards}
-        onCompleteReveal={(lastKind) => {
-          collection.setPurchasedKinds([]);
-          setDeckFocusKind(lastKind);
-          setScreen("collection");
-        }}
-        playDock={playRevealDock}
-        startRevealAudio={startCardRevealAudio}
-      />
-    );
-  }
-
-  if (screen === "menu") {
-    return (
-      <MenuScreen
-        coins={collection.coins}
-        photonAvailable={isPhotonConfigured(PHOTON_GAME_CONFIG)}
-        rulesOpen={rulesOpen}
-        onStart={startGame}
-        onStartOnline={startOnlineGame}
-        onDeck={() => {
-          playSfx("click", 0.38);
-          setDeckFocusKind(null);
-          setScreen("collection");
-        }}
-        onStore={() => {
-          playSfx("click", 0.38);
-          setScreen("store");
-        }}
-        onSettings={() => {
-          playSfx("click", 0.38);
-          setScreen("settings");
-        }}
-        onOpenRules={() => {
-          playSfx("click", 0.38);
-          setRulesOpen(true);
-        }}
-        onCloseRules={() => setRulesOpen(false)}
-      />
-    );
-  }
-
-  if (screen === "matchmaking") {
-    return (
-      <MatchmakingScreen
         network={network}
         onBot={startBotFromMatchmaking}
+        onDeckFocusChange={setDeckFocusKind}
         onMenu={leaveToMenu}
+        onMutedChange={setMuted}
+        onNavigate={setScreen}
+        onRulesChange={setRulesOpen}
+        onStart={startGame}
+        onStartOnline={startOnlineGame}
+        photonAvailable={isPhotonConfigured(PHOTON_GAME_CONFIG)}
+        rulesOpen={rulesOpen}
+        screen={screen}
       />
     );
   }

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  canPlayCard,
   cardCost,
   cardCostForPlayer,
   createGame,
@@ -134,13 +135,24 @@ test("keeps the round result separate from a drawn match result", () => {
   });
 });
 
-test("validates card targets outside the component", () => {
+test("shares card play validation between the engine and interface", () => {
   const game = createGame();
   const card = game.hands[1].find((item) => item.kind === "place");
   assert.ok(card);
+  assert.equal(canPlayCard(game, card.id, 0), true);
   assert.equal(canTargetCard(game, card.id, 0, true), true);
-  assert.equal(canTargetCard({ ...game, board: [2, ...game.board.slice(1)] }, card.id, 0, true), false);
+  const occupied = { ...game, board: [2, ...game.board.slice(1)] };
+  assert.equal(canPlayCard(occupied, card.id, 0), false);
+  assert.equal(canTargetCard(occupied, card.id, 0, true), false);
+  assert.equal(canPlayCard({ ...game, mana: -1 }, card.id, 0), false);
   assert.equal(canTargetCard(game, card.id, 0, false), false);
+
+  const targetless = {
+    ...game,
+    hands: { ...game.hands, 1: [{ id: "1-shortage-targetless", kind: "shortage" }] },
+  };
+  assert.equal(canPlayCard(targetless, "1-shortage-targetless"), true);
+  assert.equal(canTargetCard(targetless, "1-shortage-targetless", 0, true), false);
 });
 
 test("keeps displayed card costs tied to the hand owner", () => {

@@ -1,4 +1,4 @@
-import type { CardInstance } from "./cards";
+import type { CardInstance, CardKind } from "./cards";
 import type { GameState } from "./engine";
 
 export type CardEffectContext = {
@@ -11,6 +11,12 @@ export type CardEffectContext = {
   random: (indices: number[]) => number | null;
   thaw: (state: GameState, indices: number[], action: string) => GameState;
 };
+
+type CardEffect = (
+  state: GameState,
+  target: number,
+  context: CardEffectContext,
+) => GameState;
 
 function drawAfterPlacement(state: GameState, target: number, context: CardEffectContext) {
   let next = context.place(state, target);
@@ -114,37 +120,46 @@ function spendRemainingMana(state: GameState) {
   };
 }
 
+const CARD_EFFECTS: Record<CardKind, CardEffect> = {
+  place: (state, target, context) => context.place(state, target),
+  "place-draw": (state, target, context) => drawAfterPlacement(state, target, context),
+  "random-effect": (state) => addTimedFigure(state),
+  "freeze-3": (state, _target, context) => context.freezeEmpty(state, 3, "Заморожено клеток"),
+  "place-5": (state, _target, context) => context.placeRandom(state, 5),
+  "destroy-freeze": (state, _target, context) => destroyIce(state, context),
+  "freeze-effect": (state) => addTimedIce(state),
+  "freeze-6-figures": (state) => freezeOwnFigures(state),
+  "freeze-all-mana": (state, _target, context) => context.freezeEmpty(
+    spendRemainingMana(state),
+    state.mana * 2,
+    "Создано льдин",
+  ),
+  "freeze-cell": (state, target) => ({
+    ...state,
+    frozen: { ...state.frozen, [target]: { owner: state.turn, turns: 2 } },
+    lastAction: "Клетка заморожена",
+  }),
+  "full-house": (state, _target, context) => fillHand(state, context),
+  "ice-encirclement": (state, target, context) => freezeAroundFigure(state, target, context),
+  "place-around-freeze": (state, _target, context) => spreadIce(state, context),
+  "place-more": (state, _target, context) => context.placeRandom(
+    spendRemainingMana(state),
+    state.mana,
+    false,
+  ),
+  shortage: (state, _target, context) => drawTwo(state, context),
+  "surrounded-by-ice": (state, target, context) => {
+    const adjacent = context.neighbours(target, state.size)
+      .filter((index) => Boolean(state.frozen[index]));
+    return context.thaw(state, adjacent, `Разбито льдин рядом: ${adjacent.length}`);
+  },
+};
+
 export function applyCardEffect(
   state: GameState,
   card: CardInstance,
   targetIndex: number | undefined,
   context: CardEffectContext,
 ): GameState {
-  const target = targetIndex as number;
-  switch (card.kind) {
-    case "place": return context.place(state, target);
-    case "place-draw": return drawAfterPlacement(state, target, context);
-    case "random-effect": return addTimedFigure(state);
-    case "freeze-3": return context.freezeEmpty(state, 3, "Заморожено клеток");
-    case "place-5": return context.placeRandom(state, 5);
-    case "destroy-freeze": return destroyIce(state, context);
-    case "freeze-effect": return addTimedIce(state);
-    case "freeze-6-figures": return freezeOwnFigures(state);
-    case "freeze-all-mana": return context.freezeEmpty(spendRemainingMana(state), state.mana * 2, "Создано льдин");
-    case "freeze-cell": return {
-      ...state,
-      frozen: { ...state.frozen, [target]: { owner: state.turn, turns: 2 } },
-      lastAction: "Клетка заморожена",
-    };
-    case "full-house": return fillHand(state, context);
-    case "ice-encirclement": return freezeAroundFigure(state, target, context);
-    case "place-around-freeze": return spreadIce(state, context);
-    case "place-more": return context.placeRandom(spendRemainingMana(state), state.mana, false);
-    case "shortage": return drawTwo(state, context);
-    case "surrounded-by-ice": {
-      const adjacent = context.neighbours(target, state.size)
-        .filter((index) => Boolean(state.frozen[index]));
-      return context.thaw(state, adjacent, `Разбито льдин рядом: ${adjacent.length}`);
-    }
-  }
+  return CARD_EFFECTS[card.kind](state, targetIndex ?? -1, context);
 }

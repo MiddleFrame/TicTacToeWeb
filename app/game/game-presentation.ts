@@ -1,5 +1,4 @@
-import { CARD_DEFINITIONS } from "./cards.ts";
-import { cardCost, type GameState, type Player } from "./engine.ts";
+import { canTargetCardAtCell, type GameState, type Player } from "./engine.ts";
 import type { PhotonSnapshot } from "./photon.ts";
 import type { GameMode } from "./game-mode.ts";
 
@@ -56,13 +55,7 @@ export function canTargetCard(
   index: number,
   enabled: boolean,
 ): boolean {
-  if (!enabled || game.phase !== "playing" || game.frozen[index]) return false;
-  const card = game.hands[game.turn].find((item) => item.id === cardId);
-  if (!card || cardCost(game, card) > game.mana) return false;
-  const target = CARD_DEFINITIONS[card.kind].target;
-  if (target === "empty") return game.board[index] === null;
-  if (target === "ally") return game.board[index] === game.turn;
-  return false;
+  return enabled && canTargetCardAtCell(game, cardId, index);
 }
 
 export function getGameStatus(

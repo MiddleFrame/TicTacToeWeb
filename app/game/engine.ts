@@ -8,6 +8,7 @@ import {
 } from "./cards.ts";
 import { applyCardEffect } from "./card-effects.ts";
 import { findScoringCells, orthogonalNeighbours } from "./board-rules.ts";
+import { applyStartOfTurnEffects } from "./turn-effects.ts";
 export { findScoringCells } from "./board-rules.ts";
 
 export type Player = 1 | 2;
@@ -187,18 +188,8 @@ function finishRound(state: GameState, winner: Player | null): GameState {
     };
   }
 
-  const gameWinner =
-    roundWins[1] >= ROUNDS_TO_WIN
-      ? 1
-      : roundWins[2] >= ROUNDS_TO_WIN
-        ? 2
-        : completedRounds >= MAX_ROUNDS
-          ? roundWins[1] > roundWins[2]
-            ? 1
-            : roundWins[2] > roundWins[1]
-              ? 2
-              : null
-          : null;
+  const gameWinner = resolveMatchWinner(roundWins, completedRounds);
+  const matchFinished = gameWinner !== null || completedRounds >= MAX_ROUNDS;
 
   return {
     ...state,
@@ -206,11 +197,18 @@ function finishRound(state: GameState, winner: Player | null): GameState {
     roundWins,
     roundWinner: winner,
     gameWinner,
-    phase:
-      gameWinner !== null || completedRounds >= MAX_ROUNDS
-        ? "game-over"
-        : "round-over",
+    phase: matchFinished ? "game-over" : "round-over",
   };
+}
+
+function resolveMatchWinner(
+  roundWins: Record<Player, number>,
+  completedRounds: number,
+): Player | null {
+  if (roundWins[1] >= ROUNDS_TO_WIN) return 1;
+  if (roundWins[2] >= ROUNDS_TO_WIN) return 2;
+  if (completedRounds < MAX_ROUNDS || roundWins[1] === roundWins[2]) return null;
+  return roundWins[1] > roundWins[2] ? 1 : 2;
 }
 
 function enabledCellCount(state: GameState): number {
@@ -527,19 +525,46 @@ function isValidTarget(
     : state.board[targetIndex] === state.turn;
 }
 
+function playableCard(
+  state: GameState,
+  cardId: string,
+  targetIndex: number | undefined,
+): CardInstance | null {
+  if (state.phase !== "playing") return null;
+  const card = state.hands[state.turn].find((current) => current.id === cardId);
+  if (!card) return null;
+  const definition = CARD_DEFINITIONS[card.kind];
+  return cardCost(state, card) <= state.mana &&
+    isValidTarget(state, definition.target, targetIndex)
+    ? card
+    : null;
+}
+
+export function canPlayCard(
+  state: GameState,
+  cardId: string,
+  targetIndex?: number,
+): boolean {
+  return playableCard(state, cardId, targetIndex) !== null;
+}
+
+export function canTargetCardAtCell(
+  state: GameState,
+  cardId: string,
+  targetIndex: number,
+): boolean {
+  const card = playableCard(state, cardId, targetIndex);
+  return card !== null && CARD_DEFINITIONS[card.kind].target !== "none";
+}
+
 export function playCard(
   state: GameState,
   cardId: string,
   targetIndex?: number,
 ): GameState {
-  if (state.phase !== "playing") return state;
-  const card = state.hands[state.turn].find((current) => current.id === cardId);
+  const card = playableCard(state, cardId, targetIndex);
   if (!card) return state;
-  const definition = CARD_DEFINITIONS[card.kind];
   const cost = cardCost(state, card);
-  if (cost > state.mana || !isValidTarget(state, definition.target, targetIndex)) {
-    return state;
-  }
 
   let next = consumeCard(state, card, cost);
   next = applyCardEffect(next, card, targetIndex, {
@@ -570,78 +595,6 @@ function resetPlayerBonusCosts(
   return result;
 }
 
-function applyStartOfTurnEffects(state: GameState): GameState {
-  const player = state.turn;
-  let next = { ...state };
-  let effectCount = 0;
-  const thawingCells: number[] = [];
-
-  if (next.randomFigureTurns[player] > 0) {
-    const index = randomAvailableIndex(next);
-    if (index !== null) {
-      const board = [...next.board];
-      board[index] = player;
-      next = { ...next, board };
-      effectCount += 1;
-    }
-    next = {
-      ...next,
-      randomFigureTurns: {
-        ...next.randomFigureTurns,
-        [player]: next.randomFigureTurns[player] - 1,
-      },
-    };
-  }
-
-  const board = [...next.board];
-  const frozen: Record<number, FrozenCell> = {};
-  Object.entries(next.frozen).forEach(([rawIndex, effect]) => {
-    const index = Number(rawIndex);
-    if (effect.owner !== player) {
-      frozen[index] = effect;
-      return;
-    }
-    const turns = effect.turns - 1;
-    if (turns > 0) {
-      frozen[index] = { ...effect, turns };
-      return;
-    }
-    board[index] = player;
-    thawingCells.push(index);
-    effectCount += 1;
-  });
-  next = { ...next, board, frozen };
-
-  if (next.randomFreezeTurns[player] > 0) {
-    next = freezeEmptyCells(next, 1, "Сработал эффект льда");
-    next = {
-      ...next,
-      randomFreezeTurns: {
-        ...next.randomFreezeTurns,
-        [player]: next.randomFreezeTurns[player] - 1,
-      },
-    };
-    effectCount += 1;
-  }
-
-  const action =
-    effectCount > 0
-      ? "Сработали эффекты начала хода"
-      : "Новый ход: мана восстановлена, добраны 2 карты";
-  if (thawingCells.length > 0) {
-    return {
-      ...next,
-      phase: "thawing",
-      thawingCells,
-      lastAction: action,
-    };
-  }
-  return prepareScoring(
-    next,
-    action,
-  );
-}
-
 export function endTurn(state: GameState): GameState {
   if (state.phase !== "playing") return state;
   const nextPlayer = otherPlayer(state.turn);
@@ -668,7 +621,11 @@ export function endTurn(state: GameState): GameState {
     lastAction: "Новый ход: мана восстановлена, добраны 2 карты",
   };
   drawCardsMutable(next, nextPlayer, CARDS_PER_TURN);
-  next = applyStartOfTurnEffects(next);
+  next = applyStartOfTurnEffects(next, {
+    freezeEmpty: freezeEmptyCells,
+    prepareScoring,
+    randomAvailableIndex,
+  });
   return next;
 }
 
