@@ -103,7 +103,7 @@ export function GameClient() {
       previousTurnRef.current = game.turn;
       showTurnBanner(game.turn);
       setScreen("game");
-    }, 0);
+    }, 1900);
     return () => window.clearTimeout(timeout);
   }, [game.turn, network.phase, screen, showTurnBanner]);
 
