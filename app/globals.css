@@ -2552,6 +2552,14 @@ body[data-game-screen="menu"]::before {
   border: clamp(1px, 0.22vmin, 2px) solid currentColor;
 }
 
+.matchmaking-mark-shape.is-o .matchmaking-mark-outline i::after {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  border: clamp(1px, 0.22vmin, 2px) solid currentColor;
+  border-radius: 50%;
+}
+
 .matchmaking-mark-shape.is-x .matchmaking-mark-fill i {
   background: currentColor;
 }
@@ -3476,6 +3484,7 @@ body[data-game-screen="menu"]::before {
 @keyframes matchmaking-mark-collect {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   42% { opacity: 1; transform: translate(0, 0) scale(1.18); }
+  99% { opacity: 1; transform: translate(var(--collect-x), var(--collect-y)) scale(0.18) rotate(28deg); }
   100% { opacity: 0; transform: translate(var(--collect-x), var(--collect-y)) scale(0.18) rotate(28deg); }
 }
 
