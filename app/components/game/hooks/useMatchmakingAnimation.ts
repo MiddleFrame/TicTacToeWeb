@@ -33,74 +33,19 @@ const WIN_LINES = [
 
 const EMPTY_BOARD = Array<MatchmakingMark | null>(9).fill(null);
 
-function shuffle<T>(values: T[]) {
-  const result = [...values];
-  for (let index = result.length - 1; index > 0; index -= 1) {
-    const target = Math.floor(Math.random() * (index + 1));
-    [result[index], result[target]] = [result[target], result[index]];
-  }
-  return result;
+function findLine(board: (MatchmakingMark | null)[], mark: MatchmakingMark) {
+  return WIN_LINES.find((line) => line.every((index) => board[index] === mark)) ?? null;
 }
 
-function hasLine(board: (MatchmakingMark | null)[], mark: MatchmakingMark) {
-  return WIN_LINES.some((line) => line.every((index) => board[index] === mark));
-}
-
-function createWinningRound() {
-  const winner: MatchmakingMark = Math.random() < 0.5 ? "x" : "o";
-  const line = shuffle(WIN_LINES)[0];
-  const winningCells = shuffle(line);
-  const remaining = shuffle(Array.from({ length: 9 }, (_, index) => index).filter((index) => !line.includes(index)));
-
-  if (winner === "x") {
-    return {
-      moves: winningCells.flatMap((index, turn) => turn < 2
-        ? [{ index, mark: "x" as const }, { index: remaining[turn], mark: "o" as const }]
-        : [{ index, mark: "x" as const }]),
-      resolution: { kind: "win" as const, cells: line, winner },
-    };
-  }
-
-  let opponentCells = remaining.slice(0, 3);
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const candidate = shuffle(remaining).slice(0, 3);
-    const board = [...EMPTY_BOARD];
-    candidate.forEach((index) => { board[index] = "x"; });
-    if (!hasLine(board, "x")) {
-      opponentCells = candidate;
-      break;
-    }
-  }
-
-  return {
-    moves: winningCells.flatMap((index, turn) => [
-      { index: opponentCells[turn], mark: "x" as const },
-      { index, mark: "o" as const },
-    ]),
-    resolution: { kind: "win" as const, cells: line, winner },
-  };
-}
-
-function createDrawRound() {
-  let board = [...EMPTY_BOARD];
-  do {
-    board = shuffle<MatchmakingMark>(["x", "x", "x", "x", "x", "o", "o", "o", "o"]);
-  } while (hasLine(board, "x") || hasLine(board, "o"));
-
-  const xCells = shuffle(board.flatMap((mark, index) => mark === "x" ? [index] : []));
-  const oCells = shuffle(board.flatMap((mark, index) => mark === "o" ? [index] : []));
-  const moves = xCells.flatMap((index, turn) => turn < oCells.length
-    ? [{ index, mark: "x" as const }, { index: oCells[turn], mark: "o" as const }]
-    : [{ index, mark: "x" as const }]);
-
-  return {
-    moves,
-    resolution: { kind: "draw" as const, cells: Array.from({ length: 9 }, (_, index) => index), winner: null },
-  };
-}
-
-function createRound() {
-  return Math.random() < 0.78 ? createWinningRound() : createDrawRound();
+function chooseCell(board: (MatchmakingMark | null)[], mark: MatchmakingMark) {
+  const empty = board.flatMap((value, index) => value === null ? [index] : []);
+  const winning = empty.filter((index) => {
+    const candidate = [...board];
+    candidate[index] = mark;
+    return findLine(candidate, mark) !== null;
+  });
+  const choices = winning.length > 0 && Math.random() < 0.72 ? winning : empty;
+  return choices[Math.floor(Math.random() * choices.length)];
 }
 
 function randomPoint(): MatchmakingTokenPoint {
@@ -123,14 +68,16 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
   const [resolution, setResolution] = useState<MatchmakingResolution | null>(null);
   const [activeMark, setActiveMark] = useState<MatchmakingMark | null>(null);
   const [tokenPoints, setTokenPoints] = useState<Record<MatchmakingMark, MatchmakingTokenPoint>>({
-    x: { x: 15, y: 18 },
-    o: { x: 85, y: 82 },
+    x: { x: 12, y: 20 },
+    o: { x: 88, y: 80 },
   });
   const activeMarkRef = useRef<MatchmakingMark | null>(null);
+  const resolvingRef = useRef(false);
 
   useEffect(() => {
     if (failed || matched) return;
     const interval = window.setInterval(() => {
+      if (resolvingRef.current) return;
       setTokenPoints((current) => ({
         x: activeMarkRef.current === "x" ? current.x : randomPoint(),
         o: activeMarkRef.current === "o" ? current.o : randomPoint(),
@@ -149,39 +96,53 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
 
     const run = async () => {
       await wait(340);
+      const liveBoard = [...EMPTY_BOARD];
+      let nextMark: MatchmakingMark = "x";
       while (!cancelled) {
-        const round = createRound();
-        setBoard([...EMPTY_BOARD]);
-        setResolution(null);
+        const index = chooseCell(liveBoard, nextMark);
+        const move = { index, mark: nextMark };
+        activeMarkRef.current = nextMark;
+        setActiveMark(nextMark);
+        setTokenPoints((current) => ({ ...current, [nextMark]: cellPoint(index) }));
+        await wait(560);
+        if (cancelled) return;
+        setDrawing(move);
+        await wait(560);
+        if (cancelled) return;
+        liveBoard[index] = nextMark;
+        setBoard([...liveBoard]);
+        setDrawing(null);
+        activeMarkRef.current = null;
+        setActiveMark(null);
+        setTokenPoints((current) => ({ ...current, [nextMark]: randomPoint() }));
+        await wait(280);
+        if (cancelled) return;
 
-        for (const move of round.moves) {
+        const line = findLine(liveBoard, nextMark);
+        const boardIsFull = liveBoard.every((mark) => mark !== null);
+        if (line) {
+          resolvingRef.current = true;
+          setResolution({ kind: "win", cells: line, winner: nextMark });
+          await wait(920);
           if (cancelled) return;
-          activeMarkRef.current = move.mark;
-          setActiveMark(move.mark);
-          setTokenPoints((current) => ({ ...current, [move.mark]: cellPoint(move.index) }));
-          await wait(500);
-          if (cancelled) return;
-          setDrawing(move);
-          await wait(520);
-          if (cancelled) return;
-          setBoard((current) => current.map((mark, index) => index === move.index ? move.mark : mark));
-          setDrawing(null);
-          activeMarkRef.current = null;
-          setActiveMark(null);
-          setTokenPoints((current) => ({ ...current, [move.mark]: randomPoint() }));
+          line.forEach((cell) => { liveBoard[cell] = null; });
+          setBoard([...liveBoard]);
+          setResolution(null);
+          resolvingRef.current = false;
           await wait(260);
+        } else if (boardIsFull) {
+          resolvingRef.current = true;
+          setResolution({ kind: "draw", cells: Array.from({ length: 9 }, (_, cell) => cell), winner: null });
+          await wait(920);
+          if (cancelled) return;
+          liveBoard.fill(null);
+          setBoard([...liveBoard]);
+          setResolution(null);
+          resolvingRef.current = false;
+          await wait(300);
         }
 
-        if (cancelled) return;
-        setResolution(round.resolution);
-        setTokenPoints((current) => round.resolution.kind === "win"
-          ? { ...current, [round.resolution.winner as MatchmakingMark]: { x: 50, y: 50 } }
-          : { x: { x: 5, y: 50 }, o: { x: 95, y: 50 } });
-        await wait(920);
-        if (cancelled) return;
-        setBoard([...EMPTY_BOARD]);
-        setResolution(null);
-        await wait(300);
+        nextMark = nextMark === "x" ? "o" : "x";
       }
     };
 
@@ -190,6 +151,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
       cancelled = true;
       timers.forEach((timer) => window.clearTimeout(timer));
       activeMarkRef.current = null;
+      resolvingRef.current = false;
     };
   }, [failed, matched]);
 

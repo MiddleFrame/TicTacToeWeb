@@ -14,11 +14,20 @@ type MatchmakingScreenProps = {
   onMenu: () => void;
 };
 
+function MarkLayer({ mark, className }: { mark: MatchmakingMark; className: string }) {
+  return (
+    <span className={className}>
+      <i />
+      {mark === "x" && <i />}
+    </span>
+  );
+}
+
 function MarkShape({ mark, filled = false }: { mark: MatchmakingMark; filled?: boolean }) {
   return (
     <span className={`matchmaking-mark-shape is-${mark} ${filled ? "is-filled" : ""}`}>
-      <span className="matchmaking-mark-outline">{mark === "x" ? "×" : "O"}</span>
-      <span className="matchmaking-mark-fill">{mark === "x" ? "×" : "O"}</span>
+      <MarkLayer mark={mark} className="matchmaking-mark-outline" />
+      <MarkLayer mark={mark} className="matchmaking-mark-fill" />
     </span>
   );
 }
@@ -50,8 +59,8 @@ function BoardMark({
       style={getCollectStyle(index, target)}
     >
       <MarkShape mark={mark} filled />
-      <span className={`matchmaking-mark-ripple is-${mark}`}>{mark === "x" ? "×" : "O"}</span>
-      <span className={`matchmaking-mark-ripple is-${mark}`}>{mark === "x" ? "×" : "O"}</span>
+      <span className="matchmaking-mark-ripple"><MarkShape mark={mark} /></span>
+      <span className="matchmaking-mark-ripple"><MarkShape mark={mark} /></span>
     </span>
   );
 }
@@ -59,7 +68,7 @@ function BoardMark({
 function MatchmakingAnimation({ failed, matched }: { failed: boolean; matched: boolean }) {
   const { activeMark, board, drawing, resolution, tokenPoints } = useMatchmakingAnimation(failed, matched);
   return (
-    <div className={`matchmaking-animation ${failed ? "is-paused" : ""} ${matched ? "is-matched" : ""}`} aria-hidden="true">
+    <div className={`matchmaking-animation ${failed ? "is-failed" : ""} ${matched ? "is-matched" : ""}`} aria-hidden="true">
       <div className="matchmaking-board">
         <span className="matchmaking-grid-line is-vertical is-first" />
         <span className="matchmaking-grid-line is-vertical is-second" />
@@ -97,6 +106,7 @@ function MatchmakingAnimation({ failed, matched }: { failed: boolean; matched: b
           <span className="matchmaking-fusion-half is-x"><MarkShape mark="x" filled /></span>
           <span className="matchmaking-fusion-half is-o"><MarkShape mark="o" filled /></span>
         </span>
+        <span className="matchmaking-connection-impact"><i /><i /><i /><i /></span>
       </div>
     </div>
   );
@@ -108,7 +118,7 @@ export function MatchmakingScreen({ network, onBot, onMenu }: MatchmakingScreenP
   const waiting = network.phase === "waiting";
   const matched = network.phase === "ready";
   const title = failed ? t("connectFailed") : matched ? t("opponentFound") : waiting ? t("waitingOpponent") : t("searchingOpponent");
-  const description = network.error || (matched ? t("startingMatch") : waiting ? t("roomCreated") : t("searchingMatch"));
+  const description = failed ? t("connectionFailedHint") : matched ? t("startingMatch") : waiting ? t("roomCreated") : t("searchingMatch");
 
   return (
     <main className={`matchmaking-screen ${failed ? "is-error" : ""} ${matched ? "is-matched" : ""}`}>
