@@ -23,6 +23,7 @@ import {
   getRoguelikeStage,
   openCardReward,
   replaceRoguelikeCard,
+  resolveRoguelikeResult,
   restartDrawnStage,
   type RoguelikeRun,
 } from "../game/roguelike";
@@ -74,9 +75,7 @@ export function GameClient() {
     mode,
     networkSide: network.side,
     playSfx,
-    roguelike,
     setGame,
-    setRoguelike,
   });
 
   useOpponentTurns({
@@ -208,6 +207,10 @@ export function GameClient() {
 
   const continueAfterResult = () => {
     playSfx("click", 0.38);
+    if (mode === "roguelike" && roguelike) {
+      setRoguelike(resolveRoguelikeResult(roguelike, game.gameWinner));
+      return;
+    }
     if (mode === "online" && network.side === 2) {
       online.sendIntent({ type: "next-round" });
       return;
