@@ -48,6 +48,8 @@ type GameSceneProps = {
 
 export function GameScene(props: GameSceneProps) {
   const { game } = props;
+  const resultContext = props.mode === "roguelike" ? "roguelike" : "match";
+  const showsRoundResult = props.mode !== "roguelike" || props.roguelike?.status === "playing";
   return (
     <main className={`unity-game-shell turn-${game.turn} ${props.isHumanTurn ? "" : "opponent-turn"} ${props.drag ? "card-is-dragging" : ""}`}>
       <section className="unity-game-stage">
@@ -60,7 +62,7 @@ export function GameScene(props: GameSceneProps) {
         <TurnBanner player={props.turnBanner} turn={game.turn} />
       </section>
 
-      {props.mode !== "roguelike" && <ResultModal game={game} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
+      {showsRoundResult && <ResultModal game={game} context={resultContext} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
       {props.mode === "roguelike" && props.roguelike && (
         <RoguelikeOverlay
           run={props.roguelike}

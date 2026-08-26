@@ -30,6 +30,7 @@ export function PauseModal({ open, onResume, onMenu }: { open: boolean; onResume
 
 type ResultModalProps = {
   game: GameState;
+  context?: "match" | "roguelike";
   status: string;
   viewer: Player | null;
   onContinue: () => void;
@@ -70,26 +71,27 @@ function RoundProgress({ game }: { game: GameState }) {
   );
 }
 
-export function ResultModal({ game, status, viewer, onContinue, onMenu }: ResultModalProps) {
+export function ResultModal({ game, context = "match", status, viewer, onContinue, onMenu }: ResultModalProps) {
   const { t } = useLocalization();
   if (game.phase !== "round-over" && game.phase !== "game-over") return null;
   const result = getRoundResult(game, viewer, t);
+  const isRoguelike = context === "roguelike";
   return (
     <div className={`modal-backdrop result-backdrop result-${result.tone} ${result.winner ? `winner-${result.winner}` : "draw"}`} role="presentation">
       <section className="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
         <span className="eyebrow">{t("roundComplete")}</span>
         <ResultAnimation tone={result.tone} winner={result.winner} />
         <h2 id="result-title">{result.headline}</h2>
-        <RoundProgress game={game} />
-        {game.phase === "game-over" && (
+        {!isRoguelike && <RoundProgress game={game} />}
+        {!isRoguelike && game.phase === "game-over" && (
           <div className="result-match-summary">
             <span>{t("matchComplete")}</span>
             <strong>{status}</strong>
           </div>
         )}
-        {game.phase === "round-over" && <p className="result-next-round">{t("nextChallenge")}: {3 + game.completedRounds}×{3 + game.completedRounds}, {t("mana")} — {3 + game.completedRounds}</p>}
+        {!isRoguelike && game.phase === "round-over" && <p className="result-next-round">{t("nextChallenge")}: {3 + game.completedRounds}×{3 + game.completedRounds}, {t("mana")} — {3 + game.completedRounds}</p>}
         <div className="result-actions">
-          <button className="primary-button" onClick={onContinue}>{game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>
+          <button className="primary-button" onClick={onContinue}>{isRoguelike ? t("resume") : game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>
           <button className="secondary-button menu-return-button" onClick={onMenu}>{t("mainMenu")}</button>
         </div>
       </section>

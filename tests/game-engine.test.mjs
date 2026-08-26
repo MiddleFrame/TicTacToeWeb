@@ -436,6 +436,14 @@ test("first roguelike victory grants one mana and a mandatory card reward", () =
   assert.equal(rewarded.deck.filter((kind) => kind === "place").length, 9);
 });
 
+test("roguelike keeps every completed stage outcome for its follow-up screen", () => {
+  const run = createRoguelikeRun();
+
+  assert.equal(resolveRoguelikeResult(run, null).status, "draw");
+  assert.equal(resolveRoguelikeResult(run, 2).status, "defeat");
+  assert.equal(resolveRoguelikeResult(run, 1).status, "reward");
+});
+
 test("roguelike stage progression matches the configured Unity values", () => {
   assert.deepEqual(getRoguelikeStage(3), {
     boardSize: 4,
