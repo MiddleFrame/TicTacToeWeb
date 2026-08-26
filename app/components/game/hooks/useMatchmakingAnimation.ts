@@ -62,6 +62,14 @@ function cellPoint(index: number): MatchmakingTokenPoint {
   };
 }
 
+function isTokenPaused(
+  mark: MatchmakingMark,
+  activeMark: MatchmakingMark | null,
+  frozenMark: MatchmakingMark | "both" | null,
+) {
+  return activeMark === mark || frozenMark === mark || frozenMark === "both";
+}
+
 export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
   const [board, setBoard] = useState<(MatchmakingMark | null)[]>(EMPTY_BOARD);
   const [drawing, setDrawing] = useState<MatchmakingDrawing | null>(null);
@@ -72,15 +80,14 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
     o: { x: 88, y: 80 },
   });
   const activeMarkRef = useRef<MatchmakingMark | null>(null);
-  const resolvingRef = useRef(false);
+  const frozenMarkRef = useRef<MatchmakingMark | "both" | null>(null);
 
   useEffect(() => {
     if (failed || matched) return;
     const interval = window.setInterval(() => {
-      if (resolvingRef.current) return;
       setTokenPoints((current) => ({
-        x: activeMarkRef.current === "x" ? current.x : randomPoint(),
-        o: activeMarkRef.current === "o" ? current.o : randomPoint(),
+        x: isTokenPaused("x", activeMarkRef.current, frozenMarkRef.current) ? current.x : randomPoint(),
+        o: isTokenPaused("o", activeMarkRef.current, frozenMarkRef.current) ? current.o : randomPoint(),
       }));
     }, 920);
     return () => window.clearInterval(interval);
@@ -120,7 +127,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
         const line = findLine(liveBoard, nextMark);
         const boardIsFull = liveBoard.every((mark) => mark !== null);
         if (line) {
-          resolvingRef.current = true;
+          frozenMarkRef.current = nextMark;
           setTokenPoints((current) => ({ ...current, [nextMark]: randomPoint() }));
           await wait(740);
           if (cancelled) return;
@@ -130,10 +137,10 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
           line.forEach((cell) => { liveBoard[cell] = null; });
           setBoard([...liveBoard]);
           setResolution(null);
-          resolvingRef.current = false;
+          frozenMarkRef.current = null;
           await wait(260);
         } else if (boardIsFull) {
-          resolvingRef.current = true;
+          frozenMarkRef.current = "both";
           setTokenPoints({
             x: { x: 10 + Math.random() * 25, y: 15 + Math.random() * 70 },
             o: { x: 65 + Math.random() * 25, y: 15 + Math.random() * 70 },
@@ -146,7 +153,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
           liveBoard.fill(null);
           setBoard([...liveBoard]);
           setResolution(null);
-          resolvingRef.current = false;
+          frozenMarkRef.current = null;
           await wait(300);
         } else {
           setTokenPoints((current) => ({ ...current, [nextMark]: randomPoint() }));
@@ -161,7 +168,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
       cancelled = true;
       timers.forEach((timer) => window.clearTimeout(timer));
       activeMarkRef.current = null;
-      resolvingRef.current = false;
+      frozenMarkRef.current = null;
     };
   }, [failed, matched]);
 

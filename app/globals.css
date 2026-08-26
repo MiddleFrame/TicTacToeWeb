@@ -3530,8 +3530,8 @@ body[data-game-screen="menu"]::before {
 
 @keyframes matchmaking-mark-collect {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
-  99% { opacity: 1; transform: translate(var(--collect-x), var(--collect-y)) scale(0.18) rotate(28deg); }
-  100% { opacity: 0; transform: translate(var(--collect-x), var(--collect-y)) scale(0.18) rotate(28deg); }
+  99% { opacity: 1; transform: translate(var(--collect-x), var(--collect-y)) scale(1); }
+  100% { opacity: 0; transform: translate(var(--collect-x), var(--collect-y)) scale(1); }
 }
 
 @keyframes matchmaking-board-found {
