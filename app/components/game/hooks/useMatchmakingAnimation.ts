@@ -107,7 +107,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
         await wait(760);
         if (cancelled) return;
         setDrawing(move);
-        await wait(560);
+        await wait(660);
         if (cancelled) return;
         liveBoard[index] = nextMark;
         setBoard([...liveBoard]);

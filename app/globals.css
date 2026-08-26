@@ -2565,14 +2565,8 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-mark-shape.is-o .matchmaking-mark-fill i {
-  --matchmaking-draw-angle: 0deg;
-  background: conic-gradient(
-    from -90deg,
-    currentColor 0deg var(--matchmaking-draw-angle),
-    transparent var(--matchmaking-draw-angle) 360deg
-  );
-  -webkit-mask: radial-gradient(circle, transparent 0 71%, #000 72% 100%);
-  mask: radial-gradient(circle, transparent 0 71%, #000 72% 100%);
+  border: clamp(6px, 1.35vmin, 12px) solid currentColor;
+  opacity: 0;
 }
 
 .matchmaking-mark-fill {
@@ -2589,7 +2583,8 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-mark-shape.is-o.is-filled .matchmaking-mark-fill i {
-  --matchmaking-draw-angle: 360deg;
+  clip-path: none;
+  opacity: 1;
 }
 
 .matchmaking-cell-mark {
@@ -2605,7 +2600,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-token.is-painting .matchmaking-mark-shape.is-o .matchmaking-mark-fill i {
-  animation: matchmaking-o-ink-fill 520ms linear both;
+  animation: matchmaking-o-ink-fill 620ms linear both;
 }
 
 .matchmaking-cell-mark {
@@ -3499,15 +3494,27 @@ body[data-game-screen="menu"]::before {
   to { clip-path: inset(0); }
 }
 
-@property --matchmaking-draw-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
 @keyframes matchmaking-o-ink-fill {
-  from { --matchmaking-draw-angle: 0deg; }
-  to { --matchmaking-draw-angle: 360deg; }
+  0% {
+    opacity: 1;
+    clip-path: polygon(50% 50%, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0);
+  }
+  25% {
+    opacity: 1;
+    clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%);
+  }
+  50% {
+    opacity: 1;
+    clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%);
+  }
+  75% {
+    opacity: 1;
+    clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 0 100%, 0 50%, 0 50%, 0 50%);
+  }
+  100% {
+    opacity: 1;
+    clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 0 100%, 0 50%, 0 0, 50% 0);
+  }
 }
 
 @keyframes matchmaking-mark-land {
