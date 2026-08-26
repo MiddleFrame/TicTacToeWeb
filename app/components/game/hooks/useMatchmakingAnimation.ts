@@ -104,7 +104,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
         activeMarkRef.current = nextMark;
         setActiveMark(nextMark);
         setTokenPoints((current) => ({ ...current, [nextMark]: cellPoint(index) }));
-        await wait(560);
+        await wait(760);
         if (cancelled) return;
         setDrawing(move);
         await wait(560);

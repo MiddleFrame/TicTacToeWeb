@@ -14,6 +14,8 @@ type MatchmakingScreenProps = {
   onMenu: () => void;
 };
 
+const BOARD_MARK_SIZE = 0.62;
+
 function MarkLayer({ mark, className }: { mark: MatchmakingMark; className: string }) {
   return (
     <span className={className}>
@@ -36,8 +38,8 @@ function getCollectStyle(index: number, target: MatchmakingTokenPoint): CSSPrope
   const column = index % 3;
   const row = Math.floor(index / 3);
   return {
-    "--collect-x": `${target.x * 3 - (column + 0.5) * 100}%`,
-    "--collect-y": `${target.y * 3 - (row + 0.5) * 100}%`,
+    "--collect-x": `${(target.x * 3 - (column + 0.5) * 100) / BOARD_MARK_SIZE}%`,
+    "--collect-y": `${(target.y * 3 - (row + 0.5) * 100) / BOARD_MARK_SIZE}%`,
   } as CSSProperties;
 }
 
@@ -85,17 +87,12 @@ function MatchmakingAnimation({ failed, matched }: { failed: boolean; matched: b
                   target={tokenPoints[mark]}
                 />
               )}
-              {drawing?.index === index && (
-                <span className="matchmaking-drawing-mark">
-                  <MarkShape mark={drawing.mark} filled />
-                </span>
-              )}
             </span>
           ))}
         </div>
         {(["x", "o"] as MatchmakingMark[]).map((mark) => (
           <span
-            className={`matchmaking-token is-${mark} ${activeMark === mark ? "is-painting" : ""}`}
+            className={`matchmaking-token is-${mark} ${activeMark === mark ? "is-active" : ""} ${drawing?.mark === mark ? "is-painting" : ""}`}
             style={{ left: `${tokenPoints[mark].x}%`, top: `${tokenPoints[mark].y}%` }}
             key={mark}
           >

@@ -2565,7 +2565,14 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-mark-shape.is-o .matchmaking-mark-fill i {
-  border: clamp(4px, 0.9vmin, 8px) solid currentColor;
+  --matchmaking-draw-angle: 0deg;
+  background: conic-gradient(
+    from -90deg,
+    currentColor 0deg var(--matchmaking-draw-angle),
+    transparent var(--matchmaking-draw-angle) 360deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 0 71%, #000 72% 100%);
+  mask: radial-gradient(circle, transparent 0 71%, #000 72% 100%);
 }
 
 .matchmaking-mark-fill {
@@ -2577,8 +2584,15 @@ body[data-game-screen="menu"]::before {
   clip-path: inset(0);
 }
 
-.matchmaking-cell-mark,
-.matchmaking-drawing-mark {
+.matchmaking-mark-shape.is-o .matchmaking-mark-fill {
+  clip-path: none;
+}
+
+.matchmaking-mark-shape.is-o.is-filled .matchmaking-mark-fill i {
+  --matchmaking-draw-angle: 360deg;
+}
+
+.matchmaking-cell-mark {
   width: 62%;
   aspect-ratio: 1;
   position: relative;
@@ -2586,14 +2600,12 @@ body[data-game-screen="menu"]::before {
   will-change: transform, opacity;
 }
 
-.matchmaking-drawing-mark {
-  position: absolute;
-  inset: 19%;
+.matchmaking-token.is-painting .matchmaking-mark-shape.is-x .matchmaking-mark-fill {
+  animation: matchmaking-ink-fill 520ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-.matchmaking-drawing-mark .matchmaking-mark-fill,
-.matchmaking-token.is-painting .matchmaking-mark-fill {
-  animation: matchmaking-ink-fill 520ms cubic-bezier(0.4, 0, 0.2, 1) both;
+.matchmaking-token.is-painting .matchmaking-mark-shape.is-o .matchmaking-mark-fill i {
+  animation: matchmaking-o-ink-fill 520ms linear both;
 }
 
 .matchmaking-cell-mark {
@@ -2627,8 +2639,12 @@ body[data-game-screen="menu"]::before {
   display: block;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 7px 5px rgb(0 0 0 / 16%));
-  transition: left 720ms cubic-bezier(0.54, 0, 0.2, 1), top 720ms cubic-bezier(0.54, 0, 0.2, 1), filter 220ms ease;
+  transition: left 720ms cubic-bezier(0.54, 0, 0.2, 1), top 720ms cubic-bezier(0.54, 0, 0.2, 1), width 420ms ease, filter 220ms ease;
   will-change: left, top, transform;
+}
+
+.matchmaking-token.is-active {
+  width: 20.666%;
 }
 
 .matchmaking-token.is-painting {
@@ -3481,6 +3497,17 @@ body[data-game-screen="menu"]::before {
 @keyframes matchmaking-ink-fill {
   from { clip-path: inset(100% 0 0); }
   to { clip-path: inset(0); }
+}
+
+@property --matchmaking-draw-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes matchmaking-o-ink-fill {
+  from { --matchmaking-draw-angle: 0deg; }
+  to { --matchmaking-draw-angle: 360deg; }
 }
 
 @keyframes matchmaking-mark-land {
