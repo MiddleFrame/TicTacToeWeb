@@ -4562,6 +4562,11 @@ body[data-game-screen="menu"]::before {
   font-size: 28px;
 }
 
+.pause-modal .primary-button,
+.pause-modal .secondary-button {
+  border-radius: 999px;
+}
+
 .secondary-button {
   min-height: 44px;
   padding: 8px 18px;
