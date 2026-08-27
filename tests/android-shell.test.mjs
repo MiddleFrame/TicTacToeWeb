@@ -36,7 +36,7 @@ test("Android release excludes site-only assets and shrinks native code", async 
   assert.match(gradle, /minifyEnabled true/);
   assert.match(gradle, /shrinkResources true/);
   assert.match(styles, /@color\/splash_background/);
-  assert.doesNotMatch(styles, /@drawable\/splash/);
+  assert.match(styles, /@drawable\/splash_logo/);
   assert.equal(resources.filter((path) => path.endsWith("splash.png")).length, 0);
 });
 
@@ -48,4 +48,24 @@ test("Android uses edge-to-edge rendering in portrait orientation", async () => 
 
   assert.match(activity, /WindowCompat\.enableEdgeToEdge\(getWindow\(\)\)/);
   assert.match(manifest, /android:screenOrientation="portrait"/);
+});
+
+test("Android keeps the branded bootstrap splash visible for two seconds", async () => {
+  const activity = await readProjectFile(
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+  );
+
+  assert.match(activity, /SPLASH_DURATION_MS = 2000/);
+  assert.match(activity, /SplashScreen\.installSplashScreen\(this\)/);
+  assert.match(activity, /setKeepOnScreenCondition/);
+});
+
+test("Android reserves navigation-bar space even when WebView reports no safe area", async () => {
+  const entrypoint = await readProjectFile("android-client/main.tsx");
+  const styles = await readProjectFile("app/globals.css");
+
+  assert.match(entrypoint, /document\.documentElement\.dataset\.platform = "android"/);
+  assert.match(styles, /:root\[data-platform="android"\]/);
+  assert.match(styles, /--safe-area-bottom: max\(48px,/);
+  assert.match(styles, /\.unity-menu-content \{\s+min-height: 0;/);
 });

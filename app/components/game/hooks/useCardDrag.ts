@@ -10,7 +10,8 @@ type CanTarget = (cardId: string, index: number) => boolean;
 
 const CARD_GROW_DURATION_MS = 1200;
 const MECHANIC_HINT_DELAY_MS = 1000;
-const CARD_RETURN_DURATION_MS = 680;
+const CARD_RETURN_DURATION_MS = 650;
+const CARD_SETTLE_DURATION_MS = 34;
 
 const closestTarget = (
   board: HTMLDivElement | null,
@@ -133,8 +134,13 @@ export function useCardDrag(
         }
       : current);
     returnTimer.current = window.setTimeout(() => {
-      setDrag((current) => current?.cardId === cardId && current.phase === "returning" ? null : current);
-      returnTimer.current = null;
+      setDrag((current) => current?.cardId === cardId && current.phase === "returning"
+        ? { ...current, phase: "settled" }
+        : current);
+      returnTimer.current = window.setTimeout(() => {
+        setDrag((current) => current?.cardId === cardId && current.phase === "settled" ? null : current);
+        returnTimer.current = null;
+      }, CARD_SETTLE_DURATION_MS);
     }, CARD_RETURN_DURATION_MS);
   };
 

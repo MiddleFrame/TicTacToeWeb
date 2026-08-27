@@ -12,7 +12,7 @@ export type GameScreen =
 
 export type DragState = {
   cardId: string;
-  phase: "holding" | "returning";
+  phase: "holding" | "returning" | "settled";
   showMechanics: boolean;
   x: number;
   y: number;

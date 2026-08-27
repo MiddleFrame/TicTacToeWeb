@@ -4,6 +4,8 @@ import { GameClient } from "../app/components/GameClient";
 import { LocalizationProvider } from "../app/game/localization";
 import "../app/globals.css";
 
+document.documentElement.dataset.platform = "android";
+
 const root = document.getElementById("root");
 
 if (!root) {

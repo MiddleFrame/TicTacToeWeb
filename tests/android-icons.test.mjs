@@ -44,6 +44,13 @@ test("Android launcher source and Play Store artwork match the original icon", a
   assert.deepEqual(playStore, original);
 });
 
+test("Android splash uses one compact branded image", async () => {
+  assert.deepEqual(
+    await readPngSize("android/app/src/main/res/drawable-nodpi/splash_logo.png"),
+    [512, 512],
+  );
+});
+
 test("Adaptive icon layers fill the mask without the old inset", async () => {
   const icon = await readFile(projectFile("android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"), "utf8");
   const roundIcon = await readFile(projectFile("android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"), "utf8");
@@ -55,5 +62,5 @@ test("Adaptive icon layers fill the mask without the old inset", async () => {
     assert.doesNotMatch(xml, /android:inset/);
   }
 
-  assert.match(config, /^versionCode=39$/m);
+  assert.match(config, /^versionCode=40$/m);
 });

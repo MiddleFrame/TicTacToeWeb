@@ -20,7 +20,12 @@
   --paper: #fff;
   --soft: #ededed;
   --mana: #2169ac;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
+}
+
+:root[data-platform="android"] {
+  --safe-area-bottom: max(48px, env(safe-area-inset-bottom, 0px));
 }
 
 :root[data-theme="dark"] {
@@ -222,7 +227,7 @@ body[data-game-screen="menu"]::before {
   min-height: 100dvh;
   padding: max(22px, env(safe-area-inset-top))
     max(22px, env(safe-area-inset-right))
-    max(22px, env(safe-area-inset-bottom))
+    max(22px, var(--safe-area-bottom))
     max(22px, env(safe-area-inset-left));
   position: relative;
   display: grid;
@@ -355,7 +360,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(20px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(88px, calc(env(safe-area-inset-bottom) + 72px))
+    max(88px, calc(var(--safe-area-bottom) + 72px))
     max(18px, env(safe-area-inset-left));
 }
 
@@ -534,7 +539,7 @@ body[data-game-screen="menu"]::before {
 .collection-footer {
   min-height: 70px;
   padding: 8px max(18px, env(safe-area-inset-right))
-    max(8px, env(safe-area-inset-bottom))
+    max(8px, var(--safe-area-bottom))
     max(18px, env(safe-area-inset-left));
   position: fixed;
   z-index: 10;
@@ -564,7 +569,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(18px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(18px, env(safe-area-inset-bottom))
+    max(18px, var(--safe-area-bottom))
     max(18px, env(safe-area-inset-left));
   position: fixed;
   z-index: 140;
@@ -711,7 +716,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(20px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom))
+    max(24px, var(--safe-area-bottom))
     max(18px, env(safe-area-inset-left));
 }
 
@@ -1318,7 +1323,7 @@ body[data-game-screen="menu"]::before {
 
 .purchase-summary {
   width: min(920px, 100%);
-  max-height: calc(100dvh - max(28px, env(safe-area-inset-top)) - max(28px, env(safe-area-inset-bottom)));
+  max-height: calc(100dvh - max(28px, env(safe-area-inset-top)) - max(28px, var(--safe-area-bottom)));
   position: relative;
   display: grid;
   justify-items: center;
@@ -1435,7 +1440,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(20px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom))
+    max(24px, var(--safe-area-bottom))
     max(18px, env(safe-area-inset-left));
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1451,7 +1456,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .purchase-deck-scroll .collection-grid {
-  padding-bottom: max(28px, env(safe-area-inset-bottom));
+  padding-bottom: max(28px, var(--safe-area-bottom));
 }
 
 .purchase-deck-scroll .collection-card {
@@ -2139,7 +2144,7 @@ body[data-game-screen="menu"]::before {
   width: 100%;
   min-height: 188px;
   padding: 0 max(12px, env(safe-area-inset-right))
-    max(8px, env(safe-area-inset-bottom))
+    max(8px, var(--safe-area-bottom))
     max(12px, env(safe-area-inset-left));
   border-top: 3px solid var(--ink);
   background: rgb(255 255 255 / 96%);
@@ -3910,7 +3915,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(12px, env(safe-area-inset-top))
     max(14px, env(safe-area-inset-right))
-    max(16px, env(safe-area-inset-bottom))
+    max(16px, var(--safe-area-bottom))
     max(14px, env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
@@ -3992,7 +3997,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .unity-menu-content {
-  min-height: calc(100dvh - 90px);
+  min-height: 0;
   padding: clamp(45px, 11dvh, 125px) 8% 18px;
   display: flex;
   flex: 1;
@@ -4129,7 +4134,7 @@ body[data-game-screen="menu"]::before {
   padding:
     max(9px, env(safe-area-inset-top))
     max(14px, env(safe-area-inset-right))
-    max(5px, env(safe-area-inset-bottom))
+    max(5px, var(--safe-area-bottom))
     max(14px, env(safe-area-inset-left));
   position: relative;
   display: grid;
@@ -4715,6 +4720,21 @@ body[data-game-screen="menu"]::before {
   box-shadow: 0 3px 7px rgb(0 0 0 / 14%);
 }
 
+.unity-hand-card.dragging.settled {
+  position: absolute;
+  z-index: auto;
+  inset: 0;
+  left: 0;
+  top: 0;
+  animation: none;
+  transform:
+    translateY(calc(var(--fan-depth) * 3px))
+    rotate(calc((var(--fan-index) - var(--fan-center)) * 4deg))
+    scale(0.92);
+  transition: none;
+  box-shadow: 0 3px 7px rgb(0 0 0 / 14%);
+}
+
 @keyframes unity-card-hold-grow {
   from {
     transform: translate(-50%, -50%) rotate(0) scale(0.92);
@@ -4731,7 +4751,7 @@ body[data-game-screen="menu"]::before {
   position: fixed;
   z-index: 70;
   right: 50%;
-  bottom: max(172px, calc(env(safe-area-inset-bottom) + 164px));
+  bottom: max(172px, calc(var(--safe-area-bottom) + 164px));
   transform: translateX(50%);
   border: 3px solid var(--ink);
   border-radius: 12px;
