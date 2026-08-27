@@ -3,14 +3,10 @@ import { Image } from "./Image";
 import { SoundIcon } from "./Primitives";
 
 type SettingsScreenProps = {
-  coins: number;
   muted: boolean;
   playerName: string;
-  testCoinGrant: number;
-  onAddCoins: () => void;
   onBack: () => void;
   onNameChange: (name: string) => void;
-  onResetCards: () => void;
   onToggleSound: () => void;
 };
 
@@ -49,21 +45,6 @@ export function SettingsScreen(props: SettingsScreenProps) {
           <span>Discord</span>
           <Image src="/game/menu/discord.png" alt="" width="34" height="34" unoptimized />
         </a>
-        <div className="settings-test-tools">
-          <div>
-            <span>{t("testing")}</span>
-            <small>{t("testingHint")}</small>
-          </div>
-          <strong className="settings-test-balance">{t("currentBalance")}: {props.coins}</strong>
-          <div className="settings-test-actions">
-            <button className="secondary-button" onClick={props.onAddCoins}>
-              {t("addCoins")} +{props.testCoinGrant}
-            </button>
-            <button className="secondary-button settings-reset-button" onClick={props.onResetCards}>
-              {t("resetCards")}
-            </button>
-          </div>
-        </div>
       </section>
     </main>
   );

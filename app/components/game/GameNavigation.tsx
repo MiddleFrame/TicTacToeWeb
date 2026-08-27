@@ -74,14 +74,10 @@ export function GameNavigation(props: GameNavigationProps) {
   if (screen === "settings") {
     return (
       <SettingsScreen
-        coins={collection.coins}
         muted={muted}
         playerName={collection.profileName}
-        testCoinGrant={collection.testCoinGrant}
-        onAddCoins={collection.addTestCoins}
         onBack={() => onNavigate("menu")}
         onNameChange={collection.changeName}
-        onResetCards={collection.resetCards}
         onToggleSound={() => {
           audio.playSfx("click", 0.38);
           onMutedChange(!muted);
