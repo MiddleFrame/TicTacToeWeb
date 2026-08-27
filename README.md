@@ -30,6 +30,8 @@ Android-оболочка находится в `android`, а её автоном
 Идентификатор приложения, версия и уровни SDK задаются в
 `android-config/app.properties`, а release-подпись — в игнорируемом файле
 `android-config/private/keystore.properties`.
+Мастер launcher-иконки и версия для Google Play находятся в
+`android-config/app-icon-source.png` и `android-config/app-icon-play-store.png`.
 
 ```powershell
 npm run android:bundle
