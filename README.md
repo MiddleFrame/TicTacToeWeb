@@ -24,7 +24,9 @@ npm run build
 
 ## Android
 
-Android-оболочка находится в `android` и загружает опубликованную веб-версию игры.
+Android-оболочка находится в `android`, а её автономный интерфейс — в
+`android-client`. Локальные режимы и игровые ресурсы запускаются без сети;
+подключение требуется только сетевым функциям.
 Идентификатор приложения, версия и уровни SDK задаются в
 `android-config/app.properties`, а release-подпись — в игнорируемом файле
 `android-config/private/keystore.properties`.

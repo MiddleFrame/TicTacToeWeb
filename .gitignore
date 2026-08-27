@@ -38,6 +38,7 @@ yarn-error.log*
 # typescript
 next-env.d.ts
 /dist/
+/android-shell/
 /.wrangler/
 /outputs/
 /work/

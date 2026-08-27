@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { useLocalization } from "../../game/localization";
+import { Image } from "./Image";
 import { SoundIcon } from "./Primitives";
 
 type SettingsScreenProps = {

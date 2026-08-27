@@ -10,10 +10,6 @@ const config: CapacitorConfig = {
     minWebViewVersion: 60,
     webContentsDebuggingEnabled: false,
   },
-  server: {
-    url: "https://tic-tac-toe-plus-alpha.stofs.chatgpt.site",
-    errorPath: "offline.html",
-  },
 };
 
 export default config;

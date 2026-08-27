@@ -1,10 +1,10 @@
-import Image from "next/image";
 import type { CSSProperties, PointerEvent, RefObject } from "react";
 import { CARD_DEFINITIONS } from "../../game/cards";
 import { cardCostForPlayer, type GameState, type Player } from "../../game/engine";
 import { useLocalization } from "../../game/localization";
 import { CardMechanicHints } from "./CardMechanicHints";
 import { Figure } from "./Primitives";
+import { Image } from "./Image";
 import type { DamageFlight, DragState } from "./types";
 
 type HealthBarProps = {

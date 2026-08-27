@@ -1,6 +1,7 @@
 import vinext from "vinext";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
+import { photonBrowserPlugin } from "./build/photon-browser-plugin";
 import { sites } from "./build/sites-vite-plugin";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -9,29 +10,6 @@ const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
 const { d1, r2 } = hostingConfig;
 
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
-
-const photonBrowserPlugin = {
-  name: "tttp-photon-browser",
-  enforce: "pre" as const,
-  transform(code: string, id: string) {
-    if (!id.replaceAll("\\", "/").endsWith(
-      "/photon-realtime/photon-realtime-module.js",
-    )) {
-      return null;
-    }
-
-    const nodeAdapterMarker = "const wsClass = function";
-    const nodeAdapterIndex = code.lastIndexOf(nodeAdapterMarker);
-    if (nodeAdapterIndex < 0) {
-      throw new Error("Photon browser adapter marker was not found");
-    }
-
-    return {
-      code: `${code.slice(0, nodeAdapterIndex)}module.exports = Photon;\n`,
-      map: null,
-    };
-  },
-};
 
 const localBindingConfig = {
   main: "./worker/index.ts",

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import type { CardKind } from "../../game/cards";
 import { cardPackCost } from "../../game/card-purchase";
 import { useLocalization } from "../../game/localization";
 import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
 import { CardPurchaseFlow } from "./CardPurchaseFlow";
+import { Image } from "./Image";
 
 type StoreScreenProps = {
   coins: number;

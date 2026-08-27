@@ -11,7 +11,8 @@
     "start": "vinext start",
     "test": "node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "android:sync": "cap sync android",
+    "android:web": "vite build --config vite.android.config.ts",
+    "android:sync": "npm run android:web && cap sync android",
     "android:bundle": "npm run android:sync && cd android && gradlew.bat bundleRelease",
     "db:generate": "drizzle-kit generate",
     "db:local:migrate": "wrangler d1 migrations apply site-creator-d1 --local --config wrangler.db.jsonc"

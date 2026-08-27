@@ -9,10 +9,17 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "android-shell/**",
     "android/**/build/**",
     "android/app/src/main/assets/**",
     "next-env.d.ts",
   ]),
+  {
+    files: ["app/components/game/Image.tsx"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

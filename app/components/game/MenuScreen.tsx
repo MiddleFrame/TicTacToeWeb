@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { useLocalization } from "../../game/localization";
+import { Image } from "./Image";
 import { RulesModal } from "./RulesModal";
 import type { GameMode } from "./types";
 
