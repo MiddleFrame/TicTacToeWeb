@@ -13,6 +13,7 @@ const readPngSize = async (path) => {
 
 test("Android launcher icons use the original game artwork at every density", async () => {
   const densities = {
+    ldpi: [36, 81],
     mdpi: [48, 108],
     hdpi: [72, 162],
     xhdpi: [96, 216],
@@ -54,5 +55,5 @@ test("Adaptive icon layers fill the mask without the old inset", async () => {
     assert.doesNotMatch(xml, /android:inset/);
   }
 
-  assert.match(config, /^versionCode=37$/m);
+  assert.match(config, /^versionCode=38$/m);
 });
