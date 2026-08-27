@@ -21,3 +21,17 @@ npm run build
 
 Параметры будущей Android-оболочки находятся в `android-config`. Закрытая папка
 `android-config/private` содержит локальный release-ключ и не попадает в Git.
+
+## Android
+
+Android-оболочка находится в `android` и загружает опубликованную веб-версию игры.
+Идентификатор приложения, версия и уровни SDK задаются в
+`android-config/app.properties`, а release-подпись — в игнорируемом файле
+`android-config/private/keystore.properties`.
+
+```powershell
+npm run android:bundle
+```
+
+Подписанный App Bundle создаётся в
+`android/app/build/outputs/bundle/release/app-release.aab`.

@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+
+def appProperties = new Properties()
+file("$rootDir/../android-config/app.properties").withInputStream {
+    appProperties.load(it)
+}
+
+def signingProperties = new Properties()
+def signingPropertiesFile = file("$rootDir/../android-config/private/keystore.properties")
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.withInputStream {
+        signingProperties.load(it)
+    }
+}
+
+android {
+    namespace = appProperties['applicationId']
+    compileSdk = appProperties['compileSdk'] as Integer
+    defaultConfig {
+        applicationId appProperties['applicationId']
+        minSdkVersion appProperties['minSdk'] as Integer
+        targetSdkVersion appProperties['targetSdk'] as Integer
+        versionCode appProperties['versionCode'] as Integer
+        versionName appProperties['versionName']
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+        ndk {
+            abiFilters.addAll(appProperties['abiFilters'].split(',') as List)
+        }
+    }
+    signingConfigs {
+        release {
+            if (!signingProperties.isEmpty()) {
+                storeFile = new File(signingPropertiesFile.parentFile, signingProperties['storeFile'])
+                storePassword = signingProperties['storePassword']
+                keyAlias = signingProperties['keyAlias']
+                keyPassword = signingProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found")
+}
