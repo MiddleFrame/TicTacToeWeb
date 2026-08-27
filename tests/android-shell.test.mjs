@@ -39,3 +39,13 @@ test("Android release excludes site-only assets and shrinks native code", async 
   assert.doesNotMatch(styles, /@drawable\/splash/);
   assert.equal(resources.filter((path) => path.endsWith("splash.png")).length, 0);
 });
+
+test("Android uses edge-to-edge rendering in portrait orientation", async () => {
+  const activity = await readProjectFile(
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+  );
+  const manifest = await readProjectFile("android/app/src/main/AndroidManifest.xml");
+
+  assert.match(activity, /WindowCompat\.enableEdgeToEdge\(getWindow\(\)\)/);
+  assert.match(manifest, /android:screenOrientation="portrait"/);
+});
