@@ -11,7 +11,7 @@ const readPngSize = async (path) => {
   return [bytes.readUInt32BE(16), bytes.readUInt32BE(20)];
 };
 
-test("Android launcher icons use the monochrome game artwork at every density", async () => {
+test("Android launcher icons use the original game artwork at every density", async () => {
   const densities = {
     mdpi: [48, 108],
     hdpi: [72, 162],
@@ -32,6 +32,17 @@ test("Android launcher icons use the monochrome game artwork at every density", 
   assert.deepEqual(await readPngSize("android-config/app-icon-play-store.png"), [512, 512]);
 });
 
+test("Android launcher source and Play Store artwork match the original icon", async () => {
+  const [source, playStore, original] = await Promise.all([
+    readFile(projectFile("android-config/app-icon-source.png")),
+    readFile(projectFile("android-config/app-icon-play-store.png")),
+    readFile(projectFile("android-config/icon-variants/reference-icon-v2.png")),
+  ]);
+
+  assert.deepEqual(source, original);
+  assert.deepEqual(playStore, original);
+});
+
 test("Adaptive icon layers fill the mask without the old inset", async () => {
   const icon = await readFile(projectFile("android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"), "utf8");
   const roundIcon = await readFile(projectFile("android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"), "utf8");
@@ -43,5 +54,5 @@ test("Adaptive icon layers fill the mask without the old inset", async () => {
     assert.doesNotMatch(xml, /android:inset/);
   }
 
-  assert.match(config, /^versionCode=36$/m);
+  assert.match(config, /^versionCode=37$/m);
 });
