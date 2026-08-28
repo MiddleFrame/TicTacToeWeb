@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keeppackagenames com.yodo1.**
+-keep class com.yodo1.** { *; }
+-keep public class * extends com.yodo1.mas.mediation.Yodo1MasAdapterBase
+-keep public class * extends com.yodo1.mas.ad.Yodo1MasAdAdapterBase
+-keepattributes JavascriptInterface
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}

@@ -18,6 +18,7 @@ public class MainActivity extends BridgeActivity {
         splashScreen.setKeepOnScreenCondition(
             () -> SystemClock.uptimeMillis() - splashStartedAt < SPLASH_DURATION_MS
         );
+        registerPlugin(RewardedAdsPlugin.class);
         super.onCreate(savedInstanceState);
         WindowCompat.enableEdgeToEdge(getWindow());
     }

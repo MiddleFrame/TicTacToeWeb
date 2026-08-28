@@ -74,10 +74,22 @@ export function usePlayerCollection(playSfx: PlaySound) {
     window.localStorage.setItem("tttp-deck", JSON.stringify(nextDeck));
   };
 
+  const creditCoins = (amount: number) => {
+    const normalized = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+    if (normalized === 0) return;
+    playSfx("click", 0.38);
+    setCoins((current) => {
+      const next = current + normalized;
+      window.localStorage.setItem("tttp-coins", String(next));
+      return next;
+    });
+  };
+
   return {
     buyCards,
     changeName,
     coins,
+    creditCoins,
     lockedKinds: DECK_BUILDING_KINDS.filter((kind) => !unlockedKinds.includes(kind)),
     profileName,
     purchasedKinds,

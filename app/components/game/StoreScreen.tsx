@@ -1,10 +1,11 @@
 import type { CardKind } from "../../game/cards";
-import { cardPackCost } from "../../game/card-purchase";
+import { CARD_PRICE, cardPackCost } from "../../game/card-purchase";
 import { useLocalization } from "../../game/localization";
 import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
 import { CardPurchaseFlow } from "./CardPurchaseFlow";
 import { Image } from "./Image";
 import { BackIcon } from "./Primitives";
+import { useRewardedAd } from "./hooks/useRewardedAd";
 
 type StoreScreenProps = {
   coins: number;
@@ -15,6 +16,7 @@ type StoreScreenProps = {
   onAmbientSuspendedChange: (suspended: boolean) => void;
   onBack: () => void;
   onBuy: (count: number) => void;
+  onRewardAd: () => void;
   onCompleteReveal: (lastKind: CardKind) => void;
   playDock: PlayCardDock;
   startRevealAudio: StartCardRevealAudio;
@@ -22,6 +24,7 @@ type StoreScreenProps = {
 
 export function StoreScreen(props: StoreScreenProps) {
   const { t } = useLocalization();
+  const rewardedAd = useRewardedAd(props.onRewardAd);
   const soldOut = props.lockedKinds.length === 0;
   const canBuyOne = props.coins >= cardPackCost(1) && props.lockedKinds.length >= 1;
   const canBuyFive = props.coins >= cardPackCost(5) && props.lockedKinds.length >= 5;
@@ -54,6 +57,23 @@ export function StoreScreen(props: StoreScreenProps) {
             <Image src="/game/menu/coin.png" alt="" width="22" height="22" unoptimized />
           </button>
         </div>
+        {rewardedAd.supported && (
+          <button
+            className="secondary-button store-reward-ad"
+            disabled={!rewardedAd.loaded || rewardedAd.showing}
+            onClick={() => void rewardedAd.show()}
+          >
+            {rewardedAd.showing
+              ? t("adOpening")
+              : rewardedAd.loading
+                ? t("adLoading")
+                : rewardedAd.loaded
+                  ? t("watchAd")
+                  : t("adUnavailable")}
+            <span>+{CARD_PRICE}</span>
+            <Image src="/game/menu/coin.png" alt="" width="22" height="22" unoptimized />
+          </button>
+        )}
       </section>
       {props.purchasedKinds.length > 0 && (
         <CardPurchaseFlow

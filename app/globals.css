@@ -898,6 +898,28 @@ body[data-game-screen="menu"]::before {
   filter: brightness(0);
 }
 
+.store-reward-ad {
+  width: min(280px, 100%);
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.store-reward-ad img {
+  filter: brightness(0);
+}
+
+.store-reward-ad:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.store-reward-ad:disabled:hover {
+  transform: none;
+}
+
 .store-buy-button:disabled {
   cursor: default;
   opacity: 0.42;

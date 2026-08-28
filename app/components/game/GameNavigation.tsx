@@ -8,6 +8,7 @@ import { StoreScreen } from "./StoreScreen";
 import type { GameMode, GameScreen } from "./types";
 import type { useGameAudio } from "./hooks/useGameAudio";
 import type { usePlayerCollection } from "./hooks/usePlayerCollection";
+import { CARD_PRICE } from "../../game/card-purchase";
 
 type NavigationScreen = Exclude<GameScreen, "game">;
 type Collection = ReturnType<typeof usePlayerCollection>;
@@ -100,6 +101,7 @@ export function GameNavigation(props: GameNavigationProps) {
           onNavigate("menu");
         }}
         onBuy={collection.buyCards}
+        onRewardAd={() => collection.creditCoins(CARD_PRICE)}
         onCompleteReveal={(lastKind) => {
           collection.setPurchasedKinds([]);
           onDeckFocusChange(lastKind);
