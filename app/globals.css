@@ -1354,12 +1354,13 @@ body[data-game-screen="menu"]::before {
 
 .purchase-summary-backdrop {
   z-index: 121;
-  overflow: hidden;
+  align-items: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .purchase-summary {
   width: min(920px, 100%);
-  max-height: calc(100dvh - max(28px, env(safe-area-inset-top)) - max(28px, var(--safe-area-bottom)));
   position: relative;
   display: grid;
   justify-items: center;
@@ -1388,14 +1389,11 @@ body[data-game-screen="menu"]::before {
 
 .purchase-summary-grid {
   width: 100%;
-  max-height: min(62dvh, 570px);
-  padding: 12px;
+  padding: 12px 18px 18px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(112px, 150px));
   justify-content: center;
-  gap: 12px;
-  overflow: auto;
-  overscroll-behavior: contain;
+  gap: 18px;
 }
 
 .purchase-mini-card {
@@ -2412,6 +2410,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-grid-line {
+  --comet-direction: 90deg;
   position: absolute;
   z-index: 0;
   overflow: hidden;
@@ -2421,11 +2420,12 @@ body[data-game-screen="menu"]::before {
   content: "";
   position: absolute;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent 0, color-mix(in srgb, var(--ink) 12%, transparent) 30%, color-mix(in srgb, var(--ink) 58%, transparent) 82%, var(--ink));
+  background: linear-gradient(var(--comet-direction), transparent 0, color-mix(in srgb, var(--ink) 12%, transparent) 30%, color-mix(in srgb, var(--ink) 58%, transparent) 82%, var(--ink));
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ink) 58%, transparent));
 }
 
 .matchmaking-grid-line.is-vertical {
+  --comet-direction: 180deg;
   width: 2px;
   height: 100%;
   top: 0;
@@ -2435,7 +2435,6 @@ body[data-game-screen="menu"]::before {
   width: 2px;
   height: 72%;
   left: 0;
-  background: linear-gradient(180deg, transparent 0, color-mix(in srgb, var(--ink) 12%, transparent) 30%, color-mix(in srgb, var(--ink) 58%, transparent) 82%, var(--ink));
   animation: matchmaking-comet-y 1.05s linear infinite;
 }
 
@@ -2457,10 +2456,12 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-grid-line.is-vertical.is-second {
+  --comet-direction: 0deg;
   left: 66.666%;
 }
 
 .matchmaking-grid-line.is-horizontal.is-first {
+  --comet-direction: 270deg;
   top: 33.333%;
 }
 
@@ -3628,7 +3629,8 @@ body[data-game-screen="menu"]::before {
 
   .purchase-summary-grid {
     grid-template-columns: repeat(auto-fit, minmax(92px, 120px));
-    gap: 9px;
+    padding: 10px 15px 16px;
+    gap: 15px;
   }
 
   .purchase-summary-count {
