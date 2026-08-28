@@ -77,6 +77,16 @@ test("Android prevents accidental game zoom during card gestures", async () => {
   assert.match(html, /user-scalable=no/);
 });
 
+test("mobile browsers cannot zoom the web game", async () => {
+  const layout = await readProjectFile("app/layout.tsx");
+  const styles = await readProjectFile("app/globals.css");
+
+  assert.match(layout, /maximumScale:\s*1/);
+  assert.match(layout, /userScalable:\s*false/);
+  assert.match(layout, /viewportFit:\s*"cover"/);
+  assert.match(styles, /:root\s*\{[\s\S]*touch-action:\s*manipulation/);
+});
+
 test("Android forwards native pause and resume events to the game", async () => {
   const activity = await readProjectFile(
     "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",

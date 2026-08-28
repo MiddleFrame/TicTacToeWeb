@@ -22,6 +22,7 @@
   --mana: #2169ac;
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
+  touch-action: manipulation;
 }
 
 :root[data-platform="android"] {
