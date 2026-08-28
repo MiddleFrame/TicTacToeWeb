@@ -2411,32 +2411,34 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-grid-line {
-  --comet-direction: 90deg;
   position: absolute;
   z-index: 0;
   overflow: hidden;
 }
 
-.matchmaking-grid-line::after {
-  content: "";
+.matchmaking-grid-comet {
   position: absolute;
   border-radius: 999px;
   background: linear-gradient(var(--comet-direction), transparent 0, color-mix(in srgb, var(--ink) 12%, transparent) 30%, color-mix(in srgb, var(--ink) 58%, transparent) 82%, var(--ink));
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ink) 58%, transparent));
+  animation-delay: var(--comet-delay);
+  animation-direction: var(--comet-travel);
+  animation-duration: var(--comet-duration);
+  animation-fill-mode: both;
+  animation-timing-function: linear;
 }
 
 .matchmaking-grid-line.is-vertical {
-  --comet-direction: 180deg;
   width: 2px;
   height: 100%;
   top: 0;
 }
 
-.matchmaking-grid-line.is-vertical::after {
+.matchmaking-grid-line.is-vertical .matchmaking-grid-comet {
   width: 2px;
-  height: 72%;
+  height: 92%;
   left: 0;
-  animation: matchmaking-comet-y 1.05s linear infinite;
+  animation-name: matchmaking-comet-y;
 }
 
 .matchmaking-grid-line.is-horizontal {
@@ -2445,11 +2447,11 @@ body[data-game-screen="menu"]::before {
   left: 0;
 }
 
-.matchmaking-grid-line.is-horizontal::after {
-  width: 72%;
+.matchmaking-grid-line.is-horizontal .matchmaking-grid-comet {
+  width: 92%;
   height: 2px;
   top: 0;
-  animation: matchmaking-comet-x 1.55s linear infinite;
+  animation-name: matchmaking-comet-x;
 }
 
 .matchmaking-grid-line.is-vertical.is-first {
@@ -2457,34 +2459,15 @@ body[data-game-screen="menu"]::before {
 }
 
 .matchmaking-grid-line.is-vertical.is-second {
-  --comet-direction: 0deg;
   left: 66.666%;
 }
 
 .matchmaking-grid-line.is-horizontal.is-first {
-  --comet-direction: 270deg;
   top: 33.333%;
 }
 
 .matchmaking-grid-line.is-horizontal.is-second {
   top: 66.666%;
-}
-
-.matchmaking-grid-line.is-vertical.is-second::after {
-  animation-duration: 2.1s;
-  animation-direction: reverse;
-  animation-delay: -0.9s;
-}
-
-.matchmaking-grid-line.is-horizontal.is-first::after {
-  animation-duration: 1.25s;
-  animation-direction: reverse;
-  animation-delay: -0.55s;
-}
-
-.matchmaking-grid-line.is-horizontal.is-second::after {
-  animation-duration: 2.65s;
-  animation-delay: -1.6s;
 }
 
 .matchmaking-cells {
@@ -3477,13 +3460,13 @@ body[data-game-screen="menu"]::before {
 }
 
 @keyframes matchmaking-comet-y {
-  from { transform: translateY(-110%); }
-  to { transform: translateY(240%); }
+  from { transform: translateY(-105%); }
+  to { transform: translateY(215%); }
 }
 
 @keyframes matchmaking-comet-x {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(240%); }
+  from { transform: translateX(-105%); }
+  to { transform: translateX(215%); }
 }
 
 @keyframes matchmaking-ink-fill {
