@@ -103,6 +103,9 @@ test("Android forwards native pause and resume events to the game", async () => 
   assert.match(lifecycle, /visibilitychange/);
   assert.match(audio, /!appActiveRef\.current/);
   assert.match(audio, /audioContextRef\.current\?\.suspend/);
+  assert.match(audio, /document\.addEventListener\("visibilitychange", syncPageAudio\)/);
+  assert.match(audio, /window\.addEventListener\("blur", pausePlayback\)/);
+  assert.match(audio, /music\.pause\(\)/);
   assert.match(opponentTurns, /!active/);
   assert.match(damage, /!active \|\| phase !== "clearing"/);
 });

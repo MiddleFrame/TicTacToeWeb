@@ -78,12 +78,49 @@ export function useGameAudio(appActive = true) {
       const context = audioContextRef.current ?? new AudioContext();
       audioContextRef.current = context;
       void context.resume().catch(() => undefined);
-      if (!mutedRef.current && !ambientSuspendedRef.current) void music.play().catch(() => undefined);
+      if (
+        document.visibilityState !== "hidden"
+        && document.hasFocus()
+        && !mutedRef.current
+        && !ambientSuspendedRef.current
+      ) void music.play().catch(() => undefined);
+    };
+    const pausePlayback = () => {
+      music.volume = 0;
+      music.pause();
+      activeSfx.forEach((audio) => audio.pause());
+      activeSfx.clear();
+      void audioContextRef.current?.suspend().catch(() => undefined);
+    };
+    const resumePlayback = () => {
+      if (
+        document.visibilityState === "hidden"
+        || !document.hasFocus()
+        || mutedRef.current
+        || ambientSuspendedRef.current
+      ) return;
+      music.volume = 0.24;
+      void audioContextRef.current?.resume().catch(() => undefined);
+      void music.play().catch(() => undefined);
+    };
+    const syncPageAudio = () => {
+      if (document.visibilityState === "hidden" || !document.hasFocus()) pausePlayback();
+      else resumePlayback();
     };
     window.addEventListener("pointerdown", unlock, { once: true });
+    document.addEventListener("visibilitychange", syncPageAudio);
+    window.addEventListener("blur", pausePlayback);
+    window.addEventListener("focus", resumePlayback);
+    window.addEventListener("pagehide", pausePlayback);
+    window.addEventListener("pageshow", resumePlayback);
     return () => {
       window.clearTimeout(restore);
       window.removeEventListener("pointerdown", unlock);
+      document.removeEventListener("visibilitychange", syncPageAudio);
+      window.removeEventListener("blur", pausePlayback);
+      window.removeEventListener("focus", resumePlayback);
+      window.removeEventListener("pagehide", pausePlayback);
+      window.removeEventListener("pageshow", resumePlayback);
       music.pause();
       musicRef.current = null;
       activeSfx.forEach((audio) => audio.pause());
