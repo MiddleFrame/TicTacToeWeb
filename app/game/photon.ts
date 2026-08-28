@@ -20,6 +20,7 @@ export type NetworkPhase =
   | "connecting"
   | "waiting"
   | "ready"
+  | "opponent-left"
   | "error";
 
 export interface PhotonSnapshot {
@@ -81,6 +82,7 @@ interface PhotonModule {
 }
 
 export interface PhotonCallbacks {
+  onOpponentLeave: (winner: Player) => void;
   onSnapshot: (snapshot: PhotonSnapshot) => void;
   onState: (state: GameState) => void;
   onIntent: (intent: NetworkIntent) => void;
@@ -212,13 +214,15 @@ export class PhotonGameSession {
       };
       client.onActorLeave = () => {
         if (this.client !== client) return;
+        const winner = this.snapshot.side;
         this.client = null;
         this.photon = null;
         this.emit({
           playerCount: 1,
-          phase: "error",
+          phase: "opponent-left",
           error: "Соперник вышел из матча",
         });
+        if (winner) this.callbacks.onOpponentLeave(winner);
         client.disconnect();
       };
       client.onError = (_code, message) => {

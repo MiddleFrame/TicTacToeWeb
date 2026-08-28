@@ -36,6 +36,7 @@ function buildFlights(
 }
 
 export function useDamageSequence(
+  active: boolean,
   game: GameState,
   mode: GameMode,
   networkSide: Player | null,
@@ -52,7 +53,7 @@ export function useDamageSequence(
   const turn = game.turn;
 
   useEffect(() => {
-    if (phase !== "clearing") return;
+    if (!active || phase !== "clearing") return;
     const canSettle = mode !== "online" || networkSide === 1;
     const targetPlayer: Player = turn === 1 ? 2 : 1;
     const nextFlights = buildFlights(clearingCells, turn, scores[turn], cellRefs.current, healthRefs.current[targetPlayer]);
@@ -72,7 +73,7 @@ export function useDamageSequence(
       window.clearTimeout(settle);
       impacts.forEach((timeout) => window.clearTimeout(timeout));
     };
-  }, [clearingCells, mode, networkSide, phase, playSfx, scores, setGame, turn]);
+  }, [active, clearingCells, mode, networkSide, phase, playSfx, scores, setGame, turn]);
 
   return {
     flights,

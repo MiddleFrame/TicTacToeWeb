@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createGame,
   endTurn,
@@ -31,6 +31,7 @@ import { GameNavigation } from "./game/GameNavigation";
 import { GameScene } from "./game/GameScene";
 import type { GameMode, GameScreen } from "./game/types";
 import { useDamageSequence } from "./game/hooks/useDamageSequence";
+import { useAppActivity } from "./game/hooks/useAppActivity";
 import { useCardDrag } from "./game/hooks/useCardDrag";
 import { useGameAudio } from "./game/hooks/useGameAudio";
 import { usePlayerCollection } from "./game/hooks/usePlayerCollection";
@@ -46,11 +47,12 @@ import { isPhotonConfigured, PHOTON_GAME_CONFIG } from "../game/photon-config";
 export function GameClient() {
   useScenePattern();
   const { action, t } = useLocalization();
-  const { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio } = useGameAudio();
+  const appActive = useAppActivity();
+  const [mode, setMode] = useState<GameMode>("local");
+  const { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio } = useGameAudio(appActive);
   const collection = usePlayerCollection(playSfx);
   const [screen, setScreen] = useState<GameScreen>("menu");
   const [deckFocusKind, setDeckFocusKind] = useState<CardKind | null>(null);
-  const [mode, setMode] = useState<GameMode>("local");
   const [game, setGame] = useState(createGame);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [pauseOpen, setPauseOpen] = useState(false);
@@ -62,11 +64,17 @@ export function GameClient() {
     player: turnBanner,
     show: showTurnBanner,
   } = useTurnBanner(1);
-  const online = usePhotonGame(game, mode, setGame);
+  const handleOpponentLeave = useCallback(() => {
+    hideTurnBanner();
+    setScreen("game");
+  }, [hideTurnBanner]);
+  const online = usePhotonGame(game, mode, setGame, handleOpponentLeave);
   const { intentPending: networkIntentPending, network } = online;
-  const damage = useDamageSequence(game, mode, network.side, setGame, playSfx);
+  const effectsActive = appActive || mode === "online";
+  const damage = useDamageSequence(effectsActive, game, mode, network.side, setGame, playSfx);
 
   useGamePhaseEffects({
+    active: effectsActive,
     game,
     mode,
     networkSide: network.side,
@@ -75,6 +83,7 @@ export function GameClient() {
   });
 
   useOpponentTurns({
+    active: appActive,
     game,
     mode,
     pauseOpen,
@@ -150,6 +159,10 @@ export function GameClient() {
   const clearDrag = cardDrag.clearDrag;
 
   useEffect(() => {
+    if (!appActive) clearDrag();
+  }, [appActive, clearDrag]);
+
+  useEffect(() => {
     if (screen !== "game" || previousTurnRef.current === game.turn) return;
     previousTurnRef.current = game.turn;
     clearDrag();
@@ -202,6 +215,10 @@ export function GameClient() {
   };
 
   const continueAfterResult = () => {
+    if (mode === "online" && network.phase === "opponent-left") {
+      leaveToMenu();
+      return;
+    }
     playSfx("click", 0.38);
     if (mode === "roguelike" && roguelike) {
       setRoguelike(resolveRoguelikeResult(roguelike, game.gameWinner));
@@ -269,6 +286,7 @@ export function GameClient() {
       mode={mode}
       game={game}
       networkIntentPending={networkIntentPending}
+      opponentLeft={network.phase === "opponent-left"}
       isHumanTurn={isHumanTurn}
       topPlayer={topPlayer}
       bottomPlayer={bottomPlayer}

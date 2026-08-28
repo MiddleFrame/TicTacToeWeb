@@ -26,6 +26,8 @@
 
 :root[data-platform="android"] {
   --safe-area-bottom: max(48px, env(safe-area-inset-bottom, 0px));
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 :root[data-theme="dark"] {
@@ -394,6 +396,15 @@ body[data-game-screen="menu"]::before {
   font-size: 13px;
 }
 
+.deck-header {
+  padding: 9px 8px 11px;
+  position: sticky;
+  z-index: 22;
+  top: max(4px, env(safe-area-inset-top));
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+}
+
 .collection-lead {
   width: min(760px, 100%);
   margin: 18px auto 22px;
@@ -401,6 +412,31 @@ body[data-game-screen="menu"]::before {
   text-align: center;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.deck-filters {
+  width: min(1040px, 100%);
+  margin: 0 auto 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.deck-filters button {
+  min-height: 34px;
+  padding: 5px 16px;
+  cursor: pointer;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.deck-filters button.active {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .collection-grid {
@@ -1732,14 +1768,26 @@ body[data-game-screen="menu"]::before {
   width: 34px;
   height: 34px;
   padding: 0;
+  display: grid;
+  place-items: center;
   cursor: pointer;
+  overflow: hidden;
   border: 3px solid var(--ink);
   border-radius: 10px;
   background: var(--paper);
   color: var(--ink);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
+  line-height: 0;
+}
+
+.back-icon {
+  width: 21px;
+  height: 21px;
+  display: block;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .wordmark span {
@@ -4661,6 +4709,12 @@ body[data-game-screen="menu"]::before {
 .result-actions {
   display: grid;
   gap: 10px;
+}
+
+.result-auto-advance {
+  margin: 14px 0 4px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .unity-hand-card.unavailable {

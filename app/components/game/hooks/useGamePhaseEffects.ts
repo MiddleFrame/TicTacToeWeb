@@ -1,9 +1,11 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
-import { settleThaw, type GameState, type Player } from "../../../game/engine";
+import { settleThaw, startNextRound, type GameState, type Player } from "../../../game/engine";
+import { onlineRoundAdvanceDelay } from "../../../game/round-transition";
 import type { GameMode } from "../types";
 import type { PlaySound } from "./useGameAudio";
 
 type GamePhaseEffectsOptions = {
+  active: boolean;
   game: GameState;
   mode: GameMode;
   networkSide: Player | null;
@@ -12,10 +14,10 @@ type GamePhaseEffectsOptions = {
 };
 
 export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
-  const { game, mode, networkSide, playSfx, setGame } = options;
+  const { active, game, mode, networkSide, playSfx, setGame } = options;
 
   useEffect(() => {
-    if (game.phase !== "round-over" && game.phase !== "game-over") return;
+    if (!active || (game.phase !== "round-over" && game.phase !== "game-over")) return;
     const cues = game.roundWinner
       ? [
           window.setTimeout(() => playSfx("placeFill", 0.42), 650),
@@ -27,10 +29,18 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
           window.setTimeout(() => playSfx("placeScale", 0.42), 3500),
         ];
     return () => cues.forEach((cue) => window.clearTimeout(cue));
-  }, [game.phase, game.roundWinner, playSfx]);
+  }, [active, game.phase, game.roundWinner, playSfx]);
 
   useEffect(() => {
-    if (game.phase !== "thawing") return;
+    if (mode !== "online" || networkSide !== 1 || game.phase !== "round-over") return;
+    const timeout = window.setTimeout(() => {
+      setGame((current) => current.phase === "round-over" ? startNextRound(current) : current);
+    }, onlineRoundAdvanceDelay(game.roundWinner));
+    return () => window.clearTimeout(timeout);
+  }, [game.phase, game.roundWinner, mode, networkSide, setGame]);
+
+  useEffect(() => {
+    if (!active || game.phase !== "thawing") return;
     const canSettle = mode !== "online" || networkSide === 1;
     const revealTimeout = window.setTimeout(() => playSfx("placeScale", 0.46), 390);
     const settleTimeout = window.setTimeout(() => {
@@ -40,5 +50,5 @@ export function useGamePhaseEffects(options: GamePhaseEffectsOptions) {
       window.clearTimeout(revealTimeout);
       window.clearTimeout(settleTimeout);
     };
-  }, [game.phase, game.thawingCells, mode, networkSide, playSfx, setGame]);
+  }, [active, game.phase, game.thawingCells, mode, networkSide, playSfx, setGame]);
 }

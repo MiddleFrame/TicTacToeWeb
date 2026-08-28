@@ -29,6 +29,8 @@ export function PauseModal({ open, onResume, onMenu }: { open: boolean; onResume
 }
 
 type ResultModalProps = {
+  autoAdvance?: boolean;
+  continueAvailable?: boolean;
   game: GameState;
   context?: "match" | "roguelike";
   status: string;
@@ -71,7 +73,7 @@ function RoundProgress({ game }: { game: GameState }) {
   );
 }
 
-export function ResultModal({ game, context = "match", status, viewer, onContinue, onMenu }: ResultModalProps) {
+export function ResultModal({ autoAdvance = false, continueAvailable = true, game, context = "match", status, viewer, onContinue, onMenu }: ResultModalProps) {
   const { t } = useLocalization();
   if (game.phase !== "round-over" && game.phase !== "game-over") return null;
   const result = getRoundResult(game, viewer, t);
@@ -90,10 +92,14 @@ export function ResultModal({ game, context = "match", status, viewer, onContinu
           </div>
         )}
         {!isRoguelike && game.phase === "round-over" && <p className="result-next-round">{t("nextChallenge")}: {3 + game.completedRounds}×{3 + game.completedRounds}, {t("mana")} — {3 + game.completedRounds}</p>}
-        <div className="result-actions">
-          <button className="primary-button" onClick={onContinue}>{isRoguelike ? t("resume") : game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>
-          <button className="secondary-button menu-return-button" onClick={onMenu}>{t("mainMenu")}</button>
-        </div>
+        {autoAdvance
+          ? <p className="result-auto-advance">{t("nextRoundAutomatic")}</p>
+          : (
+              <div className="result-actions">
+                {continueAvailable && <button className="primary-button" onClick={onContinue}>{isRoguelike ? t("resume") : game.phase === "game-over" ? t("newMatch") : t("nextRound")}</button>}
+                <button className="secondary-button menu-return-button" onClick={onMenu}>{t("mainMenu")}</button>
+              </div>
+            )}
       </section>
     </div>
   );

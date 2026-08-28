@@ -12,6 +12,7 @@ type GameSceneProps = {
   mode: GameMode;
   game: GameState;
   networkIntentPending: boolean;
+  opponentLeft: boolean;
   isHumanTurn: boolean;
   topPlayer: Player;
   bottomPlayer: Player;
@@ -62,7 +63,7 @@ export function GameScene(props: GameSceneProps) {
         <TurnBanner player={props.turnBanner} turn={game.turn} />
       </section>
 
-      {showsRoundResult && <ResultModal game={game} context={resultContext} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
+      {showsRoundResult && <ResultModal autoAdvance={props.mode === "online" && game.phase === "round-over"} continueAvailable={!props.opponentLeft} game={game} context={resultContext} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
       {props.mode === "roguelike" && props.roguelike && (
         <RoguelikeOverlay
           run={props.roguelike}

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  awardMatchByForfeit,
   canPlayCard,
   cardCost,
   cardCostForPlayer,
@@ -14,6 +15,8 @@ import {
   settleThaw,
   startNextRound,
 } from "../app/game/engine.ts";
+import { deckKindsForFilter } from "../app/game/card-filters.ts";
+import { onlineRoundAdvanceDelay } from "../app/game/round-transition.ts";
 import { applyNetworkIntent } from "../app/game/photon.ts";
 import { isPhotonConfigured, PHOTON_GAME_CONFIG } from "../app/game/photon-config.ts";
 import { chooseRandomTarget } from "../app/game/bot-player.ts";
@@ -43,6 +46,30 @@ test("uses one shared Photon region for global matchmaking", () => {
   assert.equal(isPhotonConfigured(PHOTON_GAME_CONFIG), true);
   assert.equal(PHOTON_GAME_CONFIG.region, "EU");
   assert.equal(PHOTON_GAME_CONFIG.appVersion, "tttp-web-1");
+});
+
+test("awards the online match when the opponent leaves", () => {
+  const result = awardMatchByForfeit(createGame(), 2);
+
+  assert.equal(result.phase, "game-over");
+  assert.equal(result.roundWinner, 2);
+  assert.equal(result.gameWinner, 2);
+  assert.equal(result.roundWins[2], 2);
+});
+
+test("online rounds start two seconds after their result animation", () => {
+  assert.equal(onlineRoundAdvanceDelay(1), 5400);
+  assert.equal(onlineRoundAdvanceDelay(null), 6300);
+});
+
+test("deck filters separate ice and regular cards", () => {
+  const all = deckKindsForFilter("all");
+  const ice = deckKindsForFilter("ice");
+  const regular = deckKindsForFilter("regular");
+
+  assert.equal(ice.length + regular.length, all.length);
+  assert.ok(ice.every((kind) => mechanicsForCard(kind).includes("ice")));
+  assert.ok(regular.every((kind) => !mechanicsForCard(kind).includes("ice")));
 });
 
 test("builds reveal profiles from rarity and mechanics", () => {

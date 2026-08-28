@@ -154,6 +154,20 @@ export function createGame(
   });
 }
 
+export function awardMatchByForfeit(state: GameState, winner: Player): GameState {
+  return {
+    ...state,
+    roundWins: {
+      ...state.roundWins,
+      [winner]: ROUNDS_TO_WIN,
+    },
+    roundWinner: winner,
+    gameWinner: winner,
+    phase: "game-over",
+    lastAction: "Соперник вышел из матча",
+  };
+}
+
 export function createSingleRoundGame(setup: {
   size: number;
   maxMana: number;

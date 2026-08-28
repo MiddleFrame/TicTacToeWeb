@@ -8,7 +8,7 @@ import {
   type PhotonSessionFactory,
   type PhotonSnapshot,
 } from "../../../game/photon";
-import type { GameState } from "../../../game/engine";
+import { awardMatchByForfeit, type GameState } from "../../../game/engine";
 import type { PhotonGameConfig } from "../../../game/photon-config";
 import type { GameMode } from "../types";
 
@@ -16,6 +16,7 @@ export function usePhotonGame(
   game: GameState,
   mode: GameMode,
   setGame: Dispatch<SetStateAction<GameState>>,
+  onOpponentLeave?: () => void,
   sessionFactory: PhotonSessionFactory = createPhotonSession,
 ) {
   const [network, setNetwork] = useState<PhotonSnapshot>(INITIAL_PHOTON_SNAPSHOT);
@@ -24,6 +25,7 @@ export function usePhotonGame(
 
   if (sessionRef.current === null) {
     sessionRef.current = sessionFactory({
+      onOpponentLeave: () => undefined,
       onSnapshot: () => undefined,
       onState: () => undefined,
       onIntent: () => undefined,
@@ -32,6 +34,11 @@ export function usePhotonGame(
 
   useEffect(() => {
     sessionRef.current?.updateCallbacks({
+      onOpponentLeave: (winner) => {
+        setIntentPending(false);
+        setGame((current) => awardMatchByForfeit(current, winner));
+        onOpponentLeave?.();
+      },
       onSnapshot: (snapshot) => {
         setNetwork(snapshot);
         if (snapshot.phase !== "ready") setIntentPending(false);
@@ -45,7 +52,7 @@ export function usePhotonGame(
         setGame((current) => applyNetworkIntent(current, intent, 2));
       },
     });
-  }, [network.side, setGame]);
+  }, [network.side, onOpponentLeave, setGame]);
 
   useEffect(() => {
     if (!intentPending) return;

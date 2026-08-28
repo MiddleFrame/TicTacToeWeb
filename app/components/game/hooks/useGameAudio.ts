@@ -16,25 +16,31 @@ export type PlaySound = (kind: SoundKind, volume?: number) => void;
 export type StartCardRevealAudio = (profile: CardRevealProfile) => CardRevealAudioController;
 export type PlayCardDock = (kind: CardKind, strength?: number) => void;
 
-export function useGameAudio() {
+export function useGameAudio(appActive = true) {
   const [muted, setMuted] = useState(false);
   const [ambientSuspended, setAmbientSuspendedState] = useState(false);
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const sfxRef = useRef(new Set<HTMLAudioElement>());
+  const appActiveRef = useRef(appActive);
   const mutedRef = useRef(false);
   const ambientSuspendedRef = useRef(false);
 
   const playSfx = useCallback<PlaySound>((kind, volume = 1) => {
-    if (mutedRef.current) return;
+    if (mutedRef.current || !appActiveRef.current) return;
     const variants = paths[kind];
     const audio = new Audio(variants[Math.floor(Math.random() * variants.length)]);
+    const release = () => sfxRef.current.delete(audio);
     audio.volume = Math.min(1, volume);
     audio.playbackRate = 0.97 + Math.random() * 0.06;
-    void audio.play().catch(() => undefined);
+    audio.addEventListener("ended", release, { once: true });
+    audio.addEventListener("error", release, { once: true });
+    sfxRef.current.add(audio);
+    void audio.play().catch(release);
   }, []);
 
   const startCardRevealAudio = useCallback<StartCardRevealAudio>((profile) => {
-    if (mutedRef.current) return createCardRevealSoundscape(null, profile);
+    if (mutedRef.current || !appActiveRef.current) return createCardRevealSoundscape(null, profile);
     const context = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = context;
     void context.resume().catch(() => undefined);
@@ -52,7 +58,7 @@ export function useGameAudio() {
   }, []);
 
   const playRevealDock = useCallback<PlayCardDock>((kind, strength = 1) => {
-    if (mutedRef.current) return;
+    if (mutedRef.current || !appActiveRef.current) return;
     const context = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = context;
     void context.resume().catch(() => undefined);
@@ -60,6 +66,7 @@ export function useGameAudio() {
   }, []);
 
   useEffect(() => {
+    const activeSfx = sfxRef.current;
     const savedMuted = window.localStorage.getItem("tttp-muted") === "1";
     mutedRef.current = savedMuted;
     const restore = window.setTimeout(() => setMuted(savedMuted), 0);
@@ -79,6 +86,8 @@ export function useGameAudio() {
       window.removeEventListener("pointerdown", unlock);
       music.pause();
       musicRef.current = null;
+      activeSfx.forEach((audio) => audio.pause());
+      activeSfx.clear();
       const context = audioContextRef.current;
       audioContextRef.current = null;
       if (context) void context.close().catch(() => undefined);
@@ -86,15 +95,24 @@ export function useGameAudio() {
   }, []);
 
   useEffect(() => {
+    appActiveRef.current = appActive;
     mutedRef.current = muted;
     ambientSuspendedRef.current = ambientSuspended;
     window.localStorage.setItem("tttp-muted", muted ? "1" : "0");
     const music = musicRef.current;
+    const suspended = muted || ambientSuspended || !appActive;
+    if (suspended) {
+      sfxRef.current.forEach((audio) => audio.pause());
+      sfxRef.current.clear();
+      void audioContextRef.current?.suspend().catch(() => undefined);
+    } else {
+      void audioContextRef.current?.resume().catch(() => undefined);
+    }
     if (!music) return;
-    music.volume = muted || ambientSuspended ? 0 : 0.24;
-    if (muted || ambientSuspended) music.pause();
+    music.volume = suspended ? 0 : 0.24;
+    if (suspended) music.pause();
     else void music.play().catch(() => undefined);
-  }, [ambientSuspended, muted]);
+  }, [ambientSuspended, appActive, muted]);
 
   return { muted, setMuted, playSfx, playRevealDock, setAmbientSuspended, startCardRevealAudio };
 }

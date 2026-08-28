@@ -6,6 +6,7 @@ import type { GameMode } from "../types";
 import type { PlaySound } from "./useGameAudio";
 
 type OpponentTurnOptions = {
+  active: boolean;
   game: GameState;
   mode: GameMode;
   pauseOpen: boolean;
@@ -18,11 +19,12 @@ type OpponentTurnOptions = {
 };
 
 export function useOpponentTurns(options: OpponentTurnOptions) {
-  const { game, mode, pauseOpen, playSfx, random = Math.random, roguelike, screen, setGame, setRoguelike } = options;
+  const { active, game, mode, pauseOpen, playSfx, random = Math.random, roguelike, screen, setGame, setRoguelike } = options;
 
   useEffect(() => {
     if (
       screen !== "game" ||
+      !active ||
       pauseOpen ||
       mode !== "bot" ||
       game.turn !== 2 ||
@@ -43,11 +45,12 @@ export function useOpponentTurns(options: OpponentTurnOptions) {
       });
     }, 560);
     return () => window.clearTimeout(timeout);
-  }, [game, mode, pauseOpen, screen, setGame]);
+  }, [active, game, mode, pauseOpen, screen, setGame]);
 
   useEffect(() => {
     if (
       screen !== "game" ||
+      !active ||
       pauseOpen ||
       mode !== "roguelike" ||
       !roguelike ||
@@ -81,5 +84,5 @@ export function useOpponentTurns(options: OpponentTurnOptions) {
       playSfx("placeScale", 0.48);
     }, 520);
     return () => window.clearTimeout(timeout);
-  }, [game, mode, pauseOpen, playSfx, random, roguelike, screen, setGame, setRoguelike]);
+  }, [active, game, mode, pauseOpen, playSfx, random, roguelike, screen, setGame, setRoguelike]);
 }

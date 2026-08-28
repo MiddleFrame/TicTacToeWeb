@@ -69,3 +69,30 @@ test("Android reserves navigation-bar space even when WebView reports no safe ar
   assert.match(styles, /--safe-area-bottom: max\(48px,/);
   assert.match(styles, /\.unity-menu-content \{\s+min-height: 0;/);
 });
+
+test("Android prevents accidental game zoom during card gestures", async () => {
+  const html = await readProjectFile("android-client/index.html");
+
+  assert.match(html, /maximum-scale=1/);
+  assert.match(html, /user-scalable=no/);
+});
+
+test("Android forwards native pause and resume events to the game", async () => {
+  const activity = await readProjectFile(
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+  );
+  const lifecycle = await readProjectFile("app/components/game/hooks/useAppActivity.ts");
+  const audio = await readProjectFile("app/components/game/hooks/useGameAudio.ts");
+  const opponentTurns = await readProjectFile("app/components/game/hooks/useOpponentTurns.ts");
+  const damage = await readProjectFile("app/components/game/hooks/useDamageSequence.ts");
+
+  assert.match(activity, /public void onPause\(\)/);
+  assert.match(activity, /public void onResume\(\)/);
+  assert.match(activity, /tttp-app-pause/);
+  assert.match(activity, /tttp-app-resume/);
+  assert.match(lifecycle, /visibilitychange/);
+  assert.match(audio, /!appActiveRef\.current/);
+  assert.match(audio, /audioContextRef\.current\?\.suspend/);
+  assert.match(opponentTurns, /!active/);
+  assert.match(damage, /!active \|\| phase !== "clearing"/);
+});

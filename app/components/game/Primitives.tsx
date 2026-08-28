@@ -26,3 +26,11 @@ export function SoundIcon({ muted }: { muted: boolean }) {
     </svg>
   );
 }
+
+export function BackIcon() {
+  return (
+    <svg className="back-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 12H5m6-6-6 6 6 6" />
+    </svg>
+  );
+}

@@ -11,6 +11,7 @@ const HIDDEN_CARD_COPY = {
 type DeckCardGridProps = {
   arrivingKinds?: readonly CardKind[];
   landedKinds?: readonly CardKind[];
+  kinds?: readonly CardKind[];
   onInspect?: (kind: CardKind, origin: CardInspectionOrigin) => void;
   onToggle?: (kind: CardKind) => void;
   selectedKinds: readonly CardKind[];
@@ -20,6 +21,7 @@ type DeckCardGridProps = {
 export function DeckCardGrid({
   arrivingKinds = [],
   landedKinds = [],
+  kinds = DECK_BUILDING_KINDS,
   onInspect,
   onToggle,
   selectedKinds,
@@ -72,7 +74,7 @@ export function DeckCardGrid({
 
   return (
     <section className="collection-grid">
-      {DECK_BUILDING_KINDS.map((kind) => {
+      {kinds.map((kind) => {
         const definition = CARD_DEFINITIONS[kind];
         const localized = card(kind);
         const selected = selectedKinds.includes(kind);

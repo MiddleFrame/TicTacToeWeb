@@ -4,6 +4,7 @@ import { useLocalization } from "../../game/localization";
 import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
 import { CardPurchaseFlow } from "./CardPurchaseFlow";
 import { Image } from "./Image";
+import { BackIcon } from "./Primitives";
 
 type StoreScreenProps = {
   coins: number;
@@ -27,7 +28,7 @@ export function StoreScreen(props: StoreScreenProps) {
   return (
     <main className="store-shell">
       <header className="section-screen-header">
-        <button className="back-button" onClick={props.onBack} aria-label={t("back")}>←</button>
+        <button className="back-button" onClick={props.onBack} aria-label={t("back")}><BackIcon /></button>
         <div>
           <span>{t("store")}</span>
           <h1>{t("newCards")}</h1>

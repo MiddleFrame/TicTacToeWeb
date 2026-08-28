@@ -1,6 +1,6 @@
 import { useLocalization } from "../../game/localization";
 import { Image } from "./Image";
-import { SoundIcon } from "./Primitives";
+import { BackIcon, SoundIcon } from "./Primitives";
 
 type SettingsScreenProps = {
   muted: boolean;
@@ -15,7 +15,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
   return (
     <main className="settings-shell">
       <header className="section-screen-header">
-        <button className="back-button" onClick={props.onBack} aria-label={t("back")}>←</button>
+        <button className="back-button" onClick={props.onBack} aria-label={t("back")}><BackIcon /></button>
         <div>
           <span>{t("options")}</span>
           <h1>{t("settings")}</h1>
