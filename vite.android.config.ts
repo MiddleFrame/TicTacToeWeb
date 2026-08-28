@@ -13,6 +13,9 @@ export default defineConfig({
   publicDir: false,
   base: "./",
   define: {
+    "process.env.NEXT_PUBLIC_API_ORIGIN": JSON.stringify(
+      process.env.NEXT_PUBLIC_API_ORIGIN ?? "https://tic-tac-toe-plus-alpha.stofs.chatgpt.site",
+    ),
     "process.env.NEXT_PUBLIC_PHOTON_APP_ID": JSON.stringify(
       process.env.NEXT_PUBLIC_PHOTON_APP_ID ?? "",
     ),

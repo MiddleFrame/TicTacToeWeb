@@ -77,7 +77,10 @@ export function GameNavigation(props: GameNavigationProps) {
       <SettingsScreen
         muted={muted}
         playerName={collection.profileName}
-        onBack={() => onNavigate("menu")}
+        onBack={() => {
+          collection.saveProfile();
+          onNavigate("menu");
+        }}
         onNameChange={collection.changeName}
         onToggleSound={() => {
           audio.playSfx("click", 0.38);
@@ -90,6 +93,7 @@ export function GameNavigation(props: GameNavigationProps) {
   if (screen === "store") {
     return (
       <StoreScreen
+        cloudReady={collection.cloudReady}
         coins={collection.coins}
         lockedKinds={collection.lockedKinds}
         purchasedKinds={collection.purchasedKinds}
@@ -109,6 +113,7 @@ export function GameNavigation(props: GameNavigationProps) {
         }}
         playDock={audio.playRevealDock}
         startRevealAudio={audio.startCardRevealAudio}
+        transactionPending={collection.transactionPending}
       />
     );
   }

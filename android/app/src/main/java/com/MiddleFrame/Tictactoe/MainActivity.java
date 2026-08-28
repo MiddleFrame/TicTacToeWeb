@@ -19,6 +19,7 @@ public class MainActivity extends BridgeActivity {
             () -> SystemClock.uptimeMillis() - splashStartedAt < SPLASH_DURATION_MS
         );
         registerPlugin(RewardedAdsPlugin.class);
+        registerPlugin(SecureSessionPlugin.class);
         super.onCreate(savedInstanceState);
         WindowCompat.enableEdgeToEdge(getWindow());
     }

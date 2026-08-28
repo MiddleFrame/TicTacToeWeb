@@ -7,28 +7,31 @@ import {
   isSecureRequest,
   readSessionToken,
 } from "../../../backend/session";
-
-const PRIVATE_HEADERS = { "Cache-Control": "no-store" };
+import { apiJson, apiOptions } from "../../../backend/responses";
 
 export async function POST(request: Request): Promise<Response> {
   const currentToken = readSessionToken(request.headers.get("cookie"));
   if (currentToken) {
     const currentAccount = await findAccountBySessionToken(currentToken);
     if (currentAccount) {
-      return Response.json(
+      return apiJson(
+        request,
         { account: currentAccount },
-        { headers: PRIVATE_HEADERS },
       );
     }
   }
 
   const created = await createGuestAccount();
-  return Response.json(
-    { account: created.account },
+  const nativeClient = request.headers.get("x-tttp-client") === "android";
+  return apiJson(
+    request,
+    {
+      account: created.account,
+      ...(nativeClient ? { sessionToken: created.sessionToken } : {}),
+    },
     {
       status: 201,
       headers: {
-        ...PRIVATE_HEADERS,
         "Set-Cookie": createSessionCookie(
           created.sessionToken,
           isSecureRequest(request),
@@ -37,3 +40,5 @@ export async function POST(request: Request): Promise<Response> {
     },
   );
 }
+
+export const OPTIONS = apiOptions;

@@ -2,6 +2,8 @@ import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../../db";
 import {
   identities,
+  inventory,
+  playerProgress,
   profiles,
   sessions,
   users,
@@ -13,6 +15,7 @@ import {
   hashSessionToken,
   sessionExpiresAt,
 } from "./session";
+import { STARTER_SELECTED_KINDS } from "../game/cards";
 
 export type AccountSnapshot = {
   id: string;
@@ -137,6 +140,18 @@ export async function createGuestAccount(
           cosmeticCurrency: 0,
           updatedAt: now,
         }),
+        db.insert(playerProgress).values({
+          userId,
+          selectedKinds: JSON.stringify(STARTER_SELECTED_KINDS),
+          createdAt: now,
+          updatedAt: now,
+        }),
+        ...STARTER_SELECTED_KINDS.map((itemId) => db.insert(inventory).values({
+          userId,
+          itemId,
+          quantity: 1,
+          acquiredAt: now,
+        })),
         db.insert(sessions).values({
           tokenHash,
           userId,

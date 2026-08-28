@@ -8,6 +8,13 @@
       "when": 1787742294478,
       "tag": "0000_clever_red_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787920600384,
+      "tag": "0001_natural_colonel_america",
+      "breakpoints": true
     }
   ]
 }

@@ -1,14 +1,66 @@
-import { useEffect, useState } from "react";
-import { DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS, type CardKind } from "../../../game/cards";
-import { cardPackCost, drawCardPack } from "../../../game/card-purchase";
+import { useCallback, useEffect, useState } from "react";
+import {
+  DECK_BUILDING_KINDS,
+  STARTER_SELECTED_KINDS,
+  type CardKind,
+} from "../../../game/cards";
+import {
+  grantCloudAdReward,
+  initializePlayerProgress,
+  purchaseCloudCardPack,
+  saveCloudPlayerProgress,
+} from "../../../game/player-progress-client";
+import {
+  normalizeCoins,
+  normalizeSelectedKinds,
+  normalizeUnlockedKinds,
+  parseStoredKinds,
+  type LocalProgressSnapshot,
+  type PlayerProgressSnapshot,
+} from "../../../game/player-progress";
 import type { PlaySound } from "./useGameAudio";
 
-function validKinds(value: unknown): CardKind[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (kind): kind is CardKind =>
-      typeof kind === "string" && DECK_BUILDING_KINDS.includes(kind as CardKind),
+const DECK_KEY = "tttp-deck";
+const UNLOCKED_KEY = "tttp-unlocked";
+const COINS_KEY = "tttp-coins";
+const NAME_KEY = "tttp-player-name";
+const PENDING_DECK_KEY = "tttp-pending-deck";
+const PENDING_NAME_KEY = "tttp-pending-name";
+const PENDING_REWARDS_KEY = "tttp-pending-rewards";
+
+function readLocalProgress(): LocalProgressSnapshot {
+  const unlockedKinds = normalizeUnlockedKinds(
+    parseStoredKinds(window.localStorage.getItem(UNLOCKED_KEY)),
   );
+  const selectedKinds = normalizeSelectedKinds(
+    parseStoredKinds(window.localStorage.getItem(DECK_KEY)),
+    unlockedKinds,
+  );
+  const savedCoinsRaw = window.localStorage.getItem(COINS_KEY);
+  return {
+    nickname: window.localStorage.getItem(NAME_KEY) || "Игрок",
+    coins: savedCoinsRaw === null ? 220 : normalizeCoins(Number(savedCoinsRaw)),
+    selectedKinds,
+    unlockedKinds,
+  };
+}
+
+function cacheProgress(progress: PlayerProgressSnapshot): void {
+  window.localStorage.setItem(DECK_KEY, JSON.stringify(progress.selectedKinds));
+  window.localStorage.setItem(UNLOCKED_KEY, JSON.stringify(progress.unlockedKinds));
+  window.localStorage.setItem(COINS_KEY, String(progress.coins));
+  window.localStorage.setItem(NAME_KEY, progress.nickname);
+}
+
+function pendingRewards(): string[] {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(PENDING_REWARDS_KEY) ?? "[]");
+    return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 export function usePlayerCollection(playSfx: PlaySound) {
@@ -17,28 +69,54 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const [coins, setCoins] = useState(220);
   const [purchasedKinds, setPurchasedKinds] = useState<CardKind[]>([]);
   const [profileName, setProfileName] = useState("Игрок");
+  const [cloudReady, setCloudReady] = useState(false);
+  const [transactionPending, setTransactionPending] = useState(false);
+
+  const applyProgress = useCallback((progress: PlayerProgressSnapshot) => {
+    setSelectedKinds(progress.selectedKinds);
+    setUnlockedKinds(progress.unlockedKinds);
+    setCoins(progress.coins);
+    setProfileName(progress.nickname);
+    cacheProgress(progress);
+  }, []);
 
   useEffect(() => {
-    let timeout: number | undefined;
-    try {
-      const deck = validKinds(JSON.parse(window.localStorage.getItem("tttp-deck") ?? "null"));
-      const unlocked = validKinds(JSON.parse(window.localStorage.getItem("tttp-unlocked") ?? "null"));
-      const restoredUnlocked = [...new Set([...STARTER_SELECTED_KINDS, ...unlocked])];
-      const restoredDeck = deck.filter((kind) => restoredUnlocked.includes(kind));
-      const savedCoinsRaw = window.localStorage.getItem("tttp-coins");
-      const savedCoins = savedCoinsRaw === null ? null : Number(savedCoinsRaw);
-      const savedName = window.localStorage.getItem("tttp-player-name");
-      timeout = window.setTimeout(() => {
-        setUnlockedKinds(restoredUnlocked);
-        setSelectedKinds(restoredDeck.length >= 5 ? [...new Set(restoredDeck)] : [...STARTER_SELECTED_KINDS]);
-        if (savedCoins !== null && Number.isFinite(savedCoins) && savedCoins >= 0) setCoins(savedCoins);
-        if (savedName) setProfileName(savedName.slice(0, 20));
-      }, 0);
-    } catch {}
+    let active = true;
+    const local = readLocalProgress();
+    const restoreTimeout = window.setTimeout(() => {
+      if (!active) return;
+      setSelectedKinds(local.selectedKinds);
+      setUnlockedKinds(local.unlockedKinds);
+      setCoins(local.coins);
+      setProfileName(local.nickname);
+    }, 0);
+    void initializePlayerProgress(local).then(async (initial) => {
+      let progress = initial;
+      const pendingDeck = parseStoredKinds(window.localStorage.getItem(PENDING_DECK_KEY));
+      const pendingName = window.localStorage.getItem(PENDING_NAME_KEY);
+      if (pendingDeck.length >= 5 || pendingName) {
+        progress = await saveCloudPlayerProgress({
+          ...(pendingDeck.length >= 5 ? { selectedKinds: pendingDeck } : {}),
+          ...(pendingName ? { nickname: pendingName } : {}),
+        });
+        window.localStorage.removeItem(PENDING_DECK_KEY);
+        window.localStorage.removeItem(PENDING_NAME_KEY);
+      }
+      for (const operationId of pendingRewards()) {
+        progress = await grantCloudAdReward(operationId);
+      }
+      window.localStorage.removeItem(PENDING_REWARDS_KEY);
+      if (!active) return;
+      applyProgress(progress);
+      setCloudReady(true);
+    }).catch(() => {
+      if (active) setCloudReady(false);
+    });
     return () => {
-      if (timeout !== undefined) window.clearTimeout(timeout);
+      active = false;
+      window.clearTimeout(restoreTimeout);
     };
-  }, []);
+  }, [applyProgress]);
 
   const toggleCard = (kind: CardKind) => {
     if (!unlockedKinds.includes(kind)) return;
@@ -48,55 +126,89 @@ export function usePlayerCollection(playSfx: PlaySound) {
   };
 
   const saveDeck = () => {
-    window.localStorage.setItem("tttp-deck", JSON.stringify(selectedKinds));
+    window.localStorage.setItem(DECK_KEY, JSON.stringify(selectedKinds));
+    window.localStorage.setItem(PENDING_DECK_KEY, JSON.stringify(selectedKinds));
+    if (!cloudReady) return;
+    void saveCloudPlayerProgress({ selectedKinds }).then((progress) => {
+      window.localStorage.removeItem(PENDING_DECK_KEY);
+      applyProgress(progress);
+    }).catch(() => setCloudReady(false));
   };
 
   const changeName = (name: string) => {
     setProfileName(name);
-    window.localStorage.setItem("tttp-player-name", name);
+    window.localStorage.setItem(NAME_KEY, name);
+    window.localStorage.setItem(PENDING_NAME_KEY, name);
   };
 
-  const buyCards = (count: number) => {
-    const locked = DECK_BUILDING_KINDS.filter((kind) => !unlockedKinds.includes(kind));
-    const cost = cardPackCost(count);
-    if (coins < cost || locked.length < count || count < 1) return;
-    playSfx("click", 0.38);
-    const kinds = drawCardPack(locked, count);
-    const nextCoins = coins - cost;
-    const nextUnlocked = [...unlockedKinds, ...kinds];
-    const nextDeck = [...new Set([...selectedKinds, ...kinds])];
-    setCoins(nextCoins);
-    setUnlockedKinds(nextUnlocked);
-    setSelectedKinds(nextDeck);
-    setPurchasedKinds(kinds);
-    window.localStorage.setItem("tttp-coins", String(nextCoins));
-    window.localStorage.setItem("tttp-unlocked", JSON.stringify(nextUnlocked));
-    window.localStorage.setItem("tttp-deck", JSON.stringify(nextDeck));
+  const saveProfile = () => {
+    if (!cloudReady) return;
+    void saveCloudPlayerProgress({ nickname: profileName }).then((progress) => {
+      window.localStorage.removeItem(PENDING_NAME_KEY);
+      applyProgress(progress);
+    }).catch(() => setCloudReady(false));
   };
 
-  const creditCoins = (amount: number) => {
+  const buyCards = async (count: number) => {
+    if (!cloudReady || transactionPending) return;
+    setTransactionPending(true);
+    try {
+      const result = await purchaseCloudCardPack(count);
+      playSfx("click", 0.38);
+      applyProgress(result.progress);
+      setPurchasedKinds(result.purchasedKinds);
+    } catch {
+      setCloudReady(false);
+    } finally {
+      setTransactionPending(false);
+    }
+  };
+
+  const creditCoins = async (amount: number) => {
     const normalized = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
     if (normalized === 0) return;
-    playSfx("click", 0.38);
-    setCoins((current) => {
-      const next = current + normalized;
-      window.localStorage.setItem("tttp-coins", String(next));
-      return next;
-    });
+    const operationId = crypto.randomUUID();
+    if (!cloudReady) {
+      const queued = [...pendingRewards(), operationId];
+      window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
+      setCoins((current) => {
+        const next = current + normalized;
+        window.localStorage.setItem(COINS_KEY, String(next));
+        return next;
+      });
+      return;
+    }
+    try {
+      const progress = await grantCloudAdReward(operationId);
+      playSfx("click", 0.38);
+      applyProgress(progress);
+    } catch {
+      const queued = [...pendingRewards(), operationId];
+      window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
+      setCloudReady(false);
+      setCoins((current) => {
+        const next = current + normalized;
+        window.localStorage.setItem(COINS_KEY, String(next));
+        return next;
+      });
+    }
   };
 
   return {
     buyCards,
     changeName,
+    cloudReady,
     coins,
     creditCoins,
     lockedKinds: DECK_BUILDING_KINDS.filter((kind) => !unlockedKinds.includes(kind)),
     profileName,
     purchasedKinds,
     saveDeck,
+    saveProfile,
     selectedKinds,
     setPurchasedKinds,
     toggleCard,
+    transactionPending,
     unlockedKinds,
   };
 }

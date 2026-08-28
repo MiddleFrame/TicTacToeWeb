@@ -8,6 +8,7 @@ import { BackIcon } from "./Primitives";
 import { useRewardedAd } from "./hooks/useRewardedAd";
 
 type StoreScreenProps = {
+  cloudReady: boolean;
   coins: number;
   lockedKinds: CardKind[];
   purchasedKinds: CardKind[];
@@ -20,14 +21,15 @@ type StoreScreenProps = {
   onCompleteReveal: (lastKind: CardKind) => void;
   playDock: PlayCardDock;
   startRevealAudio: StartCardRevealAudio;
+  transactionPending: boolean;
 };
 
 export function StoreScreen(props: StoreScreenProps) {
   const { t } = useLocalization();
   const rewardedAd = useRewardedAd(props.onRewardAd);
   const soldOut = props.lockedKinds.length === 0;
-  const canBuyOne = props.coins >= cardPackCost(1) && props.lockedKinds.length >= 1;
-  const canBuyFive = props.coins >= cardPackCost(5) && props.lockedKinds.length >= 5;
+  const canBuyOne = props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(1) && props.lockedKinds.length >= 1;
+  const canBuyFive = props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(5) && props.lockedKinds.length >= 5;
   return (
     <main className="store-shell">
       <header className="section-screen-header">
@@ -48,7 +50,7 @@ export function StoreScreen(props: StoreScreenProps) {
         <p>{soldOut ? t("allUnlocked") : t("boughtToDeck")}</p>
         <div className="store-buy-actions">
           <button className="primary-button store-buy-button" disabled={!canBuyOne} onClick={() => props.onBuy(1)}>
-            {canBuyOne ? t("buy50") : soldOut ? t("soldOut") : t("notEnough")}
+            {canBuyOne ? t("buy50") : soldOut ? t("soldOut") : !props.cloudReady || props.transactionPending ? t("progressLoading") : t("notEnough")}
             {!soldOut && <Image src="/game/menu/coin.png" alt="" width="24" height="24" unoptimized />}
           </button>
           <button className="secondary-button store-buy-button store-pack-button" disabled={!canBuyFive} onClick={() => props.onBuy(5)}>

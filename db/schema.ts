@@ -121,6 +121,33 @@ export const inventory = sqliteTable(
   ],
 );
 
+export const playerProgress = sqliteTable("player_progress", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  selectedKinds: text("selected_kinds").notNull(),
+  legacyImportedAt: integer("legacy_imported_at", { mode: "timestamp_ms" }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+export const storePurchases = sqliteTable(
+  "store_purchases",
+  {
+    operationId: text("operation_id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    purchasedKinds: text("purchased_kinds").notNull(),
+    cost: integer("cost").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_store_purchases_user_created").on(table.userId, table.createdAt),
+    check("store_purchases_cost_positive", sql`${table.cost} > 0`),
+  ],
+);
+
 export const rewardLedger = sqliteTable(
   "reward_ledger",
   {
