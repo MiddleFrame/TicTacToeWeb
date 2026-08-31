@@ -5,6 +5,8 @@ import {
   type CardKind,
 } from "../../../game/cards";
 import {
+  connectGoogleAccount,
+  getGoogleAccountState,
   grantCloudAdReward,
   initializePlayerProgress,
   purchaseCloudCardPack,
@@ -71,6 +73,10 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const [profileName, setProfileName] = useState("Игрок");
   const [cloudReady, setCloudReady] = useState(false);
   const [transactionPending, setTransactionPending] = useState(false);
+  const [googleAvailable, setGoogleAvailable] = useState(false);
+  const [googleLinked, setGoogleLinked] = useState(false);
+  const [googlePending, setGooglePending] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
 
   const applyProgress = useCallback((progress: PlayerProgressSnapshot) => {
     setSelectedKinds(progress.selectedKinds);
@@ -109,6 +115,10 @@ export function usePlayerCollection(playSfx: PlaySound) {
       if (!active) return;
       applyProgress(progress);
       setCloudReady(true);
+      const google = await getGoogleAccountState();
+      if (!active) return;
+      setGoogleAvailable(google.available);
+      setGoogleLinked(google.linked);
     }).catch(() => {
       if (active) setCloudReady(false);
     });
@@ -194,12 +204,33 @@ export function usePlayerCollection(playSfx: PlaySound) {
     }
   };
 
+  const connectGoogle = async () => {
+    if (!googleAvailable || googleLinked || googlePending) return;
+    setGooglePending(true);
+    setGoogleError(false);
+    try {
+      const connected = await connectGoogleAccount();
+      applyProgress(connected.progress);
+      setGoogleLinked(true);
+      setCloudReady(true);
+    } catch {
+      setGoogleError(true);
+    } finally {
+      setGooglePending(false);
+    }
+  };
+
   return {
     buyCards,
     changeName,
     cloudReady,
     coins,
     creditCoins,
+    connectGoogle,
+    googleAvailable,
+    googleError,
+    googleLinked,
+    googlePending,
     lockedKinds: DECK_BUILDING_KINDS.filter((kind) => !unlockedKinds.includes(kind)),
     profileName,
     purchasedKinds,

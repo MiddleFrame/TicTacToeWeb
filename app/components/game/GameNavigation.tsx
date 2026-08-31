@@ -75,6 +75,10 @@ export function GameNavigation(props: GameNavigationProps) {
   if (screen === "settings") {
     return (
       <SettingsScreen
+        googleAvailable={collection.googleAvailable}
+        googleError={collection.googleError}
+        googleLinked={collection.googleLinked}
+        googlePending={collection.googlePending}
         muted={muted}
         playerName={collection.profileName}
         onBack={() => {
@@ -82,6 +86,7 @@ export function GameNavigation(props: GameNavigationProps) {
           onNavigate("menu");
         }}
         onNameChange={collection.changeName}
+        onConnectGoogle={collection.connectGoogle}
         onToggleSound={() => {
           audio.playSfx("click", 0.38);
           onMutedChange(!muted);

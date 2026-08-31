@@ -20,6 +20,7 @@ public class MainActivity extends BridgeActivity {
         );
         registerPlugin(RewardedAdsPlugin.class);
         registerPlugin(SecureSessionPlugin.class);
+        registerPlugin(GoogleAuthPlugin.class);
         super.onCreate(savedInstanceState);
         WindowCompat.enableEdgeToEdge(getWindow());
     }

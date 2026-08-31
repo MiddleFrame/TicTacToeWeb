@@ -823,6 +823,15 @@ body[data-game-screen="menu"]::before {
   filter: brightness(0);
 }
 
+.settings-google:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.settings-error {
+  color: #b42318;
+}
+
 .store-coins {
   display: flex;
   align-items: center;

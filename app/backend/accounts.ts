@@ -39,6 +39,11 @@ export type CreatedGuestAccount = {
   expiresAt: Date;
 };
 
+export type CreatedAccountSession = {
+  sessionToken: string;
+  expiresAt: Date;
+};
+
 function toSnapshot(row: {
   id: string;
   status: "active" | "banned" | "deleted";
@@ -97,6 +102,94 @@ export async function findAccountBySessionToken(
     )
     .get();
   return row ? toSnapshot(row) : null;
+}
+
+export async function findAccountByUserId(
+  userId: string,
+): Promise<AccountSnapshot | null> {
+  const db = getDb();
+  const row = await db
+    .select({
+      id: users.id,
+      status: users.status,
+      publicCode: profiles.publicCode,
+      nickname: profiles.nickname,
+      avatarId: profiles.avatarId,
+      frameId: profiles.frameId,
+      titleId: profiles.titleId,
+      coins: wallets.coins,
+      cosmeticCurrency: wallets.cosmeticCurrency,
+    })
+    .from(users)
+    .innerJoin(profiles, eq(profiles.userId, users.id))
+    .innerJoin(wallets, eq(wallets.userId, users.id))
+    .where(eq(users.id, userId))
+    .get();
+  return row ? toSnapshot(row) : null;
+}
+
+export async function hasGoogleIdentity(userId: string): Promise<boolean> {
+  const row = await getDb()
+    .select({ id: identities.id })
+    .from(identities)
+    .where(and(eq(identities.userId, userId), eq(identities.provider, "google")))
+    .get();
+  return Boolean(row);
+}
+
+async function findGoogleIdentity(providerUserId: string): Promise<{ userId: string } | null> {
+  return await getDb()
+    .select({ userId: identities.userId })
+    .from(identities)
+    .where(and(
+      eq(identities.provider, "google"),
+      eq(identities.providerUserId, providerUserId),
+    ))
+    .get() ?? null;
+}
+
+export async function createAccountSession(
+  userId: string,
+  now = new Date(),
+): Promise<CreatedAccountSession> {
+  const sessionToken = createSessionToken();
+  const expiresAt = sessionExpiresAt(now);
+  await getDb().insert(sessions).values({
+    tokenHash: await hashSessionToken(sessionToken),
+    userId,
+    expiresAt,
+    createdAt: now,
+  });
+  return { sessionToken, expiresAt };
+}
+
+export async function connectGoogleIdentity(
+  currentUserId: string,
+  providerUserId: string,
+  now = new Date(),
+): Promise<CreatedAccountSession & { userId: string; switched: boolean }> {
+  let identity = await findGoogleIdentity(providerUserId);
+  if (!identity) {
+    try {
+      await getDb().insert(identities).values({
+        id: crypto.randomUUID(),
+        userId: currentUserId,
+        provider: "google",
+        providerUserId,
+        createdAt: now,
+      });
+      identity = { userId: currentUserId };
+    } catch {
+      identity = await findGoogleIdentity(providerUserId);
+      if (!identity) throw new Error("google-identity-link-failed");
+    }
+  }
+  const session = await createAccountSession(identity.userId, now);
+  return {
+    ...session,
+    userId: identity.userId,
+    switched: identity.userId !== currentUserId,
+  };
 }
 
 export async function createGuestAccount(

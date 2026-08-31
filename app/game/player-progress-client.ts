@@ -10,10 +10,32 @@ type SecureSessionPlugin = {
   removeToken(): Promise<void>;
 };
 
+type GoogleAuthPlugin = {
+  isAvailable(): Promise<{ available: boolean }>;
+  signIn(options: { nonce: string }): Promise<{ idToken: string }>;
+};
+
 type ProgressResponse = { progress: PlayerProgressSnapshot };
 type PurchaseResponse = ProgressResponse & { purchasedKinds: CardKind[] };
+type GoogleAccountStatus = {
+  configured: boolean;
+  linked: boolean;
+  nonce: string | null;
+};
+
+export type GoogleAccountState = {
+  available: boolean;
+  linked: boolean;
+};
+
+type GoogleAccountResponse = ProgressResponse & {
+  linked: true;
+  sessionToken?: string;
+  switched: boolean;
+};
 
 const SecureSession = registerPlugin<SecureSessionPlugin>("SecureSession");
+const GoogleAuth = registerPlugin<GoogleAuthPlugin>("GoogleAuth");
 const android = Capacitor.getPlatform() === "android";
 const configuredOrigin = process.env.NEXT_PUBLIC_API_ORIGIN?.trim().replace(/\/$/, "") ?? "";
 const apiOrigin = android ? configuredOrigin : "";
@@ -110,4 +132,30 @@ export async function grantCloudAdReward(
     method: "POST",
     body: JSON.stringify({ operationId }),
   })).progress;
+}
+
+export async function getGoogleAccountState(): Promise<GoogleAccountState> {
+  const status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  if (!android) return { available: false, linked: status.linked };
+  const native = await GoogleAuth.isAvailable().catch(() => ({ available: false }));
+  return {
+    available: status.linked || status.configured && native.available,
+    linked: status.linked,
+  };
+}
+
+export async function connectGoogleAccount(): Promise<GoogleAccountResponse> {
+  if (!android) throw new Error("google-auth-unavailable");
+  const status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  if (!status.configured || !status.nonce) {
+    throw new Error("google-auth-unavailable");
+  }
+  const credential = await GoogleAuth.signIn({ nonce: status.nonce });
+  const connected = await apiRequest<GoogleAccountResponse>("/api/account/google", {
+    method: "POST",
+    body: JSON.stringify({ idToken: credential.idToken }),
+  });
+  if (!connected.sessionToken) throw new Error("native-session-missing");
+  await SecureSession.setToken({ value: connected.sessionToken });
+  return connected;
 }

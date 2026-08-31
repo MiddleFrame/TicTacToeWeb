@@ -3,9 +3,14 @@ import { Image } from "./Image";
 import { BackIcon, SoundIcon } from "./Primitives";
 
 type SettingsScreenProps = {
+  googleAvailable: boolean;
+  googleError: boolean;
+  googleLinked: boolean;
+  googlePending: boolean;
   muted: boolean;
   playerName: string;
   onBack: () => void;
+  onConnectGoogle: () => void;
   onNameChange: (name: string) => void;
   onToggleSound: () => void;
 };
@@ -41,6 +46,24 @@ export function SettingsScreen(props: SettingsScreenProps) {
           <span>{t("theme")}</span>
           <strong>{theme === "light" ? t("classic") : t("dark")}</strong>
         </button>
+        {props.googleAvailable && (
+          <button
+            className="settings-row settings-toggle settings-google"
+            disabled={props.googleLinked || props.googlePending}
+            onClick={props.onConnectGoogle}
+          >
+            <span>{t("googleAccount")}</span>
+            <strong className={props.googleError ? "settings-error" : ""}>
+              {props.googleLinked
+                ? t("googleConnected")
+                : props.googlePending
+                  ? t("googleConnecting")
+                  : props.googleError
+                    ? t("googleFailed")
+                    : t("googleConnect")}
+            </strong>
+          </button>
+        )}
         <a className="settings-row settings-link" href="https://discord.gg/4PJbjRZtkU" target="_blank" rel="noreferrer">
           <span>Discord</span>
           <Image src="/game/menu/discord.png" alt="" width="34" height="34" unoptimized />
