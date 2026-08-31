@@ -929,6 +929,150 @@ body[data-game-screen="menu"]::before {
   transform: none;
 }
 
+.ad-privacy-backdrop {
+  z-index: 150;
+  overflow: auto;
+}
+
+.ad-privacy-modal {
+  width: min(430px, 100%);
+  position: relative;
+  padding: 30px;
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 9px 10px 0 var(--ink);
+}
+
+.ad-privacy-modal h2 {
+  margin: 6px 0 10px;
+  font-size: clamp(27px, 7vw, 36px);
+}
+
+.ad-privacy-modal > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.ad-privacy-close {
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ad-age-control {
+  margin: 24px 0 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 16px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.ad-age-control strong {
+  min-width: 48px;
+  padding: 5px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.ad-age-control input {
+  width: 100%;
+  grid-column: 1 / -1;
+  accent-color: var(--ink);
+}
+
+.ad-privacy-modal .ad-privacy-note {
+  margin: 0 0 14px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.ad-privacy-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.ad-privacy-actions .primary-button,
+.ad-privacy-actions .secondary-button {
+  width: 100%;
+  margin: 0;
+  border-radius: 999px;
+}
+
+.ad-privacy-actions .primary-button:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.ad-privacy-link {
+  margin-top: 18px;
+  display: inline-block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.privacy-shell {
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 80px;
+  color: var(--ink);
+}
+
+.privacy-panel {
+  padding: clamp(24px, 6vw, 48px);
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 9px 10px 0 var(--ink);
+}
+
+.privacy-panel h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(32px, 8vw, 54px);
+}
+
+.privacy-panel h2 {
+  margin: 30px 0 8px;
+  font-size: 22px;
+}
+
+.privacy-panel p,
+.privacy-panel li {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.privacy-panel a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .ad-privacy-modal {
+    padding: 28px 20px 22px;
+  }
+}
+
 .store-buy-button:disabled {
   cursor: default;
   opacity: 0.42;

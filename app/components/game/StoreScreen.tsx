@@ -6,6 +6,7 @@ import { CardPurchaseFlow } from "./CardPurchaseFlow";
 import { Image } from "./Image";
 import { BackIcon } from "./Primitives";
 import { useRewardedAd } from "./hooks/useRewardedAd";
+import { AdPrivacyDialog } from "./AdPrivacyDialog";
 
 type StoreScreenProps = {
   cloudReady: boolean;
@@ -62,8 +63,8 @@ export function StoreScreen(props: StoreScreenProps) {
         {rewardedAd.supported && (
           <button
             className="secondary-button store-reward-ad"
-            disabled={!rewardedAd.loaded || rewardedAd.showing}
-            onClick={() => void rewardedAd.show()}
+            disabled={rewardedAd.showing || rewardedAd.privacyConfigured && !rewardedAd.loaded}
+            onClick={rewardedAd.show}
           >
             {rewardedAd.showing
               ? t("adOpening")
@@ -77,6 +78,12 @@ export function StoreScreen(props: StoreScreenProps) {
           </button>
         )}
       </section>
+      {rewardedAd.privacyOpen && (
+        <AdPrivacyDialog
+          onCancel={rewardedAd.closePrivacy}
+          onConfirm={(settings) => void rewardedAd.configurePrivacy(settings)}
+        />
+      )}
       {props.purchasedKinds.length > 0 && (
         <CardPurchaseFlow
           key={props.purchasedKinds.join("-")}

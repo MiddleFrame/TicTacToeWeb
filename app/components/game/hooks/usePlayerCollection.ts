@@ -178,29 +178,24 @@ export function usePlayerCollection(playSfx: PlaySound) {
     const normalized = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
     if (normalized === 0) return;
     const operationId = crypto.randomUUID();
+    playSfx("click", 0.38);
+    setCoins((current) => {
+      const next = current + normalized;
+      window.localStorage.setItem(COINS_KEY, String(next));
+      return next;
+    });
     if (!cloudReady) {
       const queued = [...pendingRewards(), operationId];
       window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
-      setCoins((current) => {
-        const next = current + normalized;
-        window.localStorage.setItem(COINS_KEY, String(next));
-        return next;
-      });
       return;
     }
     try {
       const progress = await grantCloudAdReward(operationId);
-      playSfx("click", 0.38);
       applyProgress(progress);
     } catch {
       const queued = [...pendingRewards(), operationId];
       window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
       setCloudReady(false);
-      setCoins((current) => {
-        const next = current + normalized;
-        window.localStorage.setItem(COINS_KEY, String(next));
-        return next;
-      });
     }
   };
 

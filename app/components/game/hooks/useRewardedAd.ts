@@ -1,9 +1,10 @@
 "use client";
 
 import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type RewardedAdStatus = {
+  privacyConfigured: boolean;
   initialized: boolean;
   loaded: boolean;
   loading: boolean;
@@ -18,6 +19,7 @@ type RewardedAdsPlugin = {
     eventName: "stateChanged",
     listener: (status: RewardedAdStatus) => void,
   ): Promise<PluginListenerHandle>;
+  configurePrivacy(options: { age: number; personalizedAds: boolean }): Promise<RewardedAdStatus>;
   getStatus(): Promise<RewardedAdStatus>;
   showRewarded(): Promise<RewardedAdResult>;
 };
@@ -25,15 +27,18 @@ type RewardedAdsPlugin = {
 const RewardedAds = registerPlugin<RewardedAdsPlugin>("RewardedAds");
 
 const initialStatus: RewardedAdStatus = {
+  privacyConfigured: false,
   initialized: false,
   loaded: false,
-  loading: true,
+  loading: false,
 };
 
 export function useRewardedAd(onReward: () => void) {
   const supported = Capacitor.getPlatform() === "android";
   const [status, setStatus] = useState(initialStatus);
   const [showing, setShowing] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const showWhenLoaded = useRef(false);
 
   useEffect(() => {
     if (!supported) return;
@@ -44,7 +49,7 @@ export function useRewardedAd(onReward: () => void) {
         if (active) setStatus(next);
       })
       .catch(() => {
-        if (active) setStatus({ initialized: false, loaded: false, loading: false });
+        if (active) setStatus(initialStatus);
       });
     RewardedAds.addListener("stateChanged", (next) => {
       if (active) setStatus(next);
@@ -58,7 +63,7 @@ export function useRewardedAd(onReward: () => void) {
     };
   }, [supported]);
 
-  const show = useCallback(async () => {
+  const openAd = useCallback(async () => {
     if (!supported || !status.loaded || showing) return;
     setShowing(true);
     try {
@@ -71,9 +76,44 @@ export function useRewardedAd(onReward: () => void) {
     }
   }, [onReward, showing, status.loaded, supported]);
 
+  useEffect(() => {
+    if (!showWhenLoaded.current || !status.loaded || showing) return;
+    showWhenLoaded.current = false;
+    void openAd();
+  }, [openAd, showing, status.loaded]);
+
+  const show = useCallback(() => {
+    if (!supported || showing) return;
+    if (!status.privacyConfigured) {
+      setPrivacyOpen(true);
+      return;
+    }
+    void openAd();
+  }, [openAd, showing, status.privacyConfigured, supported]);
+
+  const configurePrivacy = useCallback(async (settings: {
+    age: number;
+    personalizedAds: boolean;
+  }) => {
+    if (!supported) return;
+    setPrivacyOpen(false);
+    showWhenLoaded.current = true;
+    try {
+      const next = await RewardedAds.configurePrivacy(settings);
+      setStatus(next);
+    } catch {
+      showWhenLoaded.current = false;
+      setStatus(initialStatus);
+    }
+  }, [supported]);
+
   return {
     loaded: status.loaded,
-    loading: status.loading || !status.initialized,
+    loading: status.privacyConfigured && (status.loading || !status.initialized),
+    closePrivacy: () => setPrivacyOpen(false),
+    configurePrivacy,
+    privacyConfigured: status.privacyConfigured,
+    privacyOpen,
     show,
     showing,
     supported,

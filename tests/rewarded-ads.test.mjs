@@ -18,18 +18,25 @@ test("Android integrates Yodo1 MAS rewarded ads without exposing ad identifiers"
   assert.match(activity, /registerPlugin\(RewardedAdsPlugin\.class\)/);
 });
 
-test("rewarded ads grant one card price only after the native earned event", async () => {
+test("rewarded ads use a deferred custom privacy flow and resolve on the earned event", async () => {
   const plugin = await readProjectFile(
     "android/app/src/main/java/com/MiddleFrame/Tictactoe/RewardedAdsPlugin.java",
   );
   const hook = await readProjectFile("app/components/game/hooks/useRewardedAd.ts");
   const navigation = await readProjectFile("app/components/game/GameNavigation.tsx");
   const store = await readProjectFile("app/components/game/StoreScreen.tsx");
+  const collection = await readProjectFile("app/components/game/hooks/usePlayerCollection.ts");
 
-  assert.match(plugin, /onRewardAdEarned[\s\S]*rewardEarned = true/);
-  assert.match(plugin, /result\.put\("rewarded", rewardEarned\)/);
+  assert.match(plugin, /enableUserPrivacyDialog\(false\)/);
+  assert.match(plugin, /configurePrivacy[\s\S]*setCOPPA/);
+  assert.match(plugin, /onRewardAdEarned[\s\S]*result\.put\("rewarded", true\)/);
+  assert.match(plugin, /onRewardAdClosed[\s\S]*result\.put\("rewarded", false\)/);
   assert.match(hook, /result\.rewarded\) onReward\(\)/);
+  assert.match(hook, /configurePrivacy/);
   assert.match(hook, /Capacitor\.getPlatform\(\) === "android"/);
   assert.match(navigation, /creditCoins\(CARD_PRICE\)/);
   assert.match(store, /rewardedAd\.supported/);
+  assert.match(store, /AdPrivacyDialog/);
+  const creditCoins = collection.slice(collection.indexOf("const creditCoins"));
+  assert.ok(creditCoins.indexOf("setCoins((current)") < creditCoins.indexOf("grantCloudAdReward(operationId)"));
 });
