@@ -62,5 +62,5 @@ test("Adaptive icon layers fill the mask without the old inset", async () => {
     assert.doesNotMatch(xml, /android:inset/);
   }
 
-  assert.match(config, /^versionCode=44$/m);
+  assert.match(config, /^versionCode=45$/m);
 });

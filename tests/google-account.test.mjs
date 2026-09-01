@@ -50,3 +50,18 @@ test("Android uses Credential Manager instead of legacy Google Sign-In", async (
   assert.match(settings, /googleConnected/);
   assert.match(example, /webClientId=/);
 });
+
+test("Android initializes Play Games Services v2 with the configured project", async () => {
+  const [application, gradle, manifest, strings] = await Promise.all([
+    readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/TicTacToeApplication.java"),
+    readProjectFile("android/app/build.gradle"),
+    readProjectFile("android/app/src/main/AndroidManifest.xml"),
+    readProjectFile("android/app/src/main/res/values/strings.xml"),
+  ]);
+
+  assert.match(gradle, /play-services-games-v2:21\.0\.0/);
+  assert.match(application, /PlayGamesSdk\.initialize\(this\)/);
+  assert.match(manifest, /android:name="\.TicTacToeApplication"/);
+  assert.match(manifest, /com\.google\.android\.gms\.games\.APP_ID/);
+  assert.match(strings, /name="game_services_project_id"[^>]*>982871735055</);
+});
