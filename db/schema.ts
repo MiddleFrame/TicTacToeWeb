@@ -37,6 +37,7 @@ export const identities = sqliteTable(
     provider: text("provider", { enum: ["guest", "google", "discord"] })
       .notNull(),
     providerUserId: text("provider_user_id").notNull(),
+    providerEmail: text("provider_email"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => [

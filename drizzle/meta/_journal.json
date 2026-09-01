@@ -15,6 +15,13 @@
       "when": 1787920600384,
       "tag": "0001_natural_colonel_america",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788253004073,
+      "tag": "0002_furry_whizzer",
+      "breakpoints": true
     }
   ]
 }

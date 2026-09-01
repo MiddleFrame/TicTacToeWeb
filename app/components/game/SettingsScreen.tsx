@@ -4,6 +4,7 @@ import { BackIcon, SoundIcon } from "./Primitives";
 
 type SettingsScreenProps = {
   googleAvailable: boolean;
+  googleEmail: string | null;
   googleError: boolean;
   googleLinked: boolean;
   googlePending: boolean;
@@ -49,19 +50,24 @@ export function SettingsScreen(props: SettingsScreenProps) {
         {props.googleAvailable && (
           <button
             className="settings-row settings-toggle settings-google"
-            disabled={props.googleLinked || props.googlePending}
+            disabled={props.googlePending}
             onClick={props.onConnectGoogle}
           >
             <span>{t("googleAccount")}</span>
-            <strong className={props.googleError ? "settings-error" : ""}>
-              {props.googleLinked
-                ? t("googleConnected")
-                : props.googlePending
+            <span className="settings-google-state">
+              {props.googleLinked && (
+                <small>{props.googleEmail ?? t("googleConnected")}</small>
+              )}
+              <strong className={props.googleError ? "settings-error" : ""}>
+                {props.googlePending
                   ? t("googleConnecting")
-                  : props.googleError
-                    ? t("googleFailed")
-                    : t("googleConnect")}
-            </strong>
+                  : props.googleLinked
+                    ? t("googleRelink")
+                    : props.googleError
+                      ? t("googleFailed")
+                      : t("googleConnect")}
+              </strong>
+            </span>
           </button>
         )}
         <a className="settings-row settings-link" href="https://discord.gg/4PJbjRZtkU" target="_blank" rel="noreferrer">

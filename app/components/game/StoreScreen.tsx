@@ -70,7 +70,7 @@ export function StoreScreen(props: StoreScreenProps) {
               ? t("adOpening")
               : rewardedAd.loading
                 ? t("adLoading")
-                : rewardedAd.loaded
+                : !rewardedAd.privacyConfigured || rewardedAd.loaded
                   ? t("watchAd")
                   : t("adUnavailable")}
             <span>+{CARD_PRICE}</span>

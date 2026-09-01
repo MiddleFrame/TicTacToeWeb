@@ -74,6 +74,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const [cloudReady, setCloudReady] = useState(false);
   const [transactionPending, setTransactionPending] = useState(false);
   const [googleAvailable, setGoogleAvailable] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const [googleLinked, setGoogleLinked] = useState(false);
   const [googlePending, setGooglePending] = useState(false);
   const [googleError, setGoogleError] = useState(false);
@@ -118,6 +119,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
       const google = await getGoogleAccountState();
       if (!active) return;
       setGoogleAvailable(google.available);
+      setGoogleEmail(google.email);
       setGoogleLinked(google.linked);
     }).catch(() => {
       if (active) setCloudReady(false);
@@ -200,16 +202,23 @@ export function usePlayerCollection(playSfx: PlaySound) {
   };
 
   const connectGoogle = async () => {
-    if (!googleAvailable || googleLinked || googlePending) return;
+    if (!googleAvailable || googlePending) return;
     setGooglePending(true);
     setGoogleError(false);
     try {
       const connected = await connectGoogleAccount();
       applyProgress(connected.progress);
+      setGoogleEmail(connected.email);
       setGoogleLinked(true);
       setCloudReady(true);
     } catch {
-      setGoogleError(true);
+      const refreshed = await getGoogleAccountState().catch(() => null);
+      if (refreshed) {
+        setGoogleAvailable(refreshed.available);
+        setGoogleEmail(refreshed.email);
+        setGoogleLinked(refreshed.linked);
+      }
+      setGoogleError(!refreshed?.linked);
     } finally {
       setGooglePending(false);
     }
@@ -223,6 +232,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
     creditCoins,
     connectGoogle,
     googleAvailable,
+    googleEmail,
     googleError,
     googleLinked,
     googlePending,

@@ -26,7 +26,7 @@ export async function verifyGoogleIdToken(
   idToken: string,
   clientId: string,
   expectedNonce: string,
-): Promise<{ subject: string }> {
+): Promise<{ subject: string; email: string | null }> {
   const { payload } = await jwtVerify(idToken, GOOGLE_JWKS, {
     algorithms: ["RS256"],
     audience: clientId,
@@ -38,5 +38,8 @@ export async function verifyGoogleIdToken(
   if (payload.nonce !== expectedNonce) {
     throw new Error("google-nonce-invalid");
   }
-  return { subject: payload.sub };
+  const email = payload.email_verified === true && typeof payload.email === "string"
+    ? payload.email.trim().slice(0, 320) || null
+    : null;
+  return { subject: payload.sub, email };
 }

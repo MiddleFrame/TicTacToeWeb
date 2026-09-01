@@ -19,16 +19,19 @@ type ProgressResponse = { progress: PlayerProgressSnapshot };
 type PurchaseResponse = ProgressResponse & { purchasedKinds: CardKind[] };
 type GoogleAccountStatus = {
   configured: boolean;
+  email: string | null;
   linked: boolean;
   nonce: string | null;
 };
 
 export type GoogleAccountState = {
   available: boolean;
+  email: string | null;
   linked: boolean;
 };
 
 type GoogleAccountResponse = ProgressResponse & {
+  email: string | null;
   linked: true;
   sessionToken?: string;
   switched: boolean;
@@ -136,10 +139,11 @@ export async function grantCloudAdReward(
 
 export async function getGoogleAccountState(): Promise<GoogleAccountState> {
   const status = await apiRequest<GoogleAccountStatus>("/api/account/google");
-  if (!android) return { available: false, linked: status.linked };
+  if (!android) return { available: false, email: status.email, linked: status.linked };
   const native = await GoogleAuth.isAvailable().catch(() => ({ available: false }));
   return {
     available: status.linked || status.configured && native.available,
+    email: status.email,
     linked: status.linked,
   };
 }

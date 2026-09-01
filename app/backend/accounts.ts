@@ -128,18 +128,22 @@ export async function findAccountByUserId(
   return row ? toSnapshot(row) : null;
 }
 
-export async function hasGoogleIdentity(userId: string): Promise<boolean> {
+export async function getGoogleIdentity(
+  userId: string,
+): Promise<{ email: string | null } | null> {
   const row = await getDb()
-    .select({ id: identities.id })
+    .select({ email: identities.providerEmail })
     .from(identities)
     .where(and(eq(identities.userId, userId), eq(identities.provider, "google")))
     .get();
-  return Boolean(row);
+  return row ?? null;
 }
 
-async function findGoogleIdentity(providerUserId: string): Promise<{ userId: string } | null> {
+async function findGoogleIdentity(
+  providerUserId: string,
+): Promise<{ id: string; userId: string } | null> {
   return await getDb()
-    .select({ userId: identities.userId })
+    .select({ id: identities.id, userId: identities.userId })
     .from(identities)
     .where(and(
       eq(identities.provider, "google"),
@@ -166,23 +170,38 @@ export async function createAccountSession(
 export async function connectGoogleIdentity(
   currentUserId: string,
   providerUserId: string,
+  providerEmail: string | null,
   now = new Date(),
 ): Promise<CreatedAccountSession & { userId: string; switched: boolean }> {
+  const db = getDb();
   let identity = await findGoogleIdentity(providerUserId);
   if (!identity) {
     try {
-      await getDb().insert(identities).values({
-        id: crypto.randomUUID(),
-        userId: currentUserId,
-        provider: "google",
-        providerUserId,
-        createdAt: now,
-      });
-      identity = { userId: currentUserId };
+      const identityId = crypto.randomUUID();
+      await db.batch([
+        db.delete(identities).where(and(
+          eq(identities.userId, currentUserId),
+          eq(identities.provider, "google"),
+        )),
+        db.insert(identities).values({
+          id: identityId,
+          userId: currentUserId,
+          provider: "google",
+          providerUserId,
+          providerEmail,
+          createdAt: now,
+        }),
+      ]);
+      identity = { id: identityId, userId: currentUserId };
     } catch {
       identity = await findGoogleIdentity(providerUserId);
       if (!identity) throw new Error("google-identity-link-failed");
     }
+  }
+  if (providerEmail) {
+    await db.update(identities)
+      .set({ providerEmail })
+      .where(eq(identities.id, identity.id));
   }
   const session = await createAccountSession(identity.userId, now);
   return {

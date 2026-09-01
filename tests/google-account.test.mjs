@@ -27,7 +27,9 @@ test("Google account linking validates tokens and rotates native sessions", asyn
   assert.match(route, /sessionToken/);
   assert.match(identity, /createRemoteJWKSet/);
   assert.match(identity, /payload\.nonce !== expectedNonce/);
+  assert.match(identity, /payload\.email_verified === true/);
   assert.match(accounts, /connectGoogleIdentity/);
+  assert.match(accounts, /providerEmail/);
   assert.match(accounts, /provider: "google"/);
 });
 
@@ -48,6 +50,8 @@ test("Android uses Credential Manager instead of legacy Google Sign-In", async (
   assert.match(gradle, /androidx\.credentials:credentials:1\.6\.0/);
   assert.match(gradle, /googleid:1\.2\.0/);
   assert.match(settings, /googleConnected/);
+  assert.match(settings, /googleEmail/);
+  assert.match(settings, /googleRelink/);
   assert.match(example, /webClientId=/);
 });
 

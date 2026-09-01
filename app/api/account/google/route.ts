@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import {
   connectGoogleIdentity,
-  hasGoogleIdentity,
+  getGoogleIdentity,
   revokeSession,
 } from "../../../backend/accounts";
 import { googleSessionNonce, verifyGoogleIdToken } from "../../../backend/google-identity";
@@ -20,9 +20,11 @@ export async function GET(request: Request): Promise<Response> {
     return apiJson(request, { error: "unauthorized" }, { status: 401 });
   }
   const configured = Boolean(clientId());
+  const identity = await getGoogleIdentity(authenticated.account.id);
   return apiJson(request, {
     configured,
-    linked: await hasGoogleIdentity(authenticated.account.id),
+    linked: Boolean(identity),
+    email: identity?.email ?? null,
     nonce: configured ? await googleSessionNonce(authenticated.token) : null,
   });
 }
@@ -46,6 +48,7 @@ export async function POST(request: Request): Promise<Response> {
     const connected = await connectGoogleIdentity(
       authenticated.account.id,
       identity.subject,
+      identity.email,
     );
     await revokeSession(authenticated.token);
     const nativeClient = request.headers.get("x-tttp-client") === "android";
@@ -53,6 +56,7 @@ export async function POST(request: Request): Promise<Response> {
       request,
       {
         linked: true,
+        email: identity.email,
         switched: connected.switched,
         progress: await getPlayerProgress(connected.userId),
         ...(nativeClient ? { sessionToken: connected.sessionToken } : {}),

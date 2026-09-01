@@ -76,6 +76,7 @@ export function GameNavigation(props: GameNavigationProps) {
     return (
       <SettingsScreen
         googleAvailable={collection.googleAvailable}
+        googleEmail={collection.googleEmail}
         googleError={collection.googleError}
         googleLinked={collection.googleLinked}
         googlePending={collection.googlePending}
