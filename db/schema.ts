@@ -177,3 +177,28 @@ export const rewardLedger = sqliteTable(
     ),
   ],
 );
+
+export const apiRateLimits = sqliteTable(
+  "api_rate_limits",
+  {
+    key: text("key").primaryKey(),
+    hits: integer("hits").notNull(),
+    resetAt: integer("reset_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [index("idx_api_rate_limits_reset_at").on(table.resetAt)],
+);
+
+export const adminAuditLog = sqliteTable(
+  "admin_audit_log",
+  {
+    id: text("id").primaryKey(),
+    actorUserId: text("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    targetUserId: text("target_user_id").references(() => users.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_admin_audit_log_target_created").on(table.targetUserId, table.createdAt),
+    index("idx_admin_audit_log_actor").on(table.actorUserId),
+  ],
+);

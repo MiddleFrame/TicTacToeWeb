@@ -43,3 +43,5 @@ next-env.d.ts
 /outputs/
 /work/
 /android-config/private/
+/.dev.vars
+/.dev.vars.*

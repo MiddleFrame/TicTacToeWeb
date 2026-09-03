@@ -23,6 +23,7 @@ export async function GET(request: Request): Promise<Response> {
   const identity = await getGoogleIdentity(authenticated.account.id);
   return apiJson(request, {
     configured,
+    clientId: configured ? clientId() : null,
     linked: Boolean(identity),
     email: identity?.email ?? null,
     nonce: configured ? await googleSessionNonce(authenticated.token) : null,

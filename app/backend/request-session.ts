@@ -19,5 +19,5 @@ export async function authenticateRequest(request: Request): Promise<{
   const token = readRequestSessionToken(request);
   if (!token) return null;
   const account = await findAccountBySessionToken(token);
-  return account ? { account, token } : null;
+  return account?.status === "active" ? { account, token } : null;
 }
