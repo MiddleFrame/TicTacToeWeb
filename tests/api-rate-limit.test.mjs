@@ -16,6 +16,7 @@ test("API protection covers all API routes with stricter guest and Google limits
 test("IP limits ignore attacker-controlled forwarded headers and group IPv6 /64 addresses", () => {
   const request = new Request("https://test.example/api/account", { headers: { "cf-connecting-ip": "203.0.113.7", "x-forwarded-for": "1.2.3.4" } });
   assert.equal(clientRateSubject(request), "unknown-client");
+  assert.equal(clientRateSubject(request, true), "203.0.113.7");
   Object.defineProperty(request, "cf", { value: { colo: "TEST" } });
   assert.equal(clientRateSubject(request), "203.0.113.7");
   request.headers.set("x-forwarded-for", "9.9.9.9");

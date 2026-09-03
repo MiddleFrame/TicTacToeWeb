@@ -23,10 +23,10 @@ export function apiRatePolicy(pathname: string, method: string): RatePolicy | nu
     : { name: "write", limit: 90, windowMs: MINUTE };
 }
 
-export function clientRateSubject(request: Request): string {
+export function clientRateSubject(request: Request, trustCloudflareHeader = false): string {
   const cf = (request as Request & { cf?: { colo?: unknown } }).cf;
   const address = request.headers.get("cf-connecting-ip");
-  if (typeof cf?.colo !== "string" || !address || address.length > 64) return "unknown-client";
+  if ((!trustCloudflareHeader && typeof cf?.colo !== "string") || !address || address.length > 64) return "unknown-client";
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(address)) return address;
   if (/^[\da-f:]+$/i.test(address) && address.includes(":")) {
     const normalized = new URL(`http://[${address}]/`).hostname.slice(1, -1);

@@ -13,7 +13,7 @@ export async function guardApiRequest(
   const policy = apiRatePolicy(new URL(request.url).pathname, request.method);
   if (!policy) return null;
   try {
-    const key = await rateKey(clientRateSubject(request), policy);
+    const key = await rateKey(clientRateSubject(request, true), policy);
     const cached = denials.retryAfter(key);
     const result = cached ? { allowed: false, retryAfter: cached } : await consumeRateLimit(db, key, policy);
     if (!result.allowed) {
