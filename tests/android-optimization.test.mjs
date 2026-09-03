@@ -1,8 +1,29 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const source = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("the Android toolchain is pinned and declares AGP 9 build requirements", async () => {
+  const root = await source("android/build.gradle");
+  const app = await source("android/app/build.gradle");
+  const wrapper = await source("android/gradle/wrapper/gradle-wrapper.properties");
+  const properties = await source("android/gradle.properties");
+  assert.match(root, /com\.android\.tools\.build:gradle:9\.3\.2/);
+  assert.match(root, /com\.android\.tools:r8:9\.4\.14/);
+  assert.match(wrapper, /gradle-9\.5\.0-bin\.zip/);
+  assert.match(wrapper, /^distributionSha256Sum=553c78f50dafcd54d65b9a444649057857469edf836431389695608536d6b746$/m);
+  assert.match(wrapper, /^validateDistributionUrl=true$/m);
+  const wrapperJar = await readFile(new URL("../android/gradle/wrapper/gradle-wrapper.jar", import.meta.url));
+  assert.equal(createHash("sha256").update(wrapperJar).digest("hex"),
+    "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7");
+  assert.match(app, /buildFeatures\s*\{\s*buildConfig true\s*resValues true\s*\}/);
+  assert.match(app, /implementation "androidx\.core:core:\$androidxCoreVersion"/);
+  assert.match(app, /minifyEnabled true/);
+  assert.match(app, /shrinkResources true/);
+  assert.doesNotMatch(properties, /android\.newDsl=false|android\.r8\.fullMode=false/);
+});
 
 test("Android includes only the approved MAS networks and their mediation adapters", async () => {
   const gradle = await source("android/app/build.gradle");
