@@ -1,10 +1,10 @@
-import { mechanicsForCard } from "./card-mechanics.ts";
+import { CARD_COLLECTION } from "./collections.ts";
 import { DECK_BUILDING_KINDS, type CardKind } from "./cards.ts";
 
-export type DeckCardFilter = "all" | "ice" | "regular";
+export type DeckCardFilter = string;
 
 export function deckFilterForCard(kind: CardKind): DeckCardFilter {
-  return mechanicsForCard(kind).includes("ice") ? "ice" : "regular";
+  return CARD_COLLECTION[kind];
 }
 
 export function deckKindsForFilter(filter: DeckCardFilter): CardKind[] {

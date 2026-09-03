@@ -21,7 +21,7 @@ test("deck header stays visible with a centered vector back icon", async () => {
 test("deck screen exposes all, ice and regular filters", async () => {
   const screen = await readProjectFile("app/components/game/DeckScreen.tsx");
 
-  assert.match(screen, /\["all", "ice", "regular"\]/);
+  assert.match(screen, /COLLECTIONS.map/);
   assert.match(screen, /className="deck-filters"/);
   assert.match(screen, /kinds=\{visibleKinds\}/);
 });

@@ -1,4 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { flushRoundProgress } from "../../../game/round-progress-client";
+import { useElementProgression } from "./useElementProgression";
+import type { CardDrop } from "../../../game/card-purchase";
+import { compatibleDeck } from "../../../game/collections";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DECK_BUILDING_KINDS,
   STARTER_SELECTED_KINDS,
@@ -10,6 +14,7 @@ import {
   grantCloudAdReward,
   initializePlayerProgress,
   purchaseCloudCardPack,
+  refreshCloudPlayerProgress,
   saveCloudPlayerProgress,
 } from "../../../game/player-progress-client";
 import {
@@ -70,6 +75,11 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const [selectedKinds, setSelectedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
   const [unlockedKinds, setUnlockedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
   const [coins, setCoins] = useState(STARTER_COINS);
+  const [drops, setDrops] = useState<CardDrop[]>([]);
+  const [purchaseError, setPurchaseError] = useState(false);
+  const purchaseLock = useRef(false);
+  const purchaseOperation = useRef<{ id: string; count: number; collectionId: string } | null>(null);
+  const syncElements = useRef<(progress: PlayerProgressSnapshot) => void>(() => undefined);
   const [purchasedKinds, setPurchasedKinds] = useState<CardKind[]>([]);
   const [profileName, setProfileName] = useState("Игрок");
   const [cloudReady, setCloudReady] = useState(false);
@@ -86,7 +96,11 @@ export function usePlayerCollection(playSfx: PlaySound) {
     setCoins(progress.coins);
     setProfileName(progress.nickname);
     cacheProgress(progress);
+    syncElements.current(progress);
   }, []);
+
+  const progression = useElementProgression(applyProgress);
+  useEffect(() => { syncElements.current = progression.sync; }, [progression.sync]);
 
   useEffect(() => {
     let active = true;
@@ -100,7 +114,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
     }, 0);
     void initializePlayerProgress().then(async (initial) => {
       window.clearTimeout(restoreTimeout);
-      let progress = initial;
+      let progress = await flushRoundProgress().catch(() => null) ?? initial;
       const pendingDeck = parseStoredKinds(window.localStorage.getItem(PENDING_DECK_KEY));
       const pendingName = window.localStorage.getItem(PENDING_NAME_KEY);
       if (pendingDeck.length >= 5 || pendingName) {
@@ -132,21 +146,29 @@ export function usePlayerCollection(playSfx: PlaySound) {
     };
   }, [applyProgress]);
 
+  useEffect(() => {
+    const reconnect = () => {
+      void initializePlayerProgress().then(async () => {
+        const latest = await flushRoundProgress();
+        applyProgress(latest ?? await refreshCloudPlayerProgress());
+        setCloudReady(true);
+      }).catch(() => setCloudReady(false));
+    };
+    window.addEventListener("online", reconnect);
+    return () => window.removeEventListener("online", reconnect);
+  }, [applyProgress]);
+
   const toggleCard = (kind: CardKind) => {
     if (!unlockedKinds.includes(kind)) return;
     setSelectedKinds((current) => current.includes(kind)
       ? current.length <= 5 ? current : current.filter((item) => item !== kind)
-      : [...current, kind]);
+      : compatibleDeck([...current, kind]) ? [...current, kind] : current);
   };
 
-  const saveDeck = () => {
-    window.localStorage.setItem(DECK_KEY, JSON.stringify(selectedKinds));
-    window.localStorage.setItem(PENDING_DECK_KEY, JSON.stringify(selectedKinds));
-    if (!cloudReady) return;
-    void saveCloudPlayerProgress({ selectedKinds }).then((progress) => {
-      window.localStorage.removeItem(PENDING_DECK_KEY);
-      applyProgress(progress);
-    }).catch(() => setCloudReady(false));
+  const saveDeck = async () => {
+    const library = { ...progression.deckLibrary, decks: progression.deckLibrary.decks.map((deck) =>
+      deck.id === progression.deckLibrary.activeId ? { ...deck, kinds: selectedKinds } : deck) };
+    return progression.saveLibrary(library);
   };
 
   const changeName = (name: string) => {
@@ -163,17 +185,26 @@ export function usePlayerCollection(playSfx: PlaySound) {
     }).catch(() => setCloudReady(false));
   };
 
-  const buyCards = async (count: number) => {
-    if (!cloudReady || transactionPending) return;
+  const buyCards = async (count: number, collectionId: string) => {
+    if (!cloudReady || purchaseLock.current) return;
+    purchaseLock.current = true;
     setTransactionPending(true);
+    setPurchaseError(false);
     try {
-      const result = await purchaseCloudCardPack(count);
+      purchaseOperation.current ??= { id: crypto.randomUUID(), count, collectionId };
+      const pending = purchaseOperation.current;
+      const result = await purchaseCloudCardPack(pending.count, pending.collectionId, pending.id);
+      purchaseOperation.current = null;
+      setDrops(result.drops);
       playSfx("click", 0.38);
       applyProgress(result.progress);
       setPurchasedKinds(result.purchasedKinds);
-    } catch {
-      setCloudReady(false);
+    } catch (error) {
+      const definitive = ["insufficient-coins", "invalid-pack-size", "unknown-collection", "invalid-purchase"];
+      if (error instanceof Error && definitive.includes(error.message)) purchaseOperation.current = null;
+      setPurchaseError(true);
     } finally {
+      purchaseLock.current = false;
       setTransactionPending(false);
     }
   };
@@ -227,6 +258,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
   };
 
   return {
+    progression, drops, purchaseError,
     buyCards,
     changeName,
     cloudReady,

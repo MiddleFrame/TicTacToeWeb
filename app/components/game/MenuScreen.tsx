@@ -1,9 +1,13 @@
+import type { ElementPasses } from "../../game/element-progression";
+import { PassShortcuts } from "./ElementProgress";
 import { useLocalization } from "../../game/localization";
 import { Image } from "./Image";
 import { RulesModal } from "./RulesModal";
 import type { GameMode } from "./types";
 
 type MenuScreenProps = {
+  passes: ElementPasses;
+  onPass: (id: string) => void;
   coins: number;
   photonAvailable: boolean;
   rulesOpen: boolean;
@@ -51,6 +55,7 @@ export function MenuScreen(props: MenuScreenProps) {
           <button className="unity-menu-button" onClick={props.onOpenRules}>{t("guide")}</button>
         </div>
 
+        <PassShortcuts passes={props.passes} onOpen={props.onPass} />
         <nav className="unity-menu-nav" aria-label="Разделы">
           <button onClick={props.onDeck}>
             <Image src="/game/menu/deck.png" alt="" width="88" height="76" unoptimized />

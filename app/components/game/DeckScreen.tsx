@@ -1,3 +1,6 @@
+import { COLLECTIONS } from "../../game/collections";
+import { DeckLibraryControls } from "./DeckLibraryControls";
+import type { useElementProgression } from "./hooks/useElementProgression";
 import { useEffect, useRef, useState } from "react";
 import { CARD_COUNTS, type CardKind } from "../../game/cards";
 import { deckFilterForCard, deckKindsForFilter, type DeckCardFilter } from "../../game/card-filters";
@@ -7,6 +10,7 @@ import { DeckCardInspection, type CardInspectionOrigin } from "./DeckCardInspect
 import { BackIcon } from "./Primitives";
 
 type DeckScreenProps = {
+  progression: ReturnType<typeof useElementProgression>;
   selectedKinds: CardKind[];
   unlockedKinds: CardKind[];
   onBack: () => void;
@@ -15,8 +19,8 @@ type DeckScreenProps = {
   focusKind?: CardKind | null;
 };
 
-export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onSave, focusKind }: DeckScreenProps) {
-  const { t } = useLocalization();
+export function DeckScreen({ progression, selectedKinds, unlockedKinds, onBack, onToggle, onSave, focusKind }: DeckScreenProps) {
+  const { t, language } = useLocalization();
   const shellRef = useRef<HTMLElement | null>(null);
   const [filter, setFilter] = useState<DeckCardFilter>(() => focusKind ? deckFilterForCard(focusKind) : "all");
   const [inspection, setInspection] = useState<{ kind: CardKind; origin: CardInspectionOrigin } | null>(null);
@@ -39,18 +43,19 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
         </div>
         <strong>{selectedKinds.length}/16</strong>
       </header>
+      <DeckLibraryControls key={progression.deckLibrary.activeId} progression={progression} selectedKinds={selectedKinds} />
       <p className="collection-lead">
         {t("deckLead")}
       </p>
       <nav className="deck-filters" aria-label={t("deckFilters")}>
-        {(["all", "ice", "regular"] as DeckCardFilter[]).map((value) => (
+        {(["all", ...COLLECTIONS.map((collection) => collection.id)] as DeckCardFilter[]).map((value) => (
           <button
             className={filter === value ? "active" : ""}
             key={value}
             onClick={() => setFilter(value)}
             aria-pressed={filter === value}
           >
-            {t(value === "all" ? "allCards" : value === "ice" ? "iceCards" : "regularCards")}
+            {value === "all" ? t("allCards") : COLLECTIONS.find((collection) => collection.id === value)!.name[language]}
           </button>
         ))}
       </nav>
@@ -63,7 +68,7 @@ export function DeckScreen({ selectedKinds, unlockedKinds, onBack, onToggle, onS
       />
       <footer className="collection-footer">
         <span>{t("deckCopies")}: {cardCount}</span>
-        <button className="primary-button" onClick={onSave}>{t("saveDeck")}</button>
+        <button className="primary-button" disabled={progression.busy} onClick={onSave}>{t("saveDeck")}</button>
       </footer>
       {inspection && (
         <DeckCardInspection

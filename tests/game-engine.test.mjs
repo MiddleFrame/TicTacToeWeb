@@ -25,7 +25,7 @@ import { CARD_MECHANICS, mechanicsForCard } from "../app/game/card-mechanics.ts"
 import { CARD_DEFINITIONS } from "../app/game/cards.ts";
 import { cardRevealProfile } from "../app/game/card-reveal-profile.ts";
 import { cardTransferSlot } from "../app/game/card-transfer-layout.ts";
-import { cardPackCost, drawCardPack } from "../app/game/card-purchase.ts";
+import { cardPackCost, drawCollectionPack } from "../app/game/card-purchase.ts";
 import { grantCoins, starterCollectionProgress, TEST_COIN_GRANT } from "../app/game/collection-progress.ts";
 import { canTargetCard, getGamePlayers, getRoundResult } from "../app/game/game-presentation.ts";
 import {
@@ -90,14 +90,13 @@ test("scatters purchased cards horizontally in alternating directions", () => {
   assert.ok(slots.every((slot) => slot.insetPx >= 0));
 });
 
-test("draws unique card packs of supported sizes", () => {
-  [1, 3, 5, 7, 10].forEach((size) => {
-    const pack = drawCardPack(Object.keys(CARD_DEFINITIONS), size, () => 0.99);
-    assert.equal(pack.length, size);
-    assert.equal(new Set(pack).size, size);
-    assert.equal(cardPackCost(size), size * 50);
-  });
-  assert.equal(drawCardPack(["place", "freeze-cell"], 5).length, 2);
+test("draws collection packs with replacement and detects repeated cards within a pack", () => {
+  const pack = drawCollectionPack("ice", 5, [], () => 0);
+  assert.equal(pack.length, 5);
+  assert.equal(pack[0].duplicate, false);
+  assert.ok(pack.slice(1).every((drop) => drop.duplicate && drop.xp === 100));
+  assert.ok(pack.every((drop) => drop.collectionId === "ice"));
+  assert.equal(cardPackCost(5), 250);
   assert.equal(cardPackCost(Number.NaN), 0);
 });
 

@@ -1,0 +1,28 @@
+export const progressionCopy = {
+  ru: {
+    passes: "Пути коллекций", level: "Уровень", xp: "опыта", free: "Бесплатно", premium: "Премиум",
+    claim: "Забрать", claimed: "Получено", locked: "Закрыто", rewardReady: "Есть награды",
+    testPremium: "Открыть премиум · тест", testNotice: "Тестовый доступ бесплатен. Покупка пасса появится позже.",
+    remaining: "Осталось открыть", duplicates: "Повторки превращаются в 100 опыта своей коллекции.",
+    dust: "Повторка · превращаем в опыт", buyAgain: "Купить ещё одну", done: "Готово", collection: "В коллекцию",
+    newDeck: "Новая колода", deckName: "Название колоды", deleteDeck: "Удалить колоду", deckSelect: "Активная колода",
+    deckRule: "Обычные карты + одна стихия. Новые карты добавляйте в выбранную колоду самостоятельно.",
+    failed: "Не удалось сохранить. Повторите попытку.", retry: "Повторить", xpPending: "Сохраняем опыт…",
+    xpUnavailable: "Опыт пока не сохранён. Нужно подключение.", maxLevel: "Максимальный уровень", completed: "Коллекция собрана",
+    roundXp: "Опыт за раунд", noXp: "Ничья: опыт не начисляется", roundRules: "1000 опыта за уровень · победа: 3 за карту · поражение: 1 за карту",
+    forfeit: "За выход из матча опыт пока не начисляется", passOf: "Путь коллекции", buy: "Купить", cards: "карт",
+  },
+  en: {
+    passes: "Collection paths", level: "Level", xp: "XP", free: "Free", premium: "Premium",
+    claim: "Claim", claimed: "Claimed", locked: "Locked", rewardReady: "Rewards available",
+    testPremium: "Unlock premium · test", testNotice: "Test access is free. Pass purchases will arrive later.",
+    remaining: "Left to discover", duplicates: "Duplicates turn into 100 XP for their collection.",
+    dust: "Duplicate · turning into XP", buyAgain: "Buy another card", done: "Done", collection: "To collection",
+    newDeck: "New deck", deckName: "Deck name", deleteDeck: "Delete deck", deckSelect: "Active deck",
+    deckRule: "Regular cards + one element. Add new cards to your chosen deck yourself.",
+    failed: "Could not save. Please try again.", retry: "Retry", xpPending: "Saving XP…",
+    xpUnavailable: "XP has not been saved yet. Connection required.", maxLevel: "Maximum level", completed: "Collection complete",
+    roundXp: "Round XP", noXp: "Draw: no XP awarded", roundRules: "1000 XP per level · win: 3 per card · loss: 1 per card",
+    forfeit: "Leaving a match does not award XP yet", passOf: "Collection path", buy: "Buy", cards: "cards",
+  },
+};

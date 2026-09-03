@@ -11,11 +11,12 @@ type CardPurchaseRevealProps = {
   current: number;
   kind: CardKind;
   onAccept: () => void;
+  onRevealed?: () => void;
   startAudio: StartCardRevealAudio;
   total: number;
 };
 
-export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, startAudio, total }: CardPurchaseRevealProps) {
+export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, onRevealed, startAudio, total }: CardPurchaseRevealProps) {
   const [complete, setComplete] = useState(false);
   const revealRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<CardRevealAudioController | null>(null);
@@ -46,6 +47,12 @@ export function CardPurchaseReveal({ acceptLabel, current, kind, onAccept, start
     audioRef.current?.stop();
     audioRef.current = null;
   }, [complete]);
+
+  useEffect(() => {
+    if (!complete || !onRevealed) return;
+    const timeout = window.setTimeout(onRevealed, 450);
+    return () => window.clearTimeout(timeout);
+  }, [complete, onRevealed]);
 
   const accelerate = () => {
     revealRef.current?.getAnimations({ subtree: true }).forEach((animation) => {

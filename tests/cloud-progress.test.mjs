@@ -51,7 +51,7 @@ test("cloud progress routes authenticate writes and record economy operations", 
   assert.match(purchaseRoute, /isOperationId/);
   assert.match(rewardRoute, /reward-rate-limited/);
   assert.doesNotMatch(backend, /export async function importLegacyProgress/);
-  assert.match(backend, /storePurchases/);
+  assert.match(backend, /purchaseCollectionPack/);
   assert.match(migration, /CREATE TABLE `player_progress`/);
   assert.match(migration, /CREATE TABLE `store_purchases`/);
 });

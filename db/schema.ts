@@ -215,3 +215,20 @@ export const accountDeletionTickets = sqliteTable(
     index("idx_deletion_tickets_expiry").on(table.expiresAt),
   ],
 );
+
+export const elementProgress = sqliteTable("element_progress", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  state: text("state").notNull(),
+  revision: integer("revision").notNull().default(0),
+});
+
+export const progressionOperations = sqliteTable("progression_operations", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  operationId: text("operation_id").notNull(),
+  revision: integer("revision").notNull(),
+  result: text("result").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.operationId] }),
+  uniqueIndex("idx_progression_user_revision").on(table.userId, table.revision),
+]);

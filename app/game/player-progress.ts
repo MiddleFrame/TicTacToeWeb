@@ -3,6 +3,9 @@ import {
   STARTER_SELECTED_KINDS,
   type CardKind,
 } from "./cards.ts";
+import { compatibleDeck } from "./collections.ts";
+import type { ElementPasses } from "./element-progression.ts";
+import type { DeckLibrary } from "./saved-decks.ts";
 
 export const MAX_LEGACY_COINS = 1_000_000;
 export const STARTER_COINS = 220;
@@ -19,6 +22,8 @@ export type PlayerProgressSnapshot = {
   selectedKinds: CardKind[];
   unlockedKinds: CardKind[];
   legacyImported: boolean;
+  passes: ElementPasses;
+  deckLibrary: DeckLibrary;
 };
 
 export type LocalProgressSnapshot = {
@@ -56,7 +61,7 @@ export function normalizeSelectedKinds(
   unlockedKinds: readonly CardKind[],
 ): CardKind[] {
   const selected = validCardKinds(value).filter((kind) => unlockedKinds.includes(kind));
-  return selected.length >= MIN_SELECTED_KINDS && selected.length <= MAX_SELECTED_KINDS
+  return selected.length >= MIN_SELECTED_KINDS && selected.length <= MAX_SELECTED_KINDS && compatibleDeck(selected)
     ? selected
     : [...STARTER_SELECTED_KINDS];
 }

@@ -4,12 +4,20 @@ import { useLocalization } from "../../game/localization";
 import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
 import { CardDeckTransfer } from "./CardDeckTransfer";
 import { CardPurchaseReveal } from "./CardPurchaseReveal";
-import { CardPurchaseSummary } from "./CardPurchaseSummary";
+import { DuplicateDust } from "./DuplicateDust";
+import type { CardDrop } from "../../game/card-purchase";
+import type { ElementPasses } from "../../game/element-progression";
+import { progressionCopy } from "../../game/progression-copy";
 
-type FlowPhase = "revealing" | "summary" | "transferring";
+type FlowPhase = "revealing" | "dust" | "transferring" | "done";
 
 type CardPurchaseFlowProps = {
   kinds: readonly CardKind[];
+  drops: readonly CardDrop[];
+  passes: ElementPasses;
+  onBuyAgain: () => void;
+  canBuyAgain: boolean;
+  onDismiss: () => void;
   onAmbientSuspendedChange: (suspended: boolean) => void;
   onComplete: (lastKind: CardKind) => void;
   playDock: PlayCardDock;
@@ -19,7 +27,7 @@ type CardPurchaseFlowProps = {
 };
 
 export function CardPurchaseFlow({
-  kinds,
+  kinds, drops, passes, onBuyAgain, canBuyAgain, onDismiss,
   onAmbientSuspendedChange,
   onComplete,
   playDock,
@@ -27,13 +35,14 @@ export function CardPurchaseFlow({
   startAudio,
   unlockedKinds,
 }: CardPurchaseFlowProps) {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const [phase, setPhase] = useState<FlowPhase>("revealing");
   const [index, setIndex] = useState(0);
   const isLast = index === kinds.length - 1;
-  const acceptLabel = isLast
-    ? kinds.length === 1 ? t("toDeck") : t("showAllCards")
-    : t("nextCard");
+  const copy = progressionCopy[language];
+  const freshKinds = drops.filter((drop) => !drop.duplicate).map((drop) => drop.kind);
+  const drop = drops[index];
+  const acceptLabel = drop.duplicate ? `+${drop.xp} ${copy.xp}` : isLast ? copy.collection : t("nextCard");
 
   useEffect(() => {
     const suspended = phase === "revealing";
@@ -41,23 +50,34 @@ export function CardPurchaseFlow({
     return () => onAmbientSuspendedChange(false);
   }, [onAmbientSuspendedChange, phase]);
 
-  const acceptReveal = () => {
+  const advance = () => {
     if (!isLast) {
       setIndex((current) => current + 1);
+      setPhase("revealing");
       return;
     }
-    setPhase(kinds.length === 1 ? "transferring" : "summary");
+    setPhase(freshKinds.length > 0 ? "transferring" : "done");
   };
+  const acceptReveal = () => drop.duplicate ? setPhase("dust") : advance();
 
-  if (phase === "summary") {
-    return <CardPurchaseSummary kinds={kinds} onConfirm={() => setPhase("transferring")} />;
+  if (phase === "dust") {
+    const after = drop.xpAfter ?? passes[drop.collectionId].xp;
+    return <DuplicateDust drop={drop} before={drop.xpBefore ?? Math.max(0, after - drop.xp)} after={after} onDone={advance} />;
+  }
+  if (phase === "done") {
+    return <div className="modal-backdrop"><section className="dust-panel" role="dialog" aria-modal="true" aria-label={copy.done}>
+      <h2>{copy.done}</h2>
+      <button className="primary-button" disabled={!canBuyAgain} onClick={onBuyAgain}>{copy.buyAgain} · 50</button>
+      {freshKinds.length > 0 && <button className="secondary-button" onClick={() => onComplete(freshKinds.at(-1)!)}>{copy.collection}</button>}
+      <button className="secondary-button" onClick={onDismiss}>{t("store")}</button>
+    </section></div>;
   }
 
   if (phase === "transferring") {
     return (
       <CardDeckTransfer
-        kinds={kinds}
-        onComplete={onComplete}
+        kinds={freshKinds}
+        onComplete={() => setPhase("done")}
         playDock={playDock}
         selectedKinds={selectedKinds}
         unlockedKinds={unlockedKinds}
@@ -67,10 +87,12 @@ export function CardPurchaseFlow({
 
   return (
     <CardPurchaseReveal
+      key={index}
       acceptLabel={acceptLabel}
       current={index + 1}
       kind={kinds[index]}
       onAccept={acceptReveal}
+      onRevealed={drop.duplicate ? acceptReveal : undefined}
       startAudio={startAudio}
       total={kinds.length}
     />

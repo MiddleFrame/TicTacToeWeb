@@ -1,3 +1,9 @@
+import { useState, type CSSProperties } from "react";
+import { COLLECTIONS, collectionCards } from "../../game/collections";
+import { emptyPass, type ElementPasses } from "../../game/element-progression";
+import type { CardDrop } from "../../game/card-purchase";
+import { progressionCopy } from "../../game/progression-copy";
+import { ElementProgress } from "./ElementProgress";
 import type { CardKind } from "../../game/cards";
 import { CARD_PRICE, cardPackCost } from "../../game/card-purchase";
 import { useLocalization } from "../../game/localization";
@@ -11,13 +17,16 @@ import { AdPrivacyDialog } from "./AdPrivacyDialog";
 type StoreScreenProps = {
   cloudReady: boolean;
   coins: number;
-  lockedKinds: CardKind[];
+  drops: CardDrop[];
+  passes: ElementPasses;
+  purchaseError: boolean;
+  onDismissReveal: () => void;
   purchasedKinds: CardKind[];
   selectedKinds: CardKind[];
   unlockedKinds: CardKind[];
   onAmbientSuspendedChange: (suspended: boolean) => void;
   onBack: () => void;
-  onBuy: (count: number) => void;
+  onBuy: (count: number, collectionId: string) => void;
   onRewardAd: () => void;
   onCompleteReveal: (lastKind: CardKind) => void;
   playDock: PlayCardDock;
@@ -26,11 +35,12 @@ type StoreScreenProps = {
 };
 
 export function StoreScreen(props: StoreScreenProps) {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
+  const copy = progressionCopy[language];
+  const [banner, setBanner] = useState(COLLECTIONS[0].id);
+  const buy = (count: number, id: string) => { setBanner(id); props.onBuy(count, id); };
   const rewardedAd = useRewardedAd(props.onRewardAd);
-  const soldOut = props.lockedKinds.length === 0;
-  const canBuyOne = props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(1) && props.lockedKinds.length >= 1;
-  const canBuyFive = props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(5) && props.lockedKinds.length >= 5;
+  const canBuy = (count: number) => props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(count);
   return (
     <main className="store-shell">
       <header className="section-screen-header">
@@ -44,22 +54,25 @@ export function StoreScreen(props: StoreScreenProps) {
           <Image src="/game/menu/coin.png" alt="" width="25" height="25" unoptimized />
         </strong>
       </header>
-      <section className="store-card-panel">
-        <Image className="store-cart" src="/game/menu/store.png" alt="" width="128" height="112" unoptimized />
-        <span className="eyebrow">{t("randomCard")}</span>
-        <h2>{soldOut ? t("collectionComplete") : t("openNewCard")}</h2>
-        <p>{soldOut ? t("allUnlocked") : t("boughtToDeck")}</p>
-        <div className="store-buy-actions">
-          <button className="primary-button store-buy-button" disabled={!canBuyOne} onClick={() => props.onBuy(1)}>
-            {canBuyOne ? t("buy50") : soldOut ? t("soldOut") : !props.cloudReady || props.transactionPending ? t("progressLoading") : t("notEnough")}
-            {!soldOut && <Image src="/game/menu/coin.png" alt="" width="24" height="24" unoptimized />}
-          </button>
-          <button className="secondary-button store-buy-button store-pack-button" disabled={!canBuyFive} onClick={() => props.onBuy(5)}>
-            {t("buyFive")}
-            <span>250</span>
-            <Image src="/game/menu/coin.png" alt="" width="22" height="22" unoptimized />
-          </button>
-        </div>
+      <div className="collection-banners">
+        {COLLECTIONS.map((collection) => {
+          const remaining = collectionCards(collection.id).filter((kind) => !props.unlockedKinds.includes(kind)).length;
+          return <section key={collection.id} className={`collection-banner ${remaining === 0 ? "collection-complete" : ""}`} style={{ "--element-color": collection.color } as CSSProperties}>
+            <Image className="banner-art" src={collection.image} alt="" width="100" height="100" unoptimized />
+            <h2>{collection.name[language]}</h2>
+            <strong>{remaining === 0 ? copy.completed : `${copy.remaining}: ${remaining}`}</strong>
+            <p>{copy.duplicates}</p>
+            <ElementProgress collectionId={collection.id} xp={(props.passes[collection.id] ?? emptyPass()).xp} />
+            <div className="store-buy-actions">
+              <button className="primary-button" disabled={!canBuy(1)} onClick={() => buy(1, collection.id)}>{copy.buy} · 50 ◈</button>
+              <button className="secondary-button" disabled={!canBuy(5)} onClick={() => buy(5, collection.id)}>5 {copy.cards} · 250 ◈</button>
+            </div>
+          </section>;
+        })}
+      </div>
+      {!props.cloudReady && <p role="status">{t("progressLoading")}</p>}
+      {props.purchaseError && <p role="alert">{copy.failed}</p>}
+      <section className="store-ad-panel">
         {rewardedAd.supported && (
           <button
             className="secondary-button store-reward-ad"
@@ -88,6 +101,11 @@ export function StoreScreen(props: StoreScreenProps) {
         <CardPurchaseFlow
           key={props.purchasedKinds.join("-")}
           kinds={props.purchasedKinds}
+          drops={props.drops}
+          passes={props.passes}
+          canBuyAgain={canBuy(1)}
+          onBuyAgain={() => { props.onDismissReveal(); buy(1, props.drops[0]?.collectionId ?? banner); }}
+          onDismiss={props.onDismissReveal}
           onAmbientSuspendedChange={props.onAmbientSuspendedChange}
           onComplete={props.onCompleteReveal}
           playDock={props.playDock}

@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { GameClient } from "../app/components/GameClient";
 import { LocalizationProvider } from "../app/game/localization";
 import "../app/globals.css";
+import "../app/progression.css";
 
 document.documentElement.dataset.platform = "android";
 

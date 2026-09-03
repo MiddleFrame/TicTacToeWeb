@@ -7,6 +7,7 @@ export type GameScreen =
   | "collection"
   | "settings"
   | "store"
+  | "passes"
   | "matchmaking"
   | "game";
 

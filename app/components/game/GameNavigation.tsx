@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { PassScreen } from "./PassScreen";
 import type { CardKind } from "../../game/cards";
 import type { PhotonSnapshot } from "../../game/photon";
 import { DeckScreen } from "./DeckScreen";
@@ -37,6 +39,7 @@ type GameNavigationProps = {
 };
 
 export function GameNavigation(props: GameNavigationProps) {
+  const [passId, setPassId] = useState<string | undefined>();
   const {
     audio,
     collection,
@@ -56,17 +59,19 @@ export function GameNavigation(props: GameNavigationProps) {
     screen,
   } = props;
 
+  if (screen === "passes") return <PassScreen progression={collection.progression} initialId={passId} onBack={() => onNavigate("menu")} />;
+
   if (screen === "collection") {
     return (
       <DeckScreen
+        progression={collection.progression}
         focusKind={deckFocusKind}
         selectedKinds={collection.selectedKinds}
         unlockedKinds={collection.unlockedKinds}
         onBack={() => onNavigate("menu")}
         onToggle={collection.toggleCard}
         onSave={() => {
-          collection.saveDeck();
-          onNavigate("menu");
+          void collection.saveDeck().then((saved) => saved && onNavigate("menu"));
         }}
       />
     );
@@ -101,7 +106,10 @@ export function GameNavigation(props: GameNavigationProps) {
       <StoreScreen
         cloudReady={collection.cloudReady}
         coins={collection.coins}
-        lockedKinds={collection.lockedKinds}
+        drops={collection.drops}
+        passes={collection.progression.passes}
+        purchaseError={collection.purchaseError}
+        onDismissReveal={() => collection.setPurchasedKinds([])}
         purchasedKinds={collection.purchasedKinds}
         selectedKinds={collection.selectedKinds}
         unlockedKinds={collection.unlockedKinds}
@@ -130,6 +138,8 @@ export function GameNavigation(props: GameNavigationProps) {
 
   return (
     <MenuScreen
+      passes={collection.progression.passes}
+      onPass={(id) => { setPassId(id); onNavigate("passes"); }}
       coins={collection.coins}
       photonAvailable={photonAvailable}
       rulesOpen={rulesOpen}

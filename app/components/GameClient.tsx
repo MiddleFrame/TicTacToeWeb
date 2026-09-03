@@ -34,6 +34,8 @@ import { useDamageSequence } from "./game/hooks/useDamageSequence";
 import { useAppActivity } from "./game/hooks/useAppActivity";
 import { useCardDrag } from "./game/hooks/useCardDrag";
 import { useGameAudio } from "./game/hooks/useGameAudio";
+import { RoundExperience } from "./game/RoundExperience";
+import { useRoundProgression } from "./game/hooks/useRoundProgression";
 import { usePlayerCollection } from "./game/hooks/usePlayerCollection";
 import { useScenePattern } from "./game/hooks/useScenePattern";
 import { useGamePhaseEffects } from "./game/hooks/useGamePhaseEffects";
@@ -70,6 +72,7 @@ export function GameClient() {
   }, [hideTurnBanner]);
   const online = usePhotonGame(game, mode, setGame, handleOpponentLeave);
   const { intentPending: networkIntentPending, network } = online;
+  const roundProgress = useRoundProgression(game, mode, screen === "game", mode === "online" ? network.side ?? 1 : 1, network.phase === "opponent-left", collection.progression.recordRound);
   const effectsActive = appActive || mode === "online";
   const damage = useDamageSequence(effectsActive, game, mode, network.side, setGame, playSfx);
 
@@ -283,6 +286,7 @@ export function GameClient() {
 
   return (
     <GameScene
+      experience={<RoundExperience result={roundProgress} progression={collection.progression} forfeit={network.phase === "opponent-left"} draw={game.roundWinner === null} />}
       mode={mode}
       game={game}
       networkIntentPending={networkIntentPending}

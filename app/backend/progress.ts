@@ -1,18 +1,17 @@
+import { applyProgressionAction } from "./progression-actions";
 import { and, count, eq, gt, sql } from "drizzle-orm";
-import { getDb } from "../../db";
+import { getDb, getRawDb } from "../../db";
+import { readElementProgress } from "./element-progress";
+import { purchaseCollectionPack } from "./collection-store";
 import {
   inventory,
   playerProgress,
   profiles,
   rewardLedger,
-  storePurchases,
   wallets,
 } from "../../db/schema";
-import { cardPackCost } from "../game/card-purchase";
 import {
-  DECK_BUILDING_KINDS,
   STARTER_SELECTED_KINDS,
-  type CardKind,
 } from "../game/cards";
 import {
   normalizeNickname,
@@ -70,7 +69,9 @@ export async function getPlayerProgress(
   ]);
   if (!account) throw new Error("Account progress is unavailable");
   const unlockedKinds = normalizeUnlockedKinds(items.map((item) => item.itemId));
+  const { state } = await readElementProgress(getRawDb(), userId);
   return {
+    ...state,
     accountId: userId,
     publicCode: account.publicCode,
     nickname: account.nickname,
@@ -98,90 +99,26 @@ export async function updatePlayerProfile(
   const selectedKinds = input.selectedKinds === undefined
     ? current.selectedKinds
     : normalizeSelectedKinds(input.selectedKinds, current.unlockedKinds);
-  await db.batch([
-    db.update(profiles).set({ nickname, updatedAt: now }).where(eq(profiles.userId, userId)),
-    db.update(playerProgress).set({
-      selectedKinds: JSON.stringify(selectedKinds),
-      updatedAt: now,
-    }).where(eq(playerProgress.userId, userId)),
-  ]);
+  await db.update(profiles).set({ nickname, updatedAt: now }).where(eq(profiles.userId, userId));
+  if (input.selectedKinds !== undefined) {
+    const library = current.deckLibrary;
+    await applyProgressionAction(getRawDb(), userId, crypto.randomUUID(), {
+      type: "save-decks",
+      library: { ...library, decks: library.decks.map((deck) => deck.id === library.activeId ? { ...deck, kinds: selectedKinds } : deck) },
+    });
+  }
   return getPlayerProgress(userId, now);
-}
-
-function drawServerCards(lockedKinds: readonly CardKind[], countValue: number): CardKind[] {
-  const available = [...lockedKinds];
-  return Array.from({ length: countValue }, () => {
-    const values = crypto.getRandomValues(new Uint32Array(1));
-    const index = values[0] % available.length;
-    return available.splice(index, 1)[0];
-  });
 }
 
 export async function purchaseCardPack(
   userId: string,
   operationId: string,
   countValue: number,
-  now = new Date(),
-): Promise<{ progress: PlayerProgressSnapshot; purchasedKinds: CardKind[] }> {
-  const db = getDb();
-  const previous = await db.select({ purchasedKinds: storePurchases.purchasedKinds })
-    .from(storePurchases)
-    .where(and(
-      eq(storePurchases.operationId, operationId),
-      eq(storePurchases.userId, userId),
-    ))
-    .get();
-  if (previous) {
-    return {
-      progress: await getPlayerProgress(userId, now),
-      purchasedKinds: parseStoredKinds(previous.purchasedKinds),
-    };
-  }
-  if (countValue !== 1 && countValue !== 5) throw new Error("invalid-pack-size");
-  const current = await getPlayerProgress(userId, now);
-  const lockedKinds = DECK_BUILDING_KINDS.filter(
-    (kind) => !current.unlockedKinds.includes(kind),
-  );
-  const cost = cardPackCost(countValue);
-  if (current.coins < cost) throw new Error("insufficient-coins");
-  if (lockedKinds.length < countValue) throw new Error("insufficient-locked-cards");
-  const purchasedKinds = drawServerCards(lockedKinds, countValue);
-  const selectedKinds = [...new Set([...current.selectedKinds, ...purchasedKinds])];
-  const balanceAfter = current.coins - cost;
-  await db.batch([
-    db.update(wallets).set({
-      coins: sql`${wallets.coins} - ${cost}`,
-      updatedAt: now,
-    }).where(and(eq(wallets.userId, userId), sql`${wallets.coins} >= ${cost}`)),
-    ...purchasedKinds.map((itemId) => db.insert(inventory).values({
-      userId,
-      itemId,
-      quantity: 1,
-      acquiredAt: now,
-    }).onConflictDoNothing()),
-    db.update(playerProgress).set({
-      selectedKinds: JSON.stringify(selectedKinds),
-      updatedAt: now,
-    }).where(eq(playerProgress.userId, userId)),
-    db.insert(rewardLedger).values({
-      id: crypto.randomUUID(),
-      operationId,
-      userId,
-      currency: "coins",
-      amount: -cost,
-      balanceAfter,
-      reason: "card-pack",
-      createdAt: now,
-    }),
-    db.insert(storePurchases).values({
-      operationId,
-      userId,
-      purchasedKinds: JSON.stringify(purchasedKinds),
-      cost,
-      createdAt: now,
-    }),
-  ]);
-  return { progress: await getPlayerProgress(userId, now), purchasedKinds };
+  collectionId: string,
+) {
+  await getPlayerProgress(userId);
+  const result = await purchaseCollectionPack(getRawDb(), userId, operationId, countValue, collectionId);
+  return { ...result, progress: await getPlayerProgress(userId) };
 }
 
 export async function grantRewardedAdCoins(

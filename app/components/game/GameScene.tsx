@@ -1,4 +1,4 @@
-import type { PointerEvent, RefObject } from "react";
+import type { PointerEvent, RefObject, ReactNode } from "react";
 import type { CardKind } from "../../game/cards";
 import type { GameState, Player } from "../../game/engine";
 import type { RoguelikeRun } from "../../game/roguelike";
@@ -9,6 +9,7 @@ import { RoguelikeOverlay } from "./RoguelikeOverlays";
 import type { DamageFlight, DragState, GameMode } from "./types";
 
 type GameSceneProps = {
+  experience: ReactNode;
   mode: GameMode;
   game: GameState;
   networkIntentPending: boolean;
@@ -63,7 +64,7 @@ export function GameScene(props: GameSceneProps) {
         <TurnBanner player={props.turnBanner} turn={game.turn} />
       </section>
 
-      {showsRoundResult && <ResultModal autoAdvance={props.mode === "online" && game.phase === "round-over"} continueAvailable={!props.opponentLeft} game={game} context={resultContext} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
+      {showsRoundResult && <ResultModal experience={props.experience} autoAdvance={props.mode === "online" && game.phase === "round-over"} continueAvailable={!props.opponentLeft} game={game} context={resultContext} status={props.status} viewer={props.mode === "local" ? null : props.displayedPlayer} onContinue={props.onContinue} onMenu={props.onMenu} />}
       {props.mode === "roguelike" && props.roguelike && (
         <RoguelikeOverlay
           run={props.roguelike}

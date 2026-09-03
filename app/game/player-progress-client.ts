@@ -2,6 +2,8 @@
 
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { CardKind } from "./cards";
+import type { CardDrop } from "./card-purchase";
+import type { XpAward } from "./element-progression";
 import type { PlayerProgressSnapshot } from "./player-progress";
 import { adoptCloudAccount, clearAccountCache } from "./account-cache";
 
@@ -17,7 +19,7 @@ type GoogleAuthPlugin = {
 };
 
 type ProgressResponse = { progress: PlayerProgressSnapshot };
-type PurchaseResponse = ProgressResponse & { purchasedKinds: CardKind[] };
+type PurchaseResponse = ProgressResponse & { purchasedKinds: CardKind[]; drops: CardDrop[]; awards: XpAward[] };
 type GoogleAccountStatus = {
   configured: boolean;
   email: string | null;
@@ -110,6 +112,10 @@ export function initializePlayerProgress(): Promise<PlayerProgressSnapshot> {
   return initializationPromise;
 }
 
+export async function refreshCloudPlayerProgress(): Promise<PlayerProgressSnapshot> {
+  return (await apiRequest<ProgressResponse>("/api/progress")).progress;
+}
+
 export async function saveCloudPlayerProgress(input: {
   nickname?: string;
   selectedKinds?: CardKind[];
@@ -122,11 +128,19 @@ export async function saveCloudPlayerProgress(input: {
 
 export async function purchaseCloudCardPack(
   count: number,
+  collectionId: string,
   operationId = crypto.randomUUID(),
 ): Promise<PurchaseResponse> {
   return apiRequest<PurchaseResponse>("/api/store/purchase", {
     method: "POST",
-    body: JSON.stringify({ count, operationId }),
+    body: JSON.stringify({ count, collectionId, operationId }),
+  });
+}
+
+export async function cloudProgressionAction(input: Record<string, unknown>, operationId = crypto.randomUUID()) {
+  return apiRequest<ProgressResponse & { awards?: XpAward[] }>("/api/progression", {
+    method: "POST",
+    body: JSON.stringify({ ...input, operationId }),
   });
 }
 

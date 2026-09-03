@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ROUNDS_TO_WIN, type GameState, type Player } from "../../game/engine";
 import { getRoundResult, type ResultTone } from "../../game/game-presentation";
 import { Figure } from "./Primitives";
@@ -29,6 +30,7 @@ export function PauseModal({ open, onResume, onMenu }: { open: boolean; onResume
 }
 
 type ResultModalProps = {
+  experience?: ReactNode;
   autoAdvance?: boolean;
   continueAvailable?: boolean;
   game: GameState;
@@ -73,7 +75,7 @@ function RoundProgress({ game }: { game: GameState }) {
   );
 }
 
-export function ResultModal({ autoAdvance = false, continueAvailable = true, game, context = "match", status, viewer, onContinue, onMenu }: ResultModalProps) {
+export function ResultModal({ experience, autoAdvance = false, continueAvailable = true, game, context = "match", status, viewer, onContinue, onMenu }: ResultModalProps) {
   const { t } = useLocalization();
   if (game.phase !== "round-over" && game.phase !== "game-over") return null;
   const result = getRoundResult(game, viewer, t);
@@ -92,6 +94,7 @@ export function ResultModal({ autoAdvance = false, continueAvailable = true, gam
           </div>
         )}
         {!isRoguelike && game.phase === "round-over" && <p className="result-next-round">{t("nextChallenge")}: {3 + game.completedRounds}×{3 + game.completedRounds}, {t("mana")} — {3 + game.completedRounds}</p>}
+        {experience}
         {autoAdvance
           ? <p className="result-auto-advance">{t("nextRoundAutomatic")}</p>
           : (
