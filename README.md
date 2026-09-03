@@ -19,6 +19,17 @@ npm run build
 Текущее направление развития, сетевые системы, сезоны, экономика и roguelike
 зафиксированы в [GAME_DESIGN.md](GAME_DESIGN.md).
 
+## База данных и эксплуатация
+
+Рабочая база — Cloudflare D1 через Sites, а не подтверждённый D1 Free в личном
+Cloudflare-аккаунте владельца. Кто управляет базой, чем она отличается от локальной
+SQLite, какие квоты неизвестны и что потребуется для переноса:
+[docs/infrastructure.md](docs/infrastructure.md).
+
+Защита API и админка описаны в [docs/backend-foundation.md](docs/backend-foundation.md),
+реализация удаления аккаунтов и оставшиеся проверки перед Google Play — в
+[docs/account-deletion.md](docs/account-deletion.md).
+
 Параметры будущей Android-оболочки находятся в `android-config`. Закрытая папка
 `android-config/private` содержит локальный release-ключ и не попадает в Git.
 
