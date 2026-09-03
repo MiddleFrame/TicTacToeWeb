@@ -4,28 +4,47 @@
   padding: 24px 20px calc(32px + var(--safe-area-bottom));
 }
 
-.unity-menu-content:has(.pass-shortcuts) { padding-top: clamp(24px, 6dvh, 70px); }
-.unity-menu-content:has(.pass-shortcuts) .unity-menu-actions { margin-top: clamp(24px, 5dvh, 60px); }
+.unity-menu-content:has(.pass-shortcuts) { padding: clamp(6px, 1dvh, 12px) 0 4px; }
+.unity-menu-content:has(.pass-shortcuts) .unity-logo { max-height: clamp(40px, 9dvh, 100px); flex-shrink: 0; }
+.unity-menu-content:has(.pass-shortcuts) .unity-menu-actions { margin-top: clamp(8px, 1.5dvh, 20px); gap: clamp(4px, .8dvh, 8px); }
+.unity-menu-content:has(.pass-shortcuts) .unity-menu-button { min-height: clamp(30px, 5dvh, 38px); }
+.unity-menu-content:has(.pass-shortcuts) .unity-menu-button-main { min-height: clamp(40px, 7dvh, 60px); }
+.unity-menu-content:has(.pass-shortcuts) .unity-menu-nav { padding-top: 8px; }
+.unity-menu-content:has(.pass-shortcuts) .unity-menu-nav img { height: clamp(32px, 6dvh, 64px); }
 .deck-library-controls { max-width: 1040px; margin-inline: auto; }
 .deck-filters { flex-wrap: wrap; }
 
 .pass-shortcuts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  width: 100%;
-  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: clamp(4px, 1vw, 8px);
+  width: min(360px, 100%);
+  margin: clamp(8px, 1.5dvh, 16px) 0 0;
 }
 
 .pass-shortcuts > button {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  flex: 0 1 48px;
   min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--muted);
-  border-radius: 14px;
-  background: var(--paper);
+  min-height: 64px;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
   color: var(--ink);
-  text-align: left;
+  cursor: pointer;
+  text-align: center;
 }
+
+.pass-shortcuts > button:hover { background: var(--soft); }
+.pass-shortcuts > button:focus-visible { outline: 2px solid var(--mana); outline-offset: 2px; }
+.pass-shortcut-icon { width: 32px; height: 32px; object-fit: contain; }
+:root[data-theme="dark"] .pass-shortcut-icon { filter: invert(1); }
+.pass-shortcut-dot { position: absolute; top: 2px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: #d93443; box-shadow: 0 0 0 2px var(--paper); }
 
 .reward-dot {
   display: inline-grid;
@@ -43,6 +62,9 @@
 .element-progress small { color: var(--muted); }
 .element-progress-track { height: 8px; overflow: hidden; border-radius: 10px; background: var(--soft); margin-top: 8px; }
 .element-progress-track > span { display: block; height: 100%; background: var(--element-color); border-radius: inherit; transition: width 1s ease; }
+.element-progress-compact { margin: 0; }
+.element-progress-compact > div:first-child { justify-content: center; font-size: 10px; line-height: 12px; white-space: nowrap; }
+.element-progress-compact .element-progress-track { height: 3px; margin-top: 4px; }
 .pass-premium { display: grid; gap: 10px; margin: 20px 0; }
 .pass-premium small { color: var(--muted); }
 .pass-track-head, .pass-level { display: grid; grid-template-columns: 44px 1fr 1fr; gap: 12px; align-items: center; }
@@ -92,9 +114,7 @@
 
 @media (max-width: 480px) {
   .pass-shell { padding: 16px 12px calc(24px + var(--safe-area-bottom)); }
-  .pass-shortcuts { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .pass-shortcuts > button { padding: 10px; font-size: 12px; }
-  .element-progress > div:first-child { flex-wrap: wrap; font-size: 11px; }
+  .element-progress:not(.element-progress-compact) > div:first-child { flex-wrap: wrap; font-size: 11px; }
   .collection-banner { padding: 20px; }
 }
 
