@@ -73,7 +73,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
         )}
         <a className="settings-row settings-link" href="https://discord.gg/4PJbjRZtkU" target="_blank" rel="noreferrer">
           <span>Discord</span>
-          <Image src="/game/menu/discord.png" alt="" width="34" height="34" unoptimized />
+          <Image src="/game/menu/discord-white.svg" alt="" width="34" height="34" unoptimized />
         </a>
       </section>
       <div className="settings-account">

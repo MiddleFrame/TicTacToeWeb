@@ -820,6 +820,7 @@ body[data-game-screen="menu"]::before {
 }
 
 .settings-link img {
+  object-fit: contain;
   filter: brightness(0);
 }
 

@@ -37,7 +37,7 @@ export function MenuScreen(props: MenuScreenProps) {
           rel="noreferrer"
           aria-label="Открыть Discord проекта"
         >
-          <Image className="unity-discord" src="/game/menu/discord.png" alt="Discord" width="58" height="58" priority unoptimized />
+          <Image className="unity-discord" src="/game/menu/discord-white.svg" alt="Discord" width="58" height="58" priority unoptimized />
         </a>
         <span className="unity-coins">
           {props.coins}
