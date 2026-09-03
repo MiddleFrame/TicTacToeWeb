@@ -21,7 +21,7 @@
 #-renamesourcefileattribute SourceFile
 
 -keeppackagenames com.yodo1.**
--keep class com.yodo1.** { *; }
+-keep class !com.yodo1.**.R,!com.yodo1.**.R$*,com.yodo1.** { *; }
 -keep public class * extends com.yodo1.mas.mediation.Yodo1MasAdapterBase
 -keep public class * extends com.yodo1.mas.ad.Yodo1MasAdAdapterBase
 -keepattributes JavascriptInterface
@@ -31,3 +31,14 @@
 -keepclassmembers class * implements android.os.Parcelable {
     public static final android.os.Parcelable$Creator *;
 }
+
+-dontwarn com.unity3d.player.UnityPlayer
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE

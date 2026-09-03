@@ -1,0 +1,72 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.util.zip.ZipFile
+
+def optimizationScores = { metadata ->
+    ['Optimization', 'Obfuscation', 'Shrinking'].collectEntries { category ->
+        def value = metadata.stats?.get("no${category}Percentage".toString())
+        if (!(value instanceof Number) || !Double.isFinite(value.doubleValue()) || value < 0 || value > 100) {
+            throw new GradleException("Missing or invalid R8 ${category} percentage")
+        }
+        [(category.toLowerCase()): 100 - value]
+    }
+}
+
+def requireOptimization = { scores ->
+    def insufficient = scores.findAll { name, percentage -> percentage < 25 }
+    if (!insufficient.isEmpty()) {
+        throw new GradleException("R8 optimization below the 25% release minimum: ${insufficient}")
+    }
+}
+
+tasks.register('testOptimizationVerification') {
+    doLast {
+        def metadata = { value -> [stats: [noOptimizationPercentage: value,
+            noObfuscationPercentage: value, noShrinkingPercentage: value]] }
+        assert optimizationScores(metadata(95.75)).optimization == 4.25
+        requireOptimization(optimizationScores(metadata(75)))
+        requireOptimization(optimizationScores(metadata(0)))
+        [metadata(75.01), metadata(100), metadata(-1), metadata(101),
+            metadata(Double.NaN), metadata('50'), [:], [stats: [:]]].each { invalid ->
+            def rejected = false
+            try {
+                requireOptimization(optimizationScores(invalid))
+            } catch (GradleException expected) {
+                rejected = true
+            }
+            assert rejected
+        }
+        ['Optimization', 'Obfuscation', 'Shrinking'].each { category ->
+            def mixed = metadata(0)
+            mixed.stats["no${category}Percentage".toString()] = 95
+            def rejected = false
+            try {
+                requireOptimization(optimizationScores(mixed))
+            } catch (GradleException expected) {
+                rejected = true
+            }
+            assert rejected
+        }
+        logger.lifecycle('R8 release verification tests passed')
+    }
+}
+
+tasks.matching { it.name == 'bundleRelease' }.configureEach {
+    doLast {
+        def bundle = layout.buildDirectory.file('outputs/bundle/release/app-release.aab').get().asFile
+        def metadata = new ZipFile(bundle).withCloseable { archive ->
+            def entry = archive.getEntry('BUNDLE-METADATA/com.android.tools/r8.json')
+            if (entry == null) {
+                throw new GradleException('Release bundle has no R8 metadata')
+            }
+            archive.getInputStream(entry).withCloseable { new JsonSlurper().parse(it) }
+        }
+        def scores = optimizationScores(metadata)
+        def report = [r8Version: metadata.version, percentages: scores, minimum: 25]
+        def destination = layout.buildDirectory.file('reports/optimization/release.json').get().asFile
+        destination.parentFile.mkdirs()
+        destination.text = JsonOutput.prettyPrint(JsonOutput.toJson(report)) + '\n'
+        logger.lifecycle("R8 release percentages: ${scores}")
+        requireOptimization(scores)
+    }
+}

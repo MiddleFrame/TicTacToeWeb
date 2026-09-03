@@ -96,7 +96,6 @@ dependencies {
     implementation 'androidx.credentials:credentials-play-services-auth:1.6.0'
     implementation 'com.google.android.libraries.identity.googleid:googleid:1.2.0'
     implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
-    implementation 'com.yodo1.mas:full:4.18.1'
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
@@ -105,6 +104,8 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+apply from: '../gradle/rewarded-networks.gradle'
+apply from: '../gradle/verify-release-optimization.gradle'
 
 try {
     def servicesJSON = file('google-services.json')

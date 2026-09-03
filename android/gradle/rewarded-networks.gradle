@@ -1,0 +1,32 @@
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+
+dependencies {
+    implementation 'com.yodo1.mas:core:4.18.1'
+    implementation 'com.yodo1.mas:gplibrary:4.18.1'
+    implementation 'com.yodo1.mas.mediation:admob:4.18.1'
+    implementation 'com.yodo1.mas.mediation:applovin:4.18.1'
+    implementation 'com.yodo1.mas.mediation:unityads:4.18.1'
+    implementation 'com.yodo1.mas.mediation.applovin.adapters:admob:4.18.1'
+    implementation 'com.yodo1.mas.mediation.admob.adapters:applovin-admob:4.18.1'
+    implementation 'com.yodo1.mas.mediation.admob.adapters:applovin-ad-manager:4.18.1'
+    implementation 'com.yodo1.mas.mediation.unityads.adapters:applovin:4.18.1'
+    implementation 'com.yodo1.mas.mediation.unityads.adapters:admob:4.18.1'
+}
+
+def verifyRewardedNetworks = tasks.register('verifyRewardedNetworks') {
+    doLast {
+        def modules = configurations.releaseRuntimeClasspath.incoming.resolutionResult.allComponents
+            .collect { it.id }.findAll { it instanceof ModuleComponentIdentifier }
+        def networks = modules.findAll { it.group == 'com.yodo1.mas.mediation' }
+            .collect { it.module }.toSet()
+        if (networks != ['admob', 'applovin', 'unityads'].toSet() ||
+            modules.any { it.group == 'com.yodo1.mas' && it.module == 'full' }) {
+            throw new GradleException("Unexpected MAS advertising networks: ${networks}")
+        }
+        logger.lifecycle("Verified MAS advertising networks: ${networks.sort()}")
+    }
+}
+
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn(verifyRewardedNetworks)
+}

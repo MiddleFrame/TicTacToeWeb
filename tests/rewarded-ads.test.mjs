@@ -11,7 +11,7 @@ test("Android integrates Yodo1 MAS rewarded ads without exposing ad identifiers"
     "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
   );
 
-  assert.match(gradle, /com\.yodo1\.mas:full:4\.18\.1/);
+  assert.match(gradle, /apply from: '\.\.\/gradle\/rewarded-networks.gradle'/);
   assert.match(gradle, /multiDexEnabled true/);
   assert.match(gradle, /android-config\/private\/ads\.properties/);
   assert.match(manifest, /com\.google\.android\.gms\.ads\.APPLICATION_ID/);
