@@ -1,0 +1,7 @@
+{
+  "enabled": [
+    "admob", "applovin", "bigo", "facebook", "fyber", "inmobi",
+    "ironsource", "mintegral", "moloco", "pangle", "unityads"
+  ],
+  "disabledRoutes": ["mintegral:ironsource"]
+}

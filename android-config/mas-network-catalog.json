@@ -1,0 +1,19 @@
+{
+  "sdkVersion": "4.18.1",
+  "networks": {
+    "admob": ["applovin-ad-manager", "applovin-admob", "ironsource", "topon"],
+    "applovin": ["admob", "ironsource", "topon"],
+    "bidmachine": ["applovin", "ironsource", "topon"],
+    "bigo": ["applovin", "ironsource", "topon"],
+    "facebook": ["admob", "applovin", "ironsource", "topon"],
+    "fyber": ["admob", "applovin", "ironsource", "topon"],
+    "inmobi": ["admob", "applovin", "ironsource", "topon"],
+    "ironsource": ["admob", "applovin", "topon"],
+    "mintegral": ["admob", "applovin", "ironsource", "topon"],
+    "moloco": ["admob", "applovin", "ironsource"],
+    "pangle": ["admob", "applovin", "ironsource", "topon"],
+    "topon": [],
+    "unityads": ["admob", "applovin", "ironsource", "topon"],
+    "vungle": ["admob", "applovin", "ironsource", "topon"]
+  }
+}

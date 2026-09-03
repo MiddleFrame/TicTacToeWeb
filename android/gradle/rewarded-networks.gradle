@@ -1,16 +1,39 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
+def catalog = new JsonSlurper().parse(file("$rootDir/../android-config/mas-network-catalog.json"))
+def profileFile = file(providers.gradleProperty('masNetworkProfile')
+    .getOrElse("$rootDir/../android-config/mas-networks.json"))
+def profile = new JsonSlurper().parse(profileFile)
+def enabled = profile.enabled.toSet()
+def disabledRoutes = profile.disabledRoutes.toSet()
+def mediator = { adapter -> adapter.startsWith('applovin-') ? 'applovin' : adapter }
+
+if (enabled.size() != profile.enabled.size() || !enabled.containsAll(['admob', 'applovin']) ||
+    !catalog.networks.keySet().containsAll(enabled)) {
+    throw new GradleException('Invalid MAS network selection')
+}
+disabledRoutes.each { route ->
+    def parts = route.split(':')
+    if (parts.length != 2 || !enabled.contains(parts[0]) ||
+        !enabled.contains(mediator(parts[1])) || !catalog.networks[parts[0]].contains(parts[1])) {
+        throw new GradleException("Invalid disabled MAS mediation route: ${route}")
+    }
+}
+
+def coordinates = ["com.yodo1.mas:core:${catalog.sdkVersion}", "com.yodo1.mas:gplibrary:${catalog.sdkVersion}"]
+enabled.sort().each { network ->
+    coordinates.add("com.yodo1.mas.mediation:${network}:${catalog.sdkVersion}")
+    catalog.networks[network].each { adapter ->
+        if (enabled.contains(mediator(adapter)) && !disabledRoutes.contains("${network}:${adapter}".toString())) {
+            coordinates.add("com.yodo1.mas.mediation.${network}.adapters:${adapter}:${catalog.sdkVersion}")
+        }
+    }
+}
+
 dependencies {
-    implementation 'com.yodo1.mas:core:4.18.1'
-    implementation 'com.yodo1.mas:gplibrary:4.18.1'
-    implementation 'com.yodo1.mas.mediation:admob:4.18.1'
-    implementation 'com.yodo1.mas.mediation:applovin:4.18.1'
-    implementation 'com.yodo1.mas.mediation:unityads:4.18.1'
-    implementation 'com.yodo1.mas.mediation.applovin.adapters:admob:4.18.1'
-    implementation 'com.yodo1.mas.mediation.admob.adapters:applovin-admob:4.18.1'
-    implementation 'com.yodo1.mas.mediation.admob.adapters:applovin-ad-manager:4.18.1'
-    implementation 'com.yodo1.mas.mediation.unityads.adapters:applovin:4.18.1'
-    implementation 'com.yodo1.mas.mediation.unityads.adapters:admob:4.18.1'
+    coordinates.each { implementation it }
 }
 
 def verifyRewardedNetworks = tasks.register('verifyRewardedNetworks') {
@@ -19,10 +42,18 @@ def verifyRewardedNetworks = tasks.register('verifyRewardedNetworks') {
             .collect { it.id }.findAll { it instanceof ModuleComponentIdentifier }
         def networks = modules.findAll { it.group == 'com.yodo1.mas.mediation' }
             .collect { it.module }.toSet()
-        if (networks != ['admob', 'applovin', 'unityads'].toSet() ||
+        def expected = coordinates.collect { it.toString() }.toSet()
+        def resolved = modules.findAll { it.group.startsWith('com.yodo1.mas') }
+            .collect { "${it.group}:${it.module}:${it.version}".toString() }.toSet()
+        if (networks != enabled || resolved != expected ||
             modules.any { it.group == 'com.yodo1.mas' && it.module == 'full' }) {
-            throw new GradleException("Unexpected MAS advertising networks: ${networks}")
+            throw new GradleException("Unexpected MAS dependencies: ${resolved - expected}; missing: ${expected - resolved}")
         }
+        def report = layout.buildDirectory.file('reports/optimization/networks.json').get().asFile
+        report.parentFile.mkdirs()
+        report.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+            enabled: networks.sort(), disabledRoutes: disabledRoutes.sort(), dependencies: resolved.sort()
+        ])) + '\n'
         logger.lifecycle("Verified MAS advertising networks: ${networks.sort()}")
     }
 }
