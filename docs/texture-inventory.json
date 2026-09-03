@@ -1,0 +1,719 @@
+[
+  {
+    "file": "public/game/cards/destroy-freeze.png",
+    "width": 159,
+    "height": 158,
+    "bytes": 5256,
+    "rgbaMiB": 0.096,
+    "alpha": "RGBA",
+    "contentBox": [
+      8,
+      15,
+      144,
+      137
+    ],
+    "transparentPaddingPercent": 34.0,
+    "solid": false,
+    "sha256": "fdb6acf16db8e54df41f7065d18389fd9c395797fff89c48a735e3d231d5d99b",
+    "pixelHash": "652ec3e03b683e39bc5bb23b7498fda364773db1025de4a15edcbd8e3183ca0e",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/effect-o.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 2587,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      40,
+      158,
+      151
+    ],
+    "transparentPaddingPercent": 29.7,
+    "solid": false,
+    "sha256": "2fbb51ad1477b30f054dceb743bb2b820b3c42b41f566528e9ddfaed93fe1bce",
+    "pixelHash": "f91861b878dde43f1de8a8fe85c692449c6cd9476568e5ce0bfbc842859abbcd",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/effect-x.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 2045,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      46,
+      158,
+      151
+    ],
+    "transparentPaddingPercent": 33.5,
+    "solid": false,
+    "sha256": "2604eabf6c8776b4407de1d569c9a47602e54cb13dfee429ed138219adc2624a",
+    "pixelHash": "f7b30a9b7c115db1af96282c886058cf534f83c4a31bbd1219906533a33c13a0",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-3.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1304,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      25,
+      37,
+      133,
+      140
+    ],
+    "transparentPaddingPercent": 55.4,
+    "solid": false,
+    "sha256": "7f1c66e80f15b440c8291d2d96f9a098e8d55883568212ebe438ad54b9b2fbb5",
+    "pixelHash": "639a352960c66da84350841d4964ad8ebd74e9240104829a105b8d8abcaef191",
+    "references": [
+      "app/game/cards.ts",
+      "app/game/collections.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-6-o.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1704,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      71,
+      16,
+      86,
+      139
+    ],
+    "transparentPaddingPercent": 92.6,
+    "solid": false,
+    "sha256": "395ab37edd34e462bcae8634754f2050333845c6d51354ec0b24d4a3c2ba6903",
+    "pixelHash": "2cf8913427e7a1897b90232aec3fe633f5e14f5316a742da66554ab794e3e059",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-6-x.png",
+    "width": 159,
+    "height": 158,
+    "bytes": 1620,
+    "rgbaMiB": 0.096,
+    "alpha": "RGBA",
+    "contentBox": [
+      71,
+      16,
+      87,
+      139
+    ],
+    "transparentPaddingPercent": 92.2,
+    "solid": false,
+    "sha256": "fc7ad902669977e0875647817183c4f4e3dc0f84af19f5b44848603993b5ad95",
+    "pixelHash": "95c6693d8e1a5ad48a5bba17d5dfa65b7d0e47bae1e6468cc86df7073c3b8133",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-all-mana.png",
+    "width": 159,
+    "height": 158,
+    "bytes": 3242,
+    "rgbaMiB": 0.096,
+    "alpha": "RGBA",
+    "contentBox": [
+      26,
+      16,
+      148,
+      133
+    ],
+    "transparentPaddingPercent": 43.2,
+    "solid": false,
+    "sha256": "973186490a35fb18467452a17850075864afb730ba0ba0dfe98bdd4fa8e785ca",
+    "pixelHash": "4fc3a0f8442d926e722f3b324522608588eaf5887e02999838eec8bfce43252e",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-cell.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 758,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      44,
+      44,
+      115,
+      115
+    ],
+    "transparentPaddingPercent": 79.8,
+    "solid": false,
+    "sha256": "a6afdb4a8a2d46407f6f9594dc6c86ee1c01dc47ec772a3d7262df5a4a3ead8b",
+    "pixelHash": "1a59d8e225a766d5d7c9f93831fc1fa3edcc668564e265f4ff306c036c67e827",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/freeze-effect.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 2101,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      44,
+      158,
+      151
+    ],
+    "transparentPaddingPercent": 32.3,
+    "solid": false,
+    "sha256": "32841d695c028e6f07c506aca7fb5ce97516bddc0e827635199ad0f168c6f791",
+    "pixelHash": "60e803565b90bd71eb66bc45b7397197f4bf5489ff261d4fde704ba050a88f87",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/full-house.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 2943,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      14,
+      2,
+      128,
+      141
+    ],
+    "transparentPaddingPercent": 36.5,
+    "solid": false,
+    "sha256": "c9da9291f293d306cda7952004497067810ed06c67f7925269baa7ac8272ac2d",
+    "pixelHash": "422037e108f05b0bc6a20622c8a38cd09af450ba73eec24a23551a25e5694fad",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/ice-encirclement-o.png",
+    "width": 126,
+    "height": 124,
+    "bytes": 1230,
+    "rgbaMiB": 0.06,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      126,
+      124
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "e9e763fe8136aedb0cfe18d50967cf484ee16a9abd52f6511fcf91d7c6d09ac5",
+    "pixelHash": "d0f5a3e2f16aaabae92fc77ef44f6fe148485cb27fa842d93bd3f70c524d8874",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/ice-encirclement-x.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1056,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      16,
+      17,
+      142,
+      141
+    ],
+    "transparentPaddingPercent": 37.4,
+    "solid": false,
+    "sha256": "b2e7adfaf6f318655eecfe3b53cf2603716a033b6f75950213ef8d74cf877b5c",
+    "pixelHash": "f12bff251c85325af9d477122d9f370b45c63ef6270eaeacb9f195e2177fc4be",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-5-o.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1526,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      16,
+      17,
+      141,
+      140
+    ],
+    "transparentPaddingPercent": 38.4,
+    "solid": false,
+    "sha256": "12bdba3051a1820e68c989f3403bb48d1b8daa5c5fd17fc759bfdd1ca3aa8aab",
+    "pixelHash": "aad229c79e0ac425017d4f48a02f7ed616a100fa782068f0821eb0e11b750aa6",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-5-x.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1049,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      17,
+      18,
+      141,
+      140
+    ],
+    "transparentPaddingPercent": 39.4,
+    "solid": false,
+    "sha256": "f33730ea142d504f0f53e4c0028ff55f6de41290c9359f2fda10576b035e2548",
+    "pixelHash": "7fd4e2a0177008f19329e24938338e67a44d89468ae22cdb5fe66b6f7aab2d5d",
+    "references": [
+      "app/game/cards.ts",
+      "app/game/collections.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-around-freeze.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1590,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      13,
+      56,
+      143,
+      102
+    ],
+    "transparentPaddingPercent": 76.0,
+    "solid": false,
+    "sha256": "38f5bf73d5836e7417e0259fef8ba073eec43ff18748e77a081786e76305cc3b",
+    "pixelHash": "1a64e2d1dd51c6e469a36c734de6352def32f39e001a55a0a534aa45c6ea6443",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-more-o.png",
+    "width": 122,
+    "height": 116,
+    "bytes": 3663,
+    "rgbaMiB": 0.054,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      122,
+      116
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "62f4c1450d8f1a45d59efed8e4419a2d936aac26682f513fe23300b319b06d96",
+    "pixelHash": "2f8d524ad51f135e30165afe7a54dce4933f8816688aae224609ce26221a1d16",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-more-x.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 3680,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      18,
+      16,
+      140,
+      133
+    ],
+    "transparentPaddingPercent": 42.8,
+    "solid": false,
+    "sha256": "027f101c70c22b84d8452977718b6c9916963dacd3040290d9073a49b1c7230d",
+    "pixelHash": "6038e776b35916dd003c9222a7d36e060b497800f0926839c7ccfe3453186e6c",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-o.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 1150,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      39,
+      40,
+      118,
+      118
+    ],
+    "transparentPaddingPercent": 75.3,
+    "solid": false,
+    "sha256": "3d4e31b7575a9d64afa21d624636abaf76163bda8a79b9a83bf4eddf23f34a64",
+    "pixelHash": "00d8f962f80baa1c1a79cf78b2211a94f302b203e4ee25deb2bedf72b8c47e68",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/place-x.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 752,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      42,
+      42,
+      115,
+      115
+    ],
+    "transparentPaddingPercent": 78.7,
+    "solid": false,
+    "sha256": "c1f1b86f1f1d5b1bae2a849e1c87b6bd0aa4d5eefc714cd0e8011d2fc6b81063",
+    "pixelHash": "f0e31b4fcd0869d285220edb4c1465e9456e097c84885c602cd6a50b90b475d0",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/shortage.png",
+    "width": 158,
+    "height": 158,
+    "bytes": 3985,
+    "rgbaMiB": 0.095,
+    "alpha": "RGBA",
+    "contentBox": [
+      23,
+      30,
+      137,
+      117
+    ],
+    "transparentPaddingPercent": 60.3,
+    "solid": false,
+    "sha256": "44736a9a91cc790d5c19af3777f04354fcbd07e0286967a7c46eb1fcc7dbf9dd",
+    "pixelHash": "c5af0a926eb311027e0bd534bf7f4dbf031288aca2a153dfe7deabc08209bc60",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/surrounded-by-ice-o.png",
+    "width": 197,
+    "height": 190,
+    "bytes": 6892,
+    "rgbaMiB": 0.143,
+    "alpha": "RGBA",
+    "contentBox": [
+      30,
+      34,
+      166,
+      156
+    ],
+    "transparentPaddingPercent": 55.7,
+    "solid": false,
+    "sha256": "009fab76dac61b9f23d09fa3e1f2f6cb1f61cdebcc353400f8fb6341c57cf5f1",
+    "pixelHash": "a86cdffe8c20f6aa2c0474eb2ba7ce371a24775ab656eb067117b7dc1f80bc2d",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/cards/surrounded-by-ice-x.png",
+    "width": 197,
+    "height": 190,
+    "bytes": 5654,
+    "rgbaMiB": 0.143,
+    "alpha": "RGBA",
+    "contentBox": [
+      30,
+      34,
+      166,
+      156
+    ],
+    "transparentPaddingPercent": 55.7,
+    "solid": false,
+    "sha256": "9bf2274f62ffffe763d3eb9a4bb279d38af6ef70ce6aa600ab9f4269dc449d95",
+    "pixelHash": "2245f9096f2fe82f7cf3a104d888943e63207c5d766a5503211435dcc44995f2",
+    "references": [
+      "app/game/cards.ts"
+    ]
+  },
+  {
+    "file": "public/game/figures/cross.png",
+    "width": 112,
+    "height": 113,
+    "bytes": 1312,
+    "rgbaMiB": 0.048,
+    "alpha": "RGBA",
+    "contentBox": [
+      3,
+      4,
+      109,
+      109
+    ],
+    "transparentPaddingPercent": 12.1,
+    "solid": false,
+    "sha256": "ab0c3a9eb41899c6f9e1fad25f4ee9ab904ec3c9428db5bda8d7bdfc8236bfb2",
+    "pixelHash": "97e27d583c73c09f86f927a637e86837d702b3038107d45a731d2da63571dcb0",
+    "references": [
+      "app/globals.css"
+    ]
+  },
+  {
+    "file": "public/game/figures/zero.png",
+    "width": 113,
+    "height": 113,
+    "bytes": 2049,
+    "rgbaMiB": 0.049,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      112,
+      113
+    ],
+    "transparentPaddingPercent": 0.9,
+    "solid": false,
+    "sha256": "9361d19691bbc45c1e50885f8f98b7b88e275ea7f1737a45e71e0548c864ffd7",
+    "pixelHash": "9a66afbdd0f95f40b5ad6321320d4fcdda3dd92cabd449f37daf54c87df24821",
+    "references": [
+      "app/globals.css"
+    ]
+  },
+  {
+    "file": "public/game/ice.png",
+    "width": 95,
+    "height": 94,
+    "bytes": 15319,
+    "rgbaMiB": 0.034,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      95,
+      94
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "52f92a2b46557bdb5ca8fad003e8b048dda2a5c7b85a74a8bbd363ec4121ca00",
+    "pixelHash": "a767c96eab0188c4d582497c73c6d654232aad4d35c8577470e32306571f15d3",
+    "references": [
+      "app/globals.css"
+    ]
+  },
+  {
+    "file": "public/game/logo.png",
+    "width": 498,
+    "height": 137,
+    "bytes": 5723,
+    "rgbaMiB": 0.26,
+    "alpha": "RGBA",
+    "contentBox": [
+      15,
+      0,
+      498,
+      131
+    ],
+    "transparentPaddingPercent": 7.3,
+    "solid": false,
+    "sha256": "52852b2b92f9f83b70e8c61dac1cb67a72281100b8845947712ee6f57c1a6309",
+    "pixelHash": "3f174c5e149a7e18e7558efe539956b77081a784f56bfd92e406047d3d0785a7",
+    "references": [
+      "app/components/game/MenuScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/coin.png",
+    "width": 24,
+    "height": 24,
+    "bytes": 408,
+    "rgbaMiB": 0.002,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "01152a7b72bcb6c8b08e23156068d60add9301ee6aa040316441f53678ce7ca8",
+    "pixelHash": "e89043b00ba7f910073ed63a7eedd5c638f005ade368751ff24e13538fcd7ed5",
+    "references": [
+      "app/components/game/MenuScreen.tsx",
+      "app/components/game/StoreScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/deck.png",
+    "width": 159,
+    "height": 110,
+    "bytes": 2037,
+    "rgbaMiB": 0.067,
+    "alpha": "RGBA",
+    "contentBox": [
+      2,
+      2,
+      159,
+      108
+    ],
+    "transparentPaddingPercent": 4.8,
+    "solid": false,
+    "sha256": "bdbc5bf91ad827c23b7730edefb12054f800f1a02e30ca00f568e0454e11fe82",
+    "pixelHash": "10ba4863e2f28bf453a464ecfd5b38cf64c6caa00e356833b850caa539b095fe",
+    "references": [
+      "app/components/game/MenuScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/friends.png",
+    "width": 125,
+    "height": 125,
+    "bytes": 690,
+    "rgbaMiB": 0.06,
+    "alpha": "RGBA",
+    "contentBox": [
+      33,
+      43,
+      92,
+      82
+    ],
+    "transparentPaddingPercent": 85.3,
+    "solid": false,
+    "sha256": "4eff058813b44d038c8fd65e50eaaf1fb7fdf883a18e9dce944f75cecf1295f7",
+    "pixelHash": "67a91096c9bd57e84345e8f6a2c882882a059ae34834845dc0c2fe0258bce879",
+    "references": [
+      "app/components/game/MenuScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/pause.png",
+    "width": 72,
+    "height": 72,
+    "bytes": 163,
+    "rgbaMiB": 0.02,
+    "alpha": "RGBA",
+    "contentBox": [
+      18,
+      15,
+      54,
+      57
+    ],
+    "transparentPaddingPercent": 70.8,
+    "solid": false,
+    "sha256": "4db4b9045ebf8bfa0a3ec64bee3389e64d68d4f1735b5c9a27e5c141605b071e",
+    "pixelHash": "fdc0ce4e536a6f7dd8ea9c88a367f478c0db0466c9129e1c1c2080cbb3dfee59",
+    "references": [
+      "app/components/game/GameHud.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/settings.png",
+    "width": 73,
+    "height": 73,
+    "bytes": 1579,
+    "rgbaMiB": 0.02,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      73,
+      73
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "ee052fa094e8a784e6d945a7c0d100cd1c5cbb4f47d7eedffc33418246d641f7",
+    "pixelHash": "8551556f50a6a016d90430bc997fd854d1ca56656d2e2fbd2403e7e07a7d1a9e",
+    "references": [
+      "app/components/game/MenuScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/menu/store.png",
+    "width": 68,
+    "height": 61,
+    "bytes": 1117,
+    "rgbaMiB": 0.016,
+    "alpha": "RGBA",
+    "contentBox": [
+      0,
+      0,
+      68,
+      61
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "f416d78a43e6a204618fc2f085ff53bac42090e6a8cb0049accf91e5473bb380",
+    "pixelHash": "8fd450c09b46463fb6a1e58a281cf80111853e040d3c81af6b7399e5fbd7bfe9",
+    "references": [
+      "app/components/game/MenuScreen.tsx"
+    ]
+  },
+  {
+    "file": "public/game/pattern.png",
+    "width": 204,
+    "height": 205,
+    "bytes": 3449,
+    "rgbaMiB": 0.16,
+    "alpha": "RGBA",
+    "contentBox": [
+      8,
+      8,
+      197,
+      198
+    ],
+    "transparentPaddingPercent": 14.1,
+    "solid": false,
+    "sha256": "3cd9ba296bb798000a01aea97e7625154d60071233a7fff3260c447387fef394",
+    "pixelHash": "3de9df557b824841867f2a4dfe5e34f0ec9da6a50c795c5ba6c1411e342769c8",
+    "references": [
+      "app/globals.css"
+    ]
+  },
+  {
+    "file": "public/og.jpg",
+    "width": 1200,
+    "height": 630,
+    "bytes": 197392,
+    "rgbaMiB": 2.884,
+    "alpha": "RGB",
+    "contentBox": [
+      0,
+      0,
+      1200,
+      630
+    ],
+    "transparentPaddingPercent": 0.0,
+    "solid": false,
+    "sha256": "0dc946d604e763dafba525c90b544124e2547c257504d18cbd6f5d18cd5d0831",
+    "pixelHash": "e78ab6896e1065448336a8517e711cdc9857b121cefdaee8bb56ef6f6c0db948",
+    "references": [
+      "app/layout.tsx"
+    ]
+  }
+]
