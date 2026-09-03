@@ -12,7 +12,7 @@ import {
 
 const readProjectFile = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("normalizes legacy progress before its one-time cloud import", () => {
+test("normalizes cached local progress for offline play", () => {
   const unlocked = normalizeUnlockedKinds(["shortage", "broken", "shortage"]);
 
   assert.ok(unlocked.includes("place"));
@@ -50,7 +50,7 @@ test("cloud progress routes authenticate writes and record economy operations", 
   assert.match(progressRoute, /authenticateRequest/);
   assert.match(purchaseRoute, /isOperationId/);
   assert.match(rewardRoute, /reward-rate-limited/);
-  assert.match(backend, /legacy-import/);
+  assert.doesNotMatch(backend, /export async function importLegacyProgress/);
   assert.match(backend, /storePurchases/);
   assert.match(migration, /CREATE TABLE `player_progress`/);
   assert.match(migration, /CREATE TABLE `store_purchases`/);

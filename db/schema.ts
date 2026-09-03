@@ -202,3 +202,16 @@ export const adminAuditLog = sqliteTable(
     index("idx_admin_audit_log_actor").on(table.actorUserId),
   ],
 );
+
+export const accountDeletionTickets = sqliteTable(
+  "account_deletion_tickets",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_deletion_tickets_user").on(table.userId),
+    index("idx_deletion_tickets_expiry").on(table.expiresAt),
+  ],
+);

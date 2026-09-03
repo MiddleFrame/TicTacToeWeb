@@ -5,6 +5,7 @@ import {
   inventory,
   playerProgress,
   profiles,
+  rewardLedger,
   sessions,
   users,
   wallets,
@@ -16,6 +17,7 @@ import {
   sessionExpiresAt,
 } from "./session";
 import { STARTER_SELECTED_KINDS } from "../game/cards";
+import { STARTER_COINS } from "../game/player-progress";
 
 export type AccountSnapshot = {
   id: string;
@@ -248,9 +250,14 @@ export async function createGuestAccount(
         }),
         db.insert(wallets).values({
           userId,
-          coins: 0,
+          coins: STARTER_COINS,
           cosmeticCurrency: 0,
           updatedAt: now,
+        }),
+        db.insert(rewardLedger).values({
+          id: crypto.randomUUID(), operationId: `starter-${userId}`, userId,
+          currency: "coins", amount: STARTER_COINS, balanceAfter: STARTER_COINS,
+          reason: "starter-grant", createdAt: now,
         }),
         db.insert(playerProgress).values({
           userId,
@@ -283,7 +290,7 @@ export async function createGuestAccount(
             frameId: null,
             titleId: null,
           },
-          wallet: { coins: 0, cosmeticCurrency: 0 },
+          wallet: { coins: STARTER_COINS, cosmeticCurrency: 0 },
         },
         sessionToken,
         expiresAt,

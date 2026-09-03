@@ -5,6 +5,7 @@ import {
 } from "./cards.ts";
 
 export const MAX_LEGACY_COINS = 1_000_000;
+export const STARTER_COINS = 220;
 export const MAX_PLAYER_NAME_LENGTH = 20;
 export const MIN_SELECTED_KINDS = 5;
 export const MAX_SELECTED_KINDS = 16;

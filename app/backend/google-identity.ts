@@ -26,11 +26,13 @@ export async function verifyGoogleIdToken(
   idToken: string,
   clientId: string,
   expectedNonce: string,
+  requireFresh = false,
 ): Promise<{ subject: string; email: string | null }> {
   const { payload } = await jwtVerify(idToken, GOOGLE_JWKS, {
     algorithms: ["RS256"],
     audience: clientId,
     issuer: GOOGLE_ISSUERS,
+    ...(requireFresh ? { maxTokenAge: "5 minutes", clockTolerance: 10 } : {}),
   });
   if (typeof payload.sub !== "string" || !payload.sub) {
     throw new Error("google-subject-missing");

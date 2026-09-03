@@ -823,6 +823,9 @@ body[data-game-screen="menu"]::before {
   filter: brightness(0);
 }
 
+.settings-account { width: min(600px, 100%); margin: 24px auto 0; line-height: 1.5; }
+.settings-account a { color: var(--ink); }
+
 .settings-google:disabled {
   cursor: default;
   opacity: 0.72;

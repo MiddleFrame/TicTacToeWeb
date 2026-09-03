@@ -1,6 +1,7 @@
 import { useLocalization } from "../../game/localization";
 import { Image } from "./Image";
 import { BackIcon, SoundIcon } from "./Primitives";
+import { AccountDeletionPanel } from "../account/AccountDeletionPanel";
 
 type SettingsScreenProps = {
   googleAvailable: boolean;
@@ -75,6 +76,11 @@ export function SettingsScreen(props: SettingsScreenProps) {
           <Image src="/game/menu/discord.png" alt="" width="34" height="34" unoptimized />
         </a>
       </section>
+      <div className="settings-account">
+      <AccountDeletionPanel english={language === "en"} />
+      <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/delete-account" target="_blank" rel="noreferrer">{language === "ru" ? "Удаление через сайт и поддержка" : "Account deletion website and support"}</a></p>
+      <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/privacy" target="_blank" rel="noreferrer">{language === "ru" ? "Политика конфиденциальности" : "Privacy policy"}</a></p>
+      </div>
     </main>
   );
 }

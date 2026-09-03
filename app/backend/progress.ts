@@ -15,12 +15,10 @@ import {
   type CardKind,
 } from "../game/cards";
 import {
-  normalizeCoins,
   normalizeNickname,
   normalizeSelectedKinds,
   normalizeUnlockedKinds,
   parseStoredKinds,
-  type LocalProgressSnapshot,
   type PlayerProgressSnapshot,
 } from "../game/player-progress";
 
@@ -85,54 +83,6 @@ export async function getPlayerProgress(
     unlockedKinds,
     legacyImported: account.legacyImportedAt !== null,
   };
-}
-
-export async function importLegacyProgress(
-  userId: string,
-  input: LocalProgressSnapshot,
-  now = new Date(),
-): Promise<PlayerProgressSnapshot> {
-  const db = getDb();
-  const current = await getPlayerProgress(userId, now);
-  if (current.legacyImported) return current;
-  const unlockedKinds = normalizeUnlockedKinds([
-    ...current.unlockedKinds,
-    ...normalizeUnlockedKinds(input.unlockedKinds),
-  ]);
-  const selectedKinds = normalizeSelectedKinds(input.selectedKinds, unlockedKinds);
-  const importedCoins = Math.max(current.coins, normalizeCoins(input.coins));
-  const nicknameCandidate = normalizeNickname(input.nickname, current.nickname);
-  const nickname = nicknameCandidate === "Игрок" ? current.nickname : nicknameCandidate;
-  const statements: Parameters<typeof db.batch>[0][number][] = [
-    db.update(profiles).set({ nickname, updatedAt: now }).where(eq(profiles.userId, userId)),
-    db.update(wallets).set({ coins: importedCoins, updatedAt: now }).where(eq(wallets.userId, userId)),
-    db.update(playerProgress).set({
-      selectedKinds: JSON.stringify(selectedKinds),
-      legacyImportedAt: now,
-      updatedAt: now,
-    }).where(eq(playerProgress.userId, userId)),
-    ...unlockedKinds.map((itemId) => db.insert(inventory).values({
-      userId,
-      itemId,
-      quantity: 1,
-      acquiredAt: now,
-    }).onConflictDoNothing()),
-  ];
-  if (importedCoins > current.coins) {
-    statements.push(db.insert(rewardLedger).values({
-      id: crypto.randomUUID(),
-      operationId: `legacy-${userId}`,
-      userId,
-      currency: "coins",
-      amount: importedCoins - current.coins,
-      balanceAfter: importedCoins,
-      reason: "legacy-import",
-      createdAt: now,
-    }).onConflictDoNothing());
-  }
-  const [firstStatement, ...remainingStatements] = statements;
-  await db.batch([firstStatement, ...remainingStatements]);
-  return getPlayerProgress(userId, now);
 }
 
 export async function updatePlayerProfile(

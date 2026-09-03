@@ -9,6 +9,9 @@ const DAY = 24 * 60 * MINUTE;
 export function apiRatePolicy(pathname: string, method: string): RatePolicy | null {
   if (!pathname.startsWith("/api/") || method === "OPTIONS") return null;
   const path = pathname.replace(/\/+$/, "");
+  if (path === "/api/account/deletion" || path.startsWith("/api/account/deletion/")) {
+    return { name: "deletion", limit: 20, windowMs: 10 * MINUTE };
+  }
   if (path === "/api/account/guest" && method === "POST") {
     return { name: "guest", limit: 10, windowMs: 10 * MINUTE };
   }

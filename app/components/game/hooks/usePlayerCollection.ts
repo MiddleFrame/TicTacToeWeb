@@ -17,6 +17,7 @@ import {
   normalizeSelectedKinds,
   normalizeUnlockedKinds,
   parseStoredKinds,
+  STARTER_COINS,
   type LocalProgressSnapshot,
   type PlayerProgressSnapshot,
 } from "../../../game/player-progress";
@@ -41,7 +42,7 @@ function readLocalProgress(): LocalProgressSnapshot {
   const savedCoinsRaw = window.localStorage.getItem(COINS_KEY);
   return {
     nickname: window.localStorage.getItem(NAME_KEY) || "Игрок",
-    coins: savedCoinsRaw === null ? 220 : normalizeCoins(Number(savedCoinsRaw)),
+    coins: savedCoinsRaw === null ? STARTER_COINS : normalizeCoins(Number(savedCoinsRaw)),
     selectedKinds,
     unlockedKinds,
   };
@@ -68,7 +69,7 @@ function pendingRewards(): string[] {
 export function usePlayerCollection(playSfx: PlaySound) {
   const [selectedKinds, setSelectedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
   const [unlockedKinds, setUnlockedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
-  const [coins, setCoins] = useState(220);
+  const [coins, setCoins] = useState(STARTER_COINS);
   const [purchasedKinds, setPurchasedKinds] = useState<CardKind[]>([]);
   const [profileName, setProfileName] = useState("Игрок");
   const [cloudReady, setCloudReady] = useState(false);
@@ -97,7 +98,8 @@ export function usePlayerCollection(playSfx: PlaySound) {
       setCoins(local.coins);
       setProfileName(local.nickname);
     }, 0);
-    void initializePlayerProgress(local).then(async (initial) => {
+    void initializePlayerProgress().then(async (initial) => {
+      window.clearTimeout(restoreTimeout);
       let progress = initial;
       const pendingDeck = parseStoredKinds(window.localStorage.getItem(PENDING_DECK_KEY));
       const pendingName = window.localStorage.getItem(PENDING_NAME_KEY);
