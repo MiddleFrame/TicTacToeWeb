@@ -20,20 +20,20 @@
   flex-shrink: 0;
   gap: clamp(4px, 1vw, 8px);
   width: min(360px, 100%);
-  margin: auto 0 0;
+  margin: auto 0 clamp(20px, 3dvh, 28px);
   padding-top: clamp(8px, 1.5dvh, 16px);
 }
 
 .pass-shortcuts > button {
   position: relative;
   display: grid;
-  grid-template-rows: 12px 32px 3px;
+  grid-template-rows: 13px 34px 3px;
   justify-items: center;
   gap: 3px;
-  flex: 0 1 48px;
+  flex: 0 0 58px;
   min-width: 0;
-  min-height: 64px;
-  padding: 4px;
+  min-height: 72px;
+  padding: 5px;
   border: 1px solid var(--muted);
   border-radius: 8px;
   background: var(--paper);
@@ -45,7 +45,7 @@
 .pass-shortcuts > button:hover { background: var(--soft); }
 .pass-shortcuts > button.selected { border-color: var(--element-color, var(--ink)); box-shadow: 0 0 0 2px var(--element-color, var(--ink)); background: var(--paper); }
 .pass-shortcuts > button:focus-visible { outline: 2px solid var(--mana); outline-offset: 2px; }
-.pass-shortcut-icon { grid-area: 2 / 1; width: 32px; height: 32px; object-fit: contain; }
+.pass-shortcut-icon { grid-area: 2 / 1; width: 34px; height: 34px; object-fit: contain; }
 :root[data-theme="dark"] .pass-shortcut-icon { filter: invert(1); }
 .pass-shortcut-dot { position: absolute; top: -3px; right: -3px; width: 7px; height: 7px; border-radius: 50%; background: #d93443; box-shadow: 0 0 0 2px var(--paper); }
 
