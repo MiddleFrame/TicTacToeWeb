@@ -6,6 +6,7 @@ import type { CardDrop } from "./card-purchase";
 import type { XpAward } from "./element-progression";
 import type { PlayerProgressSnapshot } from "./player-progress";
 import { adoptCloudAccount, clearAccountCache } from "./account-cache";
+import type { ProgressOperation } from "./progress-operation-queue";
 
 type SecureSessionPlugin = {
   getToken(): Promise<{ value: string | null }>;
@@ -94,9 +95,10 @@ async function initialize(): Promise<PlayerProgressSnapshot> {
     current = (await apiRequest<ProgressResponse>("/api/progress")).progress;
   } catch (error) {
     if (!(error instanceof Error) || error.message !== "unauthorized") throw error;
+    const previousAccount = window.localStorage.getItem("tttp-cloud-account");
     if (android) await SecureSession.removeToken().catch(() => undefined);
     await createGuestSession();
-    clearAccountCache(window.localStorage);
+    if (previousAccount) clearAccountCache(window.localStorage);
     current = (await apiRequest<ProgressResponse>("/api/progress")).progress;
   }
   if (!current) throw new Error("progress-unavailable");
@@ -151,6 +153,19 @@ export async function grantCloudAdReward(
     method: "POST",
     body: JSON.stringify({ operationId }),
   })).progress;
+}
+
+export async function sendCloudProgressOperation(operation: ProgressOperation): Promise<ProgressResponse> {
+  if (operation.type === "purchase") {
+    return purchaseCloudCardPack(operation.count, operation.collectionId, operation.id);
+  }
+  if (operation.type === "reward-ad") {
+    return { progress: await grantCloudAdReward(operation.id) };
+  }
+  if (operation.type === "progression") {
+    return cloudProgressionAction(operation.input, operation.id);
+  }
+  return { progress: await saveCloudPlayerProgress(operation.input) };
 }
 
 export async function getGoogleAccountState(): Promise<GoogleAccountState> {

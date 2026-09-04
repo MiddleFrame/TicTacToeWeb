@@ -40,7 +40,7 @@ export function StoreScreen(props: StoreScreenProps) {
   const [banner, setBanner] = useState(COLLECTIONS[0].id);
   const buy = (count: number, id: string) => { setBanner(id); props.onBuy(count, id); };
   const rewardedAd = useRewardedAd(props.onRewardAd);
-  const canBuy = (count: number) => props.cloudReady && !props.transactionPending && props.coins >= cardPackCost(count);
+  const canBuy = (count: number) => !props.transactionPending && props.coins >= cardPackCost(count);
   return (
     <main className="store-shell">
       <header className="section-screen-header">
@@ -70,7 +70,7 @@ export function StoreScreen(props: StoreScreenProps) {
           </section>;
         })}
       </div>
-      {!props.cloudReady && <p role="status">{t("progressLoading")}</p>}
+      {!props.cloudReady && <p role="status">{t("progressOffline")}</p>}
       {props.purchaseError && <p role="alert">{copy.failed}</p>}
       <section className="store-ad-panel">
         {rewardedAd.supported && (

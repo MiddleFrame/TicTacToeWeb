@@ -1,87 +1,43 @@
-import { flushRoundProgress } from "../../../game/round-progress-client";
-import { useElementProgression } from "./useElementProgression";
-import type { CardDrop } from "../../../game/card-purchase";
 import { compatibleDeck } from "../../../game/collections";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS, type CardKind } from "../../../game/cards";
+import { connectGoogleAccount, getGoogleAccountState, initializePlayerProgress, sendCloudProgressOperation } from "../../../game/player-progress-client";
 import {
-  DECK_BUILDING_KINDS,
-  STARTER_SELECTED_KINDS,
-  type CardKind,
-} from "../../../game/cards";
+  cacheLocalPlayerProgress,
+  initialLocalPlayerProgress,
+  purchaseLocalCardPack,
+  readLocalPlayerProgress,
+  rewardLocalCoins,
+  updateLocalProfile,
+} from "../../../game/local-player-progress";
 import {
-  connectGoogleAccount,
-  getGoogleAccountState,
-  grantCloudAdReward,
-  initializePlayerProgress,
-  purchaseCloudCardPack,
-  refreshCloudPlayerProgress,
-  saveCloudPlayerProgress,
-} from "../../../game/player-progress-client";
-import {
-  normalizeCoins,
-  normalizeSelectedKinds,
-  normalizeUnlockedKinds,
-  parseStoredKinds,
-  STARTER_COINS,
-  type LocalProgressSnapshot,
-  type PlayerProgressSnapshot,
-} from "../../../game/player-progress";
+  enqueueProgressOperation,
+  migrateLegacyProgressOperations,
+  readProgressOperations,
+  type ProgressOperation,
+} from "../../../game/progress-operation-queue";
+import { flushProgressOperations } from "../../../game/progress-sync";
+import type { CardDrop } from "../../../game/card-purchase";
+import type { PlayerProgressSnapshot } from "../../../game/player-progress";
 import type { PlaySound } from "./useGameAudio";
+import { useElementProgression } from "./useElementProgression";
 
-const DECK_KEY = "tttp-deck";
-const UNLOCKED_KEY = "tttp-unlocked";
-const COINS_KEY = "tttp-coins";
-const NAME_KEY = "tttp-player-name";
-const PENDING_DECK_KEY = "tttp-pending-deck";
 const PENDING_NAME_KEY = "tttp-pending-name";
-const PENDING_REWARDS_KEY = "tttp-pending-rewards";
-
-function readLocalProgress(): LocalProgressSnapshot {
-  const unlockedKinds = normalizeUnlockedKinds(
-    parseStoredKinds(window.localStorage.getItem(UNLOCKED_KEY)),
-  );
-  const selectedKinds = normalizeSelectedKinds(
-    parseStoredKinds(window.localStorage.getItem(DECK_KEY)),
-    unlockedKinds,
-  );
-  const savedCoinsRaw = window.localStorage.getItem(COINS_KEY);
-  return {
-    nickname: window.localStorage.getItem(NAME_KEY) || "Игрок",
-    coins: savedCoinsRaw === null ? STARTER_COINS : normalizeCoins(Number(savedCoinsRaw)),
-    selectedKinds,
-    unlockedKinds,
-  };
-}
-
-function cacheProgress(progress: PlayerProgressSnapshot): void {
-  window.localStorage.setItem(DECK_KEY, JSON.stringify(progress.selectedKinds));
-  window.localStorage.setItem(UNLOCKED_KEY, JSON.stringify(progress.unlockedKinds));
-  window.localStorage.setItem(COINS_KEY, String(progress.coins));
-  window.localStorage.setItem(NAME_KEY, progress.nickname);
-}
-
-function pendingRewards(): string[] {
-  try {
-    const value = JSON.parse(window.localStorage.getItem(PENDING_REWARDS_KEY) ?? "[]");
-    return Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === "string")
-      : [];
-  } catch {
-    return [];
-  }
-}
 
 export function usePlayerCollection(playSfx: PlaySound) {
+  const initial = initialLocalPlayerProgress();
+  const progressRef = useRef(initial);
+  const syncElements = useRef<(progress: PlayerProgressSnapshot) => void>(() => undefined);
+  const requestSync = useRef<() => void>(() => undefined);
+  const syncLock = useRef<Promise<boolean> | null>(null);
   const [selectedKinds, setSelectedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
   const [unlockedKinds, setUnlockedKinds] = useState<CardKind[]>([...STARTER_SELECTED_KINDS]);
-  const [coins, setCoins] = useState(STARTER_COINS);
+  const [coins, setCoins] = useState(initial.coins);
   const [drops, setDrops] = useState<CardDrop[]>([]);
   const [purchaseError, setPurchaseError] = useState(false);
   const purchaseLock = useRef(false);
-  const purchaseOperation = useRef<{ id: string; count: number; collectionId: string } | null>(null);
-  const syncElements = useRef<(progress: PlayerProgressSnapshot) => void>(() => undefined);
   const [purchasedKinds, setPurchasedKinds] = useState<CardKind[]>([]);
-  const [profileName, setProfileName] = useState("Игрок");
+  const [profileName, setProfileName] = useState(initial.nickname);
   const [cloudReady, setCloudReady] = useState(false);
   const [transactionPending, setTransactionPending] = useState(false);
   const [googleAvailable, setGoogleAvailable] = useState(false);
@@ -91,72 +47,71 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const [googleError, setGoogleError] = useState(false);
 
   const applyProgress = useCallback((progress: PlayerProgressSnapshot) => {
+    progressRef.current = progress;
     setSelectedKinds(progress.selectedKinds);
     setUnlockedKinds(progress.unlockedKinds);
     setCoins(progress.coins);
     setProfileName(progress.nickname);
-    cacheProgress(progress);
+    cacheLocalPlayerProgress(window.localStorage, progress);
     syncElements.current(progress);
   }, []);
 
-  const progression = useElementProgression(applyProgress);
+  const progression = useElementProgression(
+    applyProgress,
+    useCallback(() => progressRef.current, []),
+    useCallback(() => requestSync.current(), []),
+  );
   useEffect(() => { syncElements.current = progression.sync; }, [progression.sync]);
 
-  useEffect(() => {
-    let active = true;
-    const local = readLocalProgress();
-    const restoreTimeout = window.setTimeout(() => {
-      if (!active) return;
-      setSelectedKinds(local.selectedKinds);
-      setUnlockedKinds(local.unlockedKinds);
-      setCoins(local.coins);
-      setProfileName(local.nickname);
-    }, 0);
-    void initializePlayerProgress().then(async (initial) => {
-      window.clearTimeout(restoreTimeout);
-      let progress = await flushRoundProgress().catch(() => null) ?? initial;
-      const pendingDeck = parseStoredKinds(window.localStorage.getItem(PENDING_DECK_KEY));
-      const pendingName = window.localStorage.getItem(PENDING_NAME_KEY);
-      if (pendingDeck.length >= 5 || pendingName) {
-        progress = await saveCloudPlayerProgress({
-          ...(pendingDeck.length >= 5 ? { selectedKinds: pendingDeck } : {}),
-          ...(pendingName ? { nickname: pendingName } : {}),
-        });
-        window.localStorage.removeItem(PENDING_DECK_KEY);
-        window.localStorage.removeItem(PENDING_NAME_KEY);
+  const synchronize = useCallback((): Promise<boolean> => {
+    if (syncLock.current) return syncLock.current;
+    const run = (async () => {
+      try {
+        const initialProgress = await initializePlayerProgress();
+        const progress = await flushProgressOperations(window.localStorage, initialProgress, sendCloudProgressOperation);
+        applyProgress(progress);
+        setCloudReady(true);
+        const google = await getGoogleAccountState().catch(() => null);
+        if (google) {
+          setGoogleAvailable(google.available);
+          setGoogleEmail(google.email);
+          setGoogleLinked(google.linked);
+        }
+        return true;
+      } catch {
+        setCloudReady(false);
+        return false;
+      } finally {
+        syncLock.current = null;
       }
-      for (const operationId of pendingRewards()) {
-        progress = await grantCloudAdReward(operationId);
-      }
-      window.localStorage.removeItem(PENDING_REWARDS_KEY);
-      if (!active) return;
-      applyProgress(progress);
-      setCloudReady(true);
-      const google = await getGoogleAccountState();
-      if (!active) return;
-      setGoogleAvailable(google.available);
-      setGoogleEmail(google.email);
-      setGoogleLinked(google.linked);
-    }).catch(() => {
-      if (active) setCloudReady(false);
-    });
-    return () => {
-      active = false;
-      window.clearTimeout(restoreTimeout);
-    };
+    })();
+    syncLock.current = run;
+    return run;
   }, [applyProgress]);
 
+  useEffect(() => { requestSync.current = () => { void synchronize(); }; }, [synchronize]);
+
   useEffect(() => {
-    const reconnect = () => {
-      void initializePlayerProgress().then(async () => {
-        const latest = await flushRoundProgress();
-        applyProgress(latest ?? await refreshCloudPlayerProgress());
-        setCloudReady(true);
-      }).catch(() => setCloudReady(false));
-    };
+    const restore = window.setTimeout(() => {
+      const local = readLocalPlayerProgress(window.localStorage);
+      progressRef.current = local;
+      applyProgress(local);
+      migrateLegacyProgressOperations(window.localStorage, local);
+      void synchronize();
+    }, 0);
+    return () => window.clearTimeout(restore);
+  }, [applyProgress, synchronize]);
+
+  useEffect(() => {
+    const reconnect = () => { void synchronize(); };
     window.addEventListener("online", reconnect);
     return () => window.removeEventListener("online", reconnect);
-  }, [applyProgress]);
+  }, [synchronize]);
+
+  const enqueue = (operation: ProgressOperation) => {
+    enqueueProgressOperation(window.localStorage, operation);
+    requestSync.current();
+  };
 
   const toggleCard = (kind: CardKind) => {
     if (!unlockedKinds.includes(kind)) return;
@@ -172,36 +127,31 @@ export function usePlayerCollection(playSfx: PlaySound) {
   };
 
   const changeName = (name: string) => {
-    setProfileName(name);
-    window.localStorage.setItem(NAME_KEY, name);
+    applyProgress(updateLocalProfile(progressRef.current, name));
     window.localStorage.setItem(PENDING_NAME_KEY, name);
   };
 
   const saveProfile = () => {
-    if (!cloudReady) return;
-    void saveCloudPlayerProgress({ nickname: profileName }).then((progress) => {
-      window.localStorage.removeItem(PENDING_NAME_KEY);
-      applyProgress(progress);
-    }).catch(() => setCloudReady(false));
+    const nickname = progressRef.current.nickname;
+    enqueue({ id: crypto.randomUUID(), type: "profile", input: { nickname } });
+    window.localStorage.removeItem(PENDING_NAME_KEY);
   };
 
   const buyCards = async (count: number, collectionId: string) => {
-    if (!cloudReady || purchaseLock.current) return;
+    if (purchaseLock.current) return;
     purchaseLock.current = true;
     setTransactionPending(true);
     setPurchaseError(false);
     try {
-      purchaseOperation.current ??= { id: crypto.randomUUID(), count, collectionId };
-      const pending = purchaseOperation.current;
-      const result = await purchaseCloudCardPack(pending.count, pending.collectionId, pending.id);
-      purchaseOperation.current = null;
+      const operation = { id: crypto.randomUUID(), type: "purchase" as const, count, collectionId };
+      const result = purchaseLocalCardPack(progressRef.current, operation.id, count, collectionId);
+      enqueueProgressOperation(window.localStorage, operation);
       setDrops(result.drops);
       playSfx("click", 0.38);
       applyProgress(result.progress);
       setPurchasedKinds(result.purchasedKinds);
-    } catch (error) {
-      const definitive = ["insufficient-coins", "invalid-pack-size", "unknown-collection", "invalid-purchase"];
-      if (error instanceof Error && definitive.includes(error.message)) purchaseOperation.current = null;
+      requestSync.current();
+    } catch {
       setPurchaseError(true);
     } finally {
       purchaseLock.current = false;
@@ -212,26 +162,11 @@ export function usePlayerCollection(playSfx: PlaySound) {
   const creditCoins = async (amount: number) => {
     const normalized = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
     if (normalized === 0) return;
-    const operationId = crypto.randomUUID();
+    const operation = { id: crypto.randomUUID(), type: "reward-ad" as const };
     playSfx("click", 0.38);
-    setCoins((current) => {
-      const next = current + normalized;
-      window.localStorage.setItem(COINS_KEY, String(next));
-      return next;
-    });
-    if (!cloudReady) {
-      const queued = [...pendingRewards(), operationId];
-      window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
-      return;
-    }
-    try {
-      const progress = await grantCloudAdReward(operationId);
-      applyProgress(progress);
-    } catch {
-      const queued = [...pendingRewards(), operationId];
-      window.localStorage.setItem(PENDING_REWARDS_KEY, JSON.stringify(queued));
-      setCloudReady(false);
-    }
+    enqueueProgressOperation(window.localStorage, operation);
+    applyProgress(rewardLocalCoins(progressRef.current, normalized));
+    requestSync.current();
   };
 
   const connectGoogle = async () => {
@@ -239,6 +174,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
     setGooglePending(true);
     setGoogleError(false);
     try {
+      if (!await synchronize() || readProgressOperations(window.localStorage).length > 0) throw new Error("progress-sync-pending");
       const connected = await connectGoogleAccount();
       applyProgress(connected.progress);
       setGoogleEmail(connected.email);

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { CARD_COUNTS, DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS } from "../app/game/cards.ts";
 import { CARD_COLLECTION, COLLECTIONS, collectionCards, compatibleDeck, compatibleElements } from "../app/game/collections.ts";
-import { drawCollectionPack } from "../app/game/card-purchase.ts";
+import { drawCollectionPack, operationRandom } from "../app/game/card-purchase.ts";
 import { availableClaims, awardExperience, canClaim, emptyPass, initialPasses, PASS_REWARDS, passLevel, roundExperience } from "../app/game/element-progression.ts";
 import { initialDeckLibrary, validateLibrary } from "../app/game/saved-decks.ts";
 import { validRoundCards } from "../app/game/round-progression.ts";
@@ -49,6 +49,13 @@ test("draws include owned starter cards and duplicates within a five-card purcha
   assert.ok(drops.every((drop) => drop.duplicate && drop.xp === 100 && drop.kind === "place"));
   assert.throws(() => drawCollectionPack("fire", 1, []), /unknown-collection/);
   for (const count of [0, 2, 6, NaN, Infinity]) assert.throws(() => drawCollectionPack("regular", count, []));
+});
+
+test("operation-seeded collection draws remain stable for deferred offline sync", () => {
+  const id = "f03cc575-70e0-4be3-90ae-2fe69403401d";
+  const first = drawCollectionPack("ice", 5, [], operationRandom(id));
+  const second = drawCollectionPack("ice", 5, [], operationRandom(id));
+  assert.deepEqual(second, first);
 });
 
 test("experience counts actual copies, separates paths, handles defeat and caps at level 100", () => {

@@ -39,5 +39,5 @@ test("rewarded ads use a deferred custom privacy flow and resolve on the earned 
   assert.match(store, /AdPrivacyDialog/);
   assert.match(store, /!rewardedAd\.privacyConfigured \|\| rewardedAd\.loaded/);
   const creditCoins = collection.slice(collection.indexOf("const creditCoins"));
-  assert.ok(creditCoins.indexOf("setCoins((current)") < creditCoins.indexOf("grantCloudAdReward(operationId)"));
+  assert.match(creditCoins, /enqueueProgressOperation[\s\S]*rewardLocalCoins/);
 });

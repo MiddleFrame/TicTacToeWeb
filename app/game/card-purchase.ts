@@ -23,3 +23,17 @@ export function cardPackCost(count: number): number {
   const normalized = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
   return normalized * CARD_PRICE;
 }
+
+export function operationRandom(operationId: string): () => number {
+  let state = 2166136261;
+  for (let index = 0; index < operationId.length; index += 1) {
+    state = Math.imul(state ^ operationId.charCodeAt(index), 16777619);
+  }
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ value >>> 15, value | 1);
+    value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+    return ((value ^ value >>> 14) >>> 0) / 4294967296;
+  };
+}

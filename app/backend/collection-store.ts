@@ -1,11 +1,11 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { cardPackCost, drawCollectionPack } from "../game/card-purchase.ts";
+import { cardPackCost, drawCollectionPack, operationRandom } from "../game/card-purchase.ts";
 import { awardExperience } from "../game/element-progression.ts";
 import { changeCoins, mutateElementProgress } from "./element-progress.ts";
 
 export async function purchaseCollectionPack(db: D1Database, userId: string, operationId: string, count: number, collectionId: string) {
   return mutateElementProgress(db, userId, operationId, (context) => {
-    const drops = drawCollectionPack(collectionId, count, context.unlockedKinds, () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296);
+    const drops = drawCollectionPack(collectionId, count, context.unlockedKinds, operationRandom(operationId));
     const cost = cardPackCost(count);
     changeCoins(context, -cost, "collection-pack");
     const awards = drops.filter((drop) => drop.duplicate).map((drop) => {
