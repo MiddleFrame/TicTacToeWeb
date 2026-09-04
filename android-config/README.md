@@ -8,6 +8,8 @@ Before a release build, verify that the certificate fingerprint matches `signing
 
 Google account linking reads the OAuth web client ID from `private/google-auth.properties`. Copy `google-auth.properties.example` there and replace the example value after creating the Android and Web OAuth clients for `com.MiddleFrame.Tictactoe`.
 
+Google Auth Platform also has separate Android OAuth clients for each signing certificate. Keep both: the local/upload client uses SHA-1 `B4:C7:CB:60:B9:0A:12:36:88:94:10:22:9B:15:59:38:C3:78:BD:F2`, while `Tic Tac Toe Plus — Google Play` uses the Play app-signing SHA-1 `BB:AA:D6:52:08:B5:DB:28:B1:58:73:62:48:DA:89:49:64:F7:EC:9E`. The latter was extracted from the Play-installed release 48 and registered on September 4, 2026 after Credential Manager logged that the installed application was not registered for OAuth. Do not replace one with the other: Google Play re-signs distributed APKs, so their certificate differs from the upload key. The Web client remains the token audience used by the app and backend. No new Android build is required when adding another signing certificate client, but Google notes that propagation can take from five minutes to several hours.
+
 ## Release optimization
 
 With the owner's approval, `android/gradle/rewarded-networks.gradle` uses MAS custom integration. `mas-networks.json` selects networks and disabled mediation routes; `mas-network-catalog.json` records the commercial networks and supported routes from MAS 4.18.1's full POM. This follows [Yodo1's custom Android integration](https://developers.yodo1.com/docs/sdk/guides/android/integration/#customize-ad-networks); AdMob and AppLovin are mandatory.
