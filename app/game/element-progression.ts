@@ -52,6 +52,15 @@ export function availableClaims(pass: ElementPass): { level: number; track: Rewa
     .filter((track) => canClaim(pass, level, track)).map((track) => ({ level, track })));
 }
 
+export function claimableRewards(pass: ElementPass): { keys: string[]; coins: number } {
+  const claims = availableClaims(pass);
+  return {
+    keys: claims.map(({ level, track }) => claimKey(level, track)),
+    coins: claims.reduce((total, { level, track }) => total + PASS_REWARDS[level - 1].rewards[track]
+      .reduce((rewardTotal, reward) => rewardTotal + (reward.currency === "coins" ? reward.amount : 0), 0), 0),
+  };
+}
+
 export function awardExperience(passes: ElementPasses, amounts: Record<string, number>): XpAward[] {
   return Object.entries(amounts).filter(([, amount]) => amount > 0).map(([collectionId, amount]) => {
     const pass = passes[collectionId];

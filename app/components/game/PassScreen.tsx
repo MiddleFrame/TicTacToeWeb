@@ -43,7 +43,10 @@ export function PassScreen({ progression, initialId, onBack }: Props) {
         <ElementProgress collectionId={id} xp={pass.xp} />
         <div className="pass-overview-footer">
           <p>{ready.length > 0 ? `${copy.readyCount}: ${ready.length}` : currentLevel === PASS_LEVELS ? copy.allRewardsReached : `${copy.nextReward}: ${copy.level} ${focusLevel}`}</p>
-          <button className="secondary-button pass-focus-button" onClick={focusRewards}>{copy.showNearest}</button>
+          <div className="pass-overview-actions">
+            {ready.length > 0 && <button className="secondary-button pass-claim-all-button" disabled={progression.busy} onClick={() => void progression.claimAll(id)}>{copy.claimAll}</button>}
+            <button className="secondary-button pass-focus-button" onClick={focusRewards}>{copy.showNearest}</button>
+          </div>
         </div>
       </section>
       <p className="pass-rules">{copy.roundRules}</p>

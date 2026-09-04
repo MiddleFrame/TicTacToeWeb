@@ -1,7 +1,7 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { validRoundCards } from "../game/round-progression.ts";
 import { collectionById } from "../game/collections.ts";
-import { awardExperience, canClaim, claimKey, PASS_REWARDS, ROUND_XP, roundExperience, type RewardTrack, type RoundOutcome } from "../game/element-progression.ts";
+import { awardExperience, canClaim, claimableRewards, claimKey, PASS_REWARDS, ROUND_XP, roundExperience, type RewardTrack, type RoundOutcome } from "../game/element-progression.ts";
 import { validateLibrary } from "../game/saved-decks.ts";
 import { changeCoins, mutateElementProgress, type ProgressionContext } from "./element-progress.ts";
 
@@ -22,6 +22,16 @@ const claim: ActionHandler = (context, input) => {
   for (const reward of rewards) rewardHandlers[reward.type](context, reward.amount);
   pass.claimed.push(claimKey(level, track));
   return { claimed: claimKey(level, track) };
+};
+
+const claimAll: ActionHandler = (context, input) => {
+  const id = collectionById(String(input.collectionId)).id;
+  const pass = context.state.passes[id];
+  const rewards = claimableRewards(pass);
+  if (rewards.keys.length === 0) throw new Error("reward-unavailable");
+  if (rewards.coins > 0) changeCoins(context, rewards.coins, "element-pass-reward");
+  pass.claimed.push(...rewards.keys);
+  return { claimed: rewards.keys };
 };
 
 const activatePremium: ActionHandler = (context, input) => {
@@ -49,6 +59,7 @@ const recordRound: ActionHandler = (context, input) => {
 
 const actions: Record<string, ActionHandler> = {
   claim,
+  "claim-all": claimAll,
   "activate-test-premium": activatePremium,
   "save-decks": saveDecks,
   "record-round": recordRound,

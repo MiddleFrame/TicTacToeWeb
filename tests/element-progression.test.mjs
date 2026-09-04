@@ -3,7 +3,7 @@ import test from "node:test";
 import { CARD_COUNTS, DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS } from "../app/game/cards.ts";
 import { CARD_COLLECTION, COLLECTIONS, collectionCards, compatibleDeck, compatibleElements } from "../app/game/collections.ts";
 import { drawCollectionPack, operationRandom } from "../app/game/card-purchase.ts";
-import { availableClaims, awardExperience, canClaim, emptyPass, initialPasses, PASS_REWARDS, passLevel, roundExperience } from "../app/game/element-progression.ts";
+import { availableClaims, awardExperience, canClaim, claimableRewards, emptyPass, initialPasses, PASS_REWARDS, passLevel, roundExperience } from "../app/game/element-progression.ts";
 import { initialDeckLibrary, validateLibrary } from "../app/game/saved-decks.ts";
 import { validRoundCards } from "../app/game/round-progression.ts";
 import { purchaseCollectionPack } from "../app/backend/collection-store.ts";
@@ -88,6 +88,11 @@ test("premium rewards stay locked, become retroactively available, and claims st
   assert.equal(canClaim(pass, 1.5, "free"), false);
 });
 
+test("claim all includes every accessible unclaimed reward", () => {
+  const pass = { ...emptyPass(), xp: 2000, premium: true, claimed: ["1:free"] };
+  assert.deepEqual(claimableRewards(pass), { keys: ["1:premium", "2:free", "2:premium"], coins: 60 });
+});
+
 test("deck libraries reject missing active decks, repeated IDs, locked cards and bad sizes", () => {
   const library = initialDeckLibrary();
   assert.equal(validateLibrary(library, STARTER_SELECTED_KINDS), true);
@@ -151,6 +156,22 @@ test("concurrent claims of the same tier grant currency once, including requests
   assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
   assert.equal(sqlite.prepare("SELECT coins FROM wallets").get().coins, 2010);
   assert.deepEqual((await readElementProgress(db, "owner")).state.passes.ice.claimed, ["1:free"]);
+  sqlite.close();
+});
+
+test("claim all grants available tiers in one ledger operation and remains idempotent", async () => {
+  const { db, sqlite } = fixture();
+  await setPass(db, sqlite, "ice", 2000, true);
+  await action(db, { type: "claim", collectionId: "ice", level: 1, track: "free" });
+  const id = crypto.randomUUID();
+  const input = { type: "claim-all", collectionId: "ice" };
+  const first = await action(db, input, id);
+  assert.deepEqual(first.claimed, ["1:premium", "2:free", "2:premium"]);
+  assert.deepEqual(await action(db, input, id), first);
+  assert.equal(sqlite.prepare("SELECT coins FROM wallets").get().coins, 2070);
+  assert.equal(sqlite.prepare("SELECT count(*) AS n FROM reward_ledger").get().n, 2);
+  assert.deepEqual((await readElementProgress(db, "owner")).state.passes.ice.claimed, ["1:free", "1:premium", "2:free", "2:premium"]);
+  await assert.rejects(action(db, input), /reward-unavailable/);
   sqlite.close();
 });
 

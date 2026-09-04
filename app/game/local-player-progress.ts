@@ -4,6 +4,7 @@ import { STARTER_SELECTED_KINDS, type CardKind } from "./cards.ts";
 import {
   awardExperience,
   canClaim,
+  claimableRewards,
   claimKey,
   initialPasses,
   PASS_LEVELS,
@@ -182,6 +183,15 @@ export function applyLocalProgressionAction(
     pass.claimed.push(claimKey(level, track));
     const coins = rewards.reduce((total, reward) => total + (reward.currency === "coins" ? reward.amount : 0), progress.coins);
     return { progress: { ...progress, coins, passes }, awards: [] };
+  }
+  if (type === "claim-all") {
+    const collectionId = String(input.collectionId);
+    const pass = passes[collectionId];
+    if (!pass) throw new Error("unknown-collection");
+    const rewards = claimableRewards(pass);
+    if (rewards.keys.length === 0) throw new Error("reward-unavailable");
+    pass.claimed.push(...rewards.keys);
+    return { progress: { ...progress, coins: progress.coins + rewards.coins, passes }, awards: [] };
   }
   if (type === "activate-test-premium") {
     const collectionId = String(input.collectionId);

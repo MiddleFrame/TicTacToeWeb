@@ -72,6 +72,9 @@
 .pass-overview .element-progress { margin: 0; }
 .pass-overview-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
 .pass-overview-footer p { margin: 0; color: var(--muted); font-size: 14px; }
+.pass-overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.pass-claim-all-button { border-color: var(--element-color); background: var(--element-color); color: white; }
+.pass-claim-all-button:disabled { cursor: wait; opacity: .58; }
 .pass-focus-button { flex: 0 0 auto; min-height: 38px; padding: 8px 12px; font-size: 13px; }
 .pass-rules { margin: 12px 2px 18px; color: var(--muted); font-size: 13px; line-height: 1.4; }
 .pass-track-head, .pass-level { display: grid; grid-template-columns: minmax(62px, .5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: center; }
@@ -133,7 +136,8 @@
   .pass-shell .section-screen-header { gap: 10px; }
   .pass-shell .section-screen-header h1 { font-size: clamp(23px, 7vw, 31px); }
   .pass-overview-footer { align-items: stretch; flex-direction: column; }
-  .pass-focus-button { width: 100%; }
+  .pass-overview-actions { display: grid; }
+  .pass-focus-button, .pass-claim-all-button { width: 100%; }
   .pass-track-head, .pass-level { grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
   .pass-track-head { padding-inline: 4px; }
   .pass-track-head span, .pass-track-head strong { font-size: 12px; }

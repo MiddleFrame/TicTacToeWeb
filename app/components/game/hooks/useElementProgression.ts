@@ -62,6 +62,7 @@ export function useElementProgression(
     passes, deckLibrary, busy, error, sync, recordRound,
     saveLibrary: (library: DeckLibrary) => execute({ type: "save-decks", library }),
     claim: (collectionId: string, level: number, track: RewardTrack) => execute({ type: "claim", collectionId, level, track }),
+    claimAll: (collectionId: string) => execute({ type: "claim-all", collectionId }),
     activatePremium: (collectionId: string) => execute({ type: "activate-test-premium", collectionId }),
   };
 }
