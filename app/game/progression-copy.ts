@@ -2,6 +2,8 @@ export const progressionCopy = {
   ru: {
     passes: "Пути коллекций", level: "Уровень", xp: "опыта", free: "Бесплатно", premium: "Премиум",
     claim: "Забрать", claimed: "Получено", locked: "Закрыто", rewardReady: "Есть награды",
+    current: "Сейчас", premiumLocked: "Нужен премиум", levelRequired: "Нужен уровень", progressSummary: "Прогресс коллекции",
+    readyCount: "Можно забрать", nextReward: "Следующая награда", allRewardsReached: "Все уровни достигнуты", showNearest: "К ближайшей награде",
     testPremium: "Открыть премиум · тест", testNotice: "Тестовый доступ бесплатен. Покупка пасса появится позже.",
     remaining: "Осталось открыть", duplicates: "Повторки превращаются в 100 опыта своей коллекции.",
     dust: "Повторка · превращаем в опыт", buyAgain: "Купить ещё одну", done: "Готово", collection: "В коллекцию",
@@ -15,6 +17,8 @@ export const progressionCopy = {
   en: {
     passes: "Collection paths", level: "Level", xp: "XP", free: "Free", premium: "Premium",
     claim: "Claim", claimed: "Claimed", locked: "Locked", rewardReady: "Rewards available",
+    current: "Current", premiumLocked: "Premium required", levelRequired: "Requires level", progressSummary: "Collection progress",
+    readyCount: "Ready to claim", nextReward: "Next reward", allRewardsReached: "All levels reached", showNearest: "Nearest reward",
     testPremium: "Unlock premium · test", testNotice: "Test access is free. Pass purchases will arrive later.",
     remaining: "Left to discover", duplicates: "Duplicates turn into 100 XP for their collection.",
     dust: "Duplicate · turning into XP", buyAgain: "Buy another card", done: "Done", collection: "To collection",

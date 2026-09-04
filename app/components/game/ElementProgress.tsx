@@ -34,7 +34,7 @@ export function ElementProgress({ collectionId, xp, from = xp, compact = false }
   );
 }
 
-export function PassShortcuts({ passes, onOpen }: { passes: ElementPasses; onOpen: (id: string) => void }) {
+export function PassShortcuts({ passes, onOpen, selectedId }: { passes: ElementPasses; onOpen: (id: string) => void; selectedId?: string }) {
   const { language } = useLocalization();
   const copy = progressionCopy[language];
   return (
@@ -43,7 +43,7 @@ export function PassShortcuts({ passes, onOpen }: { passes: ElementPasses; onOpe
         const pass = passes[collection.id] ?? emptyPass();
         const ready = availableClaims(pass).length;
         const label = `${collection.name[language]}: ${copy.level} ${passLevel(pass.xp)}${ready > 0 ? `, ${copy.rewardReady}` : ""}`;
-        return <button key={collection.id} aria-label={label} title={label} onClick={() => onOpen(collection.id)}>
+        return <button className={selectedId === collection.id ? "selected" : ""} key={collection.id} aria-label={label} aria-current={selectedId === collection.id ? "page" : undefined} title={label} onClick={() => onOpen(collection.id)}>
           <Image className="pass-shortcut-icon" src={collection.image} alt="" width="32" height="32" unoptimized />
           {ready > 0 && <span className="pass-shortcut-dot" aria-hidden="true" />}
           <ElementProgress collectionId={collection.id} xp={pass.xp} compact />
