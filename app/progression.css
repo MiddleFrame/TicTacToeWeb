@@ -77,6 +77,13 @@
 .pass-claim-all-button:disabled { cursor: wait; opacity: .58; }
 .pass-focus-button { flex: 0 0 auto; min-height: 38px; padding: 8px 12px; font-size: 13px; }
 .pass-rules { margin: 12px 2px 18px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.pass-action-status { min-height: 0; margin-bottom: 10px; }
+.pass-action-status:empty { display: none; }
+.pass-action-status p { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.pass-action-pending { background: var(--soft); color: var(--muted); }
+.pass-action-success { border: 1px solid var(--element-color); background: color-mix(in srgb, var(--element-color) 12%, var(--paper)); color: var(--ink); }
+.pass-action-error { border: 1px solid #bd2734; background: color-mix(in srgb, #bd2734 9%, var(--paper)); color: #a41f2b; }
+.pass-action-error .secondary-button { min-height: 34px; padding: 5px 12px; font-size: 12px; }
 .pass-track-head, .pass-level { display: grid; grid-template-columns: minmax(62px, .5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: center; }
 .pass-track-head { position: sticky; top: env(safe-area-inset-top); z-index: 2; padding: 14px 10px; border-bottom: 2px solid var(--ink); background: color-mix(in srgb, var(--paper) 96%, transparent); backdrop-filter: blur(8px); text-align: center; }
 .pass-track-head span, .pass-track-head strong { min-width: 0; font-size: 14px; overflow-wrap: anywhere; }
@@ -91,6 +98,7 @@
 .pass-reward > small { grid-area: 2 / 1 / 2 / 3; margin-top: 4px; line-height: 1.15; }
 .pass-reward.claimable { border: 2px solid var(--element-color); background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 color-mix(in srgb, var(--element-color) 35%, transparent); }
 .pass-reward.claimed { border-color: color-mix(in srgb, var(--element-color) 35%, var(--soft)); background: color-mix(in srgb, var(--element-color) 8%, var(--paper)); opacity: .72; }
+.pass-reward.claiming { cursor: wait; opacity: .72; }
 .pass-reward.premium-locked { background: repeating-linear-gradient(135deg, var(--soft), var(--soft) 8px, color-mix(in srgb, var(--muted) 12%, var(--soft)) 8px, color-mix(in srgb, var(--muted) 12%, var(--soft)) 16px); }
 .collection-banners { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 24px; margin: 24px 0; }
 .collection-banner { position: relative; padding: 24px; border: 2px solid var(--element-color); border-radius: 22px; background: var(--paper); overflow: hidden; }

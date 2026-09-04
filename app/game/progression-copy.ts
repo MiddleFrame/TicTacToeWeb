@@ -2,6 +2,7 @@ export const progressionCopy = {
   ru: {
     passes: "Пути коллекций", level: "Уровень", xp: "опыта", free: "Бесплатно", premium: "Премиум",
     claim: "Забрать", claimed: "Получено", locked: "Закрыто", rewardReady: "Есть награды",
+    claiming: "Получаем…", rewardReceived: "Награда получена", rewardsReceived: "Награды получены", coinsReceived: "монет",
     current: "Сейчас", premiumLocked: "Нужен премиум", levelRequired: "Нужен уровень", progressSummary: "Прогресс коллекции",
     readyCount: "Можно забрать", nextReward: "Следующая награда", allRewardsReached: "Все уровни достигнуты", showNearest: "К ближайшей награде",
     claimAll: "Забрать всё",
@@ -18,6 +19,7 @@ export const progressionCopy = {
   en: {
     passes: "Collection paths", level: "Level", xp: "XP", free: "Free", premium: "Premium",
     claim: "Claim", claimed: "Claimed", locked: "Locked", rewardReady: "Rewards available",
+    claiming: "Claiming…", rewardReceived: "Reward claimed", rewardsReceived: "Rewards claimed", coinsReceived: "coins",
     current: "Current", premiumLocked: "Premium required", levelRequired: "Requires level", progressSummary: "Collection progress",
     readyCount: "Ready to claim", nextReward: "Next reward", allRewardsReached: "All levels reached", showNearest: "Nearest reward",
     claimAll: "Claim all",
