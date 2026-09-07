@@ -46,6 +46,16 @@ export function useCardDrag(
   const [drag, setDrag] = useState<DragState | null>(null);
   const mechanicTimer = useRef<number | null>(null);
   const returnTimer = useRef<number | null>(null);
+  const activeCard = useRef<string | null>(null);
+  const moveFrame = useRef<number | null>(null);
+  const pendingMove = useRef<(() => void) | null>(null);
+
+  const clearMovement = useCallback(() => {
+    if (moveFrame.current !== null) cancelAnimationFrame(moveFrame.current);
+    moveFrame.current = null;
+    pendingMove.current = null;
+    activeCard.current = null;
+  }, []);
 
   const clearTimer = (timer: typeof mechanicTimer) => {
     if (timer.current !== null) window.clearTimeout(timer.current);
@@ -53,9 +63,10 @@ export function useCardDrag(
   };
 
   const clearTimers = useCallback(() => {
+    clearMovement();
     clearTimer(mechanicTimer);
     clearTimer(returnTimer);
-  }, []);
+  }, [clearMovement]);
 
   const locate = (cardId: string, x: number, y: number) => {
     const boardElement = boardRef.current;
@@ -79,6 +90,7 @@ export function useCardDrag(
     const card = game.hands[game.turn].find((item) => item.id === cardId);
     if (!card || cardCost(game, card) > game.mana) return;
     clearTimers();
+    activeCard.current = cardId;
     playSfx("click", 0.25);
     event.currentTarget.setPointerCapture(event.pointerId);
     const rect = event.currentTarget.getBoundingClientRect();
@@ -106,20 +118,33 @@ export function useCardDrag(
   };
 
   const move = (event: PointerEvent<HTMLButtonElement>, cardId: string) => {
-    const location = locate(cardId, event.clientX, event.clientY);
-    if (location.overField) clearTimer(mechanicTimer);
-    setDrag((current) => current?.cardId === cardId && current.phase === "holding"
-      ? {
-          ...current,
-          x: event.clientX - current.pointerOffsetX,
-          y: event.clientY - current.pointerOffsetY,
-          showMechanics: location.overField ? false : current.showMechanics,
-          ...location,
-        }
-      : current);
+    if (!isEnabled || activeCard.current !== cardId) return;
+    const { clientX, clientY } = event;
+    pendingMove.current = () => {
+      const location = locate(cardId, clientX, clientY);
+      if (location.overField) clearTimer(mechanicTimer);
+      setDrag((current) => current?.cardId === cardId && current.phase === "holding"
+        ? {
+            ...current,
+            x: clientX - current.pointerOffsetX,
+            y: clientY - current.pointerOffsetY,
+            showMechanics: location.overField ? false : current.showMechanics,
+            ...location,
+          }
+        : current);
+    };
+    if (moveFrame.current !== null) return;
+    moveFrame.current = requestAnimationFrame(() => {
+      moveFrame.current = null;
+      const update = pendingMove.current;
+      pendingMove.current = null;
+      update?.();
+    });
   };
 
   const cancel = (cardId: string) => {
+    if (activeCard.current !== cardId) return;
+    clearMovement();
     clearTimer(mechanicTimer);
     clearTimer(returnTimer);
     setDrag((current) => current?.cardId === cardId
@@ -145,7 +170,7 @@ export function useCardDrag(
   };
 
   const finish = (event: PointerEvent<HTMLButtonElement>, cardId: string) => {
-    if (drag?.cardId !== cardId || drag.phase !== "holding") return;
+    if (activeCard.current !== cardId || drag?.cardId !== cardId || drag.phase !== "holding") return;
     const card = game.hands[game.turn].find((item) => item.id === cardId);
     const location = locate(cardId, event.clientX, event.clientY);
     const drop: CardDrop = card

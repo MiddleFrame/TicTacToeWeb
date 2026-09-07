@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { PassScreen } from "./PassScreen";
+import { lazy, useState } from "react";
 import type { CardKind } from "../../game/cards";
 import type { PhotonSnapshot } from "../../game/photon";
-import { DeckScreen } from "./DeckScreen";
+import { DeferredScreen } from "./DeferredScreen";
 import { MatchmakingScreen } from "./MatchmakingScreen";
 import { MenuScreen } from "./MenuScreen";
-import { SettingsScreen } from "./SettingsScreen";
-import { StoreScreen } from "./StoreScreen";
 import type { GameMode, GameScreen } from "./types";
 import type { useGameAudio } from "./hooks/useGameAudio";
 import type { usePlayerCollection } from "./hooks/usePlayerCollection";
 
+const PassScreen = lazy(() => import("./PassScreen").then((module) => ({ default: module.PassScreen })));
+const DeckScreen = lazy(() => import("./DeckScreen").then((module) => ({ default: module.DeckScreen })));
+const SettingsScreen = lazy(() => import("./SettingsScreen").then((module) => ({ default: module.SettingsScreen })));
+const StoreScreen = lazy(() => import("./StoreScreen").then((module) => ({ default: module.StoreScreen })));
 
 type NavigationScreen = Exclude<GameScreen, "game">;
 type Collection = ReturnType<typeof usePlayerCollection>;
@@ -59,10 +60,11 @@ export function GameNavigation(props: GameNavigationProps) {
     screen,
   } = props;
 
-  if (screen === "passes") return <PassScreen progression={collection.progression} initialId={passId} onBack={() => onNavigate("menu")} />;
+  if (screen === "passes") return <DeferredScreen key={screen} onBack={onMenu}><PassScreen progression={collection.progression} initialId={passId} onBack={() => onNavigate("menu")} /></DeferredScreen>;
 
   if (screen === "collection") {
     return (
+      <DeferredScreen key={screen} onBack={onMenu}>
       <DeckScreen
         progression={collection.progression}
         focusKind={deckFocusKind}
@@ -74,11 +76,13 @@ export function GameNavigation(props: GameNavigationProps) {
           void collection.saveDeck().then((saved) => saved && onNavigate("menu"));
         }}
       />
+      </DeferredScreen>
     );
   }
 
   if (screen === "settings") {
     return (
+      <DeferredScreen key={screen} onBack={onMenu}>
       <SettingsScreen
         googleAvailable={collection.googleAvailable}
         googleEmail={collection.googleEmail}
@@ -98,11 +102,13 @@ export function GameNavigation(props: GameNavigationProps) {
           onMutedChange(!muted);
         }}
       />
+      </DeferredScreen>
     );
   }
 
   if (screen === "store") {
     return (
+      <DeferredScreen key={screen} onBack={onMenu}>
       <StoreScreen
         cloudReady={collection.cloudReady}
         coins={collection.coins}
@@ -131,6 +137,7 @@ export function GameNavigation(props: GameNavigationProps) {
         startRevealAudio={audio.startCardRevealAudio}
         transactionPending={collection.transactionPending}
       />
+      </DeferredScreen>
     );
   }
 

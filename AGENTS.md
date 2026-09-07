@@ -42,6 +42,7 @@
 - Async connect/import callbacks must check a generation; teardown detaches handlers and invalidates pending startup. SDK cleanup events must not award a win.
 - Before ranked/authoritative work, add versioned commands, deterministic RNG/state transitions, and a headless match scheduler. Animation completion must not become a new source of trusted game results.
 - Every timer, animation frame, Web Animation, audio source, and listener has one teardown owner. Completed timer handles must leave their collection. Use stable animation inputs; render updates must not restart a running purchase reveal.
+- Coalesce visual pointer movement to at most one update per animation frame. Resolve pointer-up from its own coordinates immediately; cancel queued movement on completion, cancellation, and teardown.
 - Do not claim FPS, startup, heap, CPU, or battery improvements from code shape, bundle size, or R8 coverage. Measure each separately. See the device protocol in `docs/engineering-standards.md`.
 - New cards, seasons, decks, currencies, or cosmetics need the extension checks in that document. Do not invent parallel booleans or duplicate reward paths across screens.
 

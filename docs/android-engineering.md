@@ -36,6 +36,8 @@ After `bundleRelease`, the gate checks the AAB's embedded AGP/R8 versions, relea
 
 The JSON result is `android/app/build/reports/optimization/artifact-budget.json`. `testReleasePolicy` exercises budget boundaries, malformed/non-finite values, ELF32/64 with both byte orders, and rejected ELF alignments. Existing optimization verification separately enforces the three R8 coverage thresholds. `docs/audit-support/measure-aab.py` independently measures the artifact, including method definitions, for audit comparisons.
 
+The [optimization closeout](optimization-closeout-2026-09-07.md) additionally sets `webLoading.maximumInitialJavaScriptBytes` to 340,000 bytes. `quality` checks the initial module's entire static import/re-export graph against this limit; dynamic screen chunks are measured in the total web budget. This separate policy does not widen any AAB/DEX/native limit.
+
 From the repository root, use the supported Java 21 and SDK installation, then run one Gradle process at a time:
 
 ```powershell

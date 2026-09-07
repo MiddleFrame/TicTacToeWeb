@@ -6,6 +6,7 @@
   "disabledRoutes": ["mintegral:ironsource"],
   "abis": ["arm64-v8a", "armeabi-v7a"],
   "webView": { "minimumChromiumMajor": 111, "errorPage": "webview-update.html" },
+  "webLoading": { "maximumInitialJavaScriptBytes": 340000 },
   "maximum": {
     "aabBytes": 38500000,
     "allDexBytes": 42500000,

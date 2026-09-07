@@ -1,0 +1,134 @@
+{
+  "baselineCommit": "2575af20548ed32cc78160d3909efa242bff90f0",
+  "baselineWeb": {
+    "files": 53,
+    "webAssetBytes": 1167718,
+    "javascriptBytes": 445332,
+    "initialJavaScriptBytes": 359090,
+    "initialJavaScriptModules": [
+      "assets/index-DwD7yg09.js"
+    ]
+  },
+  "finalWeb": {
+    "files": 59,
+    "webAssetBytes": 1171053,
+    "javascriptBytes": 448666,
+    "initialJavaScriptBytes": 323068,
+    "initialJavaScriptModules": [
+      "assets/index-BDLzcFm0.js"
+    ],
+    "maximumWebAssetBytes": 1500000,
+    "maximumInitialJavaScriptBytes": 340000
+  },
+  "baselineAabBytes": 35057804,
+  "finalAabBytes": 35063594,
+  "finalAabSha256": "869c8b4fefdab7ccf7df90b603984862d5b64e83786b8a2b47d943ab9006841e",
+  "coverage": {
+    "optimization": 27.03,
+    "obfuscation": 27.16,
+    "shrinking": 27.15
+  },
+  "dex": {
+    "bytes": 40556968,
+    "classDefinitions": 42217,
+    "methodDefinitions": 242773,
+    "methodIdsIncludingReferences": 272211,
+    "fieldIdsIncludingReferences": 154204
+  },
+  "nativeCount": 20,
+  "nativeBytes": 3460752,
+  "allDexAndNativeEntriesByteIdentical": true,
+  "drag": {
+    "baselineCommit": "2575af20548ed32cc78160d3909efa242bff90f0",
+    "baseline": {
+      "stream240Samples60Frames": {
+        "hitTests": 240,
+        "stateWrites": 240,
+        "finalX": 239
+      },
+      "idle100Samples": {
+        "hitTests": 100,
+        "stateWrites": 100
+      }
+    },
+    "final": {
+      "stream240Samples60Frames": {
+        "hitTests": 60,
+        "stateWrites": 60,
+        "finalX": 239
+      },
+      "idle100Samples": {
+        "hitTests": 0,
+        "stateWrites": 0
+      }
+    },
+    "scope": "Real useCardDrag code with synthetic React hooks, pointer events and animation clock; not a device frame-time measurement."
+  },
+  "picasso": {
+    "scanned": {
+      "archives": 295,
+      "classes": 60941
+    },
+    "notificationReferences": [
+      {
+        "component": "com.squareup.picasso:picasso:2.8",
+        "class": "com/squareup/picasso/RequestCreator",
+        "owner": "com/squareup/picasso/RequestCreator",
+        "method": "into",
+        "descriptor": "(Landroid/widget/RemoteViews;IILandroid/app/Notification;Ljava/lang/String;)V"
+      },
+      {
+        "component": "com.squareup.picasso:picasso:2.8",
+        "class": "com/squareup/picasso/RequestCreator",
+        "owner": "com/squareup/picasso/RequestCreator",
+        "method": "into",
+        "descriptor": "(Landroid/widget/RemoteViews;IILandroid/app/Notification;Ljava/lang/String;Lcom/squareup/picasso/Callback;)V"
+      },
+      {
+        "component": "com.squareup.picasso:picasso:2.8",
+        "class": "com/squareup/picasso/RequestCreator",
+        "owner": "com/squareup/picasso/RemoteViewsAction$NotificationAction",
+        "method": "<init>",
+        "descriptor": "(Lcom/squareup/picasso/Picasso;Lcom/squareup/picasso/Request;Landroid/widget/RemoteViews;IILandroid/app/Notification;Ljava/lang/String;IILjava/lang/String;Ljava/lang/Object;ILcom/squareup/picasso/Callback;)V"
+      }
+    ],
+    "limitations": [
+      "Constant-pool method references are conservative references, not a whole-program reachability proof.",
+      "Reflection, JNI, runtime-downloaded code and embedded DEX are not analysed.",
+      "Only resolved dependency JAR/AAR classes are read; application data and signing inputs are not inspected."
+    ]
+  },
+  "lint": {
+    "fullLintStatus": "failed",
+    "regressionStatus": "no-new-errors",
+    "errors": 1,
+    "warnings": 19,
+    "knownErrors": [
+      {
+        "id": "NotificationPermission",
+        "source": "android/app/src/main/AndroidManifest.xml",
+        "line": null,
+        "owner": "Android maintainer",
+        "reason": "Existing Picasso notification path; no notification API is invoked by the game. Do not add a permission or suppress vendor R8 rules to satisfy lint.",
+        "reviewBy": "2026-10-07"
+      }
+    ],
+    "unexpectedErrors": [],
+    "reportFresh": true
+  },
+  "archiveVerification": {
+    "bundletoolExit": 0,
+    "apkZip16KiBAlignmentExit": 0,
+    "apkBytes": 25445759,
+    "apkSignatureExit": 0,
+    "certificateMatchesPin": true,
+    "aabSignatureExit": 0
+  },
+  "tests": {
+    "javascriptPassed": 231,
+    "nativePassed": 6,
+    "nativeResult": "up-to-date; native source unchanged since last execution"
+  },
+  "deviceRuntimeMeasured": false,
+  "androidInstalledOrPublished": false
+}
