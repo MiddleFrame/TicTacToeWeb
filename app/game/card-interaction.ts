@@ -45,12 +45,11 @@ export function findClosestCardTarget(
   y: number,
   areas: CardTargetArea[],
 ): number | null {
-  let closest: { index: number; distance: number } | null = null;
-  areas.forEach((area) => {
+  const closest = areas.reduce<{ index: number; distance: number } | null>((nearest, area) => {
     const dx = distanceToRange(x, area.left, area.right);
     const dy = distanceToRange(y, area.top, area.bottom);
     const distance = dx * dx + dy * dy;
-    if (!closest || distance < closest.distance) closest = { index: area.index, distance };
-  });
+    return !nearest || distance < nearest.distance ? { index: area.index, distance } : nearest;
+  }, null);
   return closest?.index ?? null;
 }

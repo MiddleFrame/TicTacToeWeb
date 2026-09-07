@@ -37,6 +37,8 @@ export function useScenePattern() {
     const pattern = createPattern();
     if (!pattern) return;
     document.documentElement.style.setProperty("--scene-pattern", `url(${pattern})`);
-    return () => document.documentElement.style.removeProperty("--scene-pattern");
+    return () => {
+      document.documentElement.style.removeProperty("--scene-pattern");
+    };
   }, []);
 }

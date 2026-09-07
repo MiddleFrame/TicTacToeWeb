@@ -125,7 +125,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
         if (cancelled) return;
 
         const line = findLine(liveBoard, nextMark);
-        const boardIsFull = liveBoard.every((mark) => mark !== null);
+        const boardIsFull = liveBoard.every((mark): boolean => mark !== null);
         if (line) {
           frozenMarkRef.current = nextMark;
           setTokenPoints((current) => ({ ...current, [nextMark]: randomPoint() }));
