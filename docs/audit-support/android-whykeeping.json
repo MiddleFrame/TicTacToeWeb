@@ -1,0 +1,79 @@
+{
+  "profile": "production-11-networks",
+  "queryFile": "work/technical-audit-2026-09-07/android/why.pro",
+  "rawEvidence": "work/technical-audit-2026-09-07/android/final-production/full-lint-build.log:192-239",
+  "interpretation": "R8 reports a retention path, not every possible retaining rule. Queries add no keep rule and do not change shrink behavior.",
+  "results": [
+    {
+      "classes": ["com.yodo1.mas.reward.Yodo1MasRewardAd", "com.yodo1.mas.mediation.pangle.Yodo1MasPangleAdapter", "com.yodo1.mas.mediation.applovin.Yodo1MasAppLovinMaxRewardAdapter", "com.yodo1.mas.interstitial.Yodo1MasInterstitialAd", "com.yodo1.mas.banner.Yodo1MasBannerAdView"],
+      "reason": "keep-rule",
+      "source": "android/app/proguard-rules.pro",
+      "line": 24
+    },
+    {
+      "classes": ["com.facebook.ads.AudienceNetworkAds"],
+      "reason": "keep-rule",
+      "source": "com.facebook.android:audience-network-sdk:6.20.0/proguard.txt",
+      "line": 7
+    },
+    {
+      "classes": ["com.facebook.ads.internal.dynamicloading.DynamicLoaderImpl"],
+      "reason": "query-produces-no-program-item-output",
+      "interpretation": "Definition exists in the separately packaged audience_network.dex asset, outside app R8 program input. Absence from this query is not proof of removal."
+    },
+    {
+      "classes": ["com.applovin.sdk.AppLovinSdk"],
+      "reason": "keep-rule",
+      "source": "com.applovin:applovin-sdk:13.5.1/proguard.txt",
+      "line": 25
+    },
+    {
+      "classes": ["com.bytedance.sdk.openadsdk.api.init.PAGSdk"],
+      "reason": "keep-rule",
+      "source": "com.applovin.mediation:bytedance-adapter:7.9.1.0.0/proguard.txt",
+      "line": 22
+    },
+    {
+      "classes": ["com.mbridge.msdk.out.MBRewardVideoHandler", "com.mbridge.msdk.out.MBridgeSDKFactory"],
+      "reason": "keep-rule",
+      "source": "com.mbridge.msdk.oversea:mbridge_android_sdk:17.0.61/proguard.txt",
+      "line": 3
+    },
+    {
+      "classes": ["com.ironsource.mediationsdk.IronSource"],
+      "reason": "keep-rule",
+      "source": "com.unity3d.ads-mediation:mediation-sdk:9.3.0/proguard.txt",
+      "line": 19
+    },
+    {
+      "classes": ["com.unity3d.ads.UnityAds"],
+      "reason": "keep-rule",
+      "source": "com.unity3d.ads:unity-ads:4.17.0/proguard.txt",
+      "line": 13
+    },
+    {
+      "classes": ["com.tiktok.iap.billing.client.V5_V8BillingProxy"],
+      "reason": "Nothing is keeping",
+      "additionalEvidence": "Absent from baseline mapping; bare removed-class entry in baseline usage.txt:120742. Missing-class warnings alone do not prove this proxy is live in the output."
+    },
+    {
+      "classes": ["androidx.core.view.WindowCompat"],
+      "reason": "referenced-from-method-then-keep-rule",
+      "method": "com.inmobi.media.O8.a(android.content.Intent,android.util.SparseArray)",
+      "source": "com.google.ads.mediation:inmobi:11.1.0.1/proguard.txt",
+      "line": 16
+    },
+    {
+      "classes": ["androidx.recyclerview.widget.RecyclerView"],
+      "reason": "xml-reference",
+      "source": "res/layout/preference_recyclerview.xml",
+      "additionalEvidence": "MAX Meta also keeps the whole class. Removing the MAX InMobi route does not remove that separate keep."
+    },
+    {
+      "classes": ["androidx.browser.customtabs.CustomTabsService"],
+      "reason": "keep-rule",
+      "source": "com.applovin.mediation:inmobi-adapter:11.1.1.0/proguard.txt",
+      "line": 41
+    }
+  ]
+}

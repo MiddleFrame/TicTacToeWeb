@@ -1,0 +1,670 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-09-07",
+  "baselineSourceCommit": "e0e8cbfcebf002ac72b667e980574d166ad5502a",
+  "byteUnits": "bytes, uncompressed for DEX/native; physical archive bytes for AAB",
+  "coverageOrder": [
+    "optimization",
+    "obfuscation",
+    "shrinking"
+  ],
+  "toolchain": {
+    "java": "21",
+    "agp": "9.3.2",
+    "gradle": "9.5.0",
+    "r8": "9.4.14",
+    "mas": "4.18.1",
+    "minSdk": 25,
+    "targetSdk": 36,
+    "compileSdk": 36
+  },
+  "inputHashes": {
+    "package-lock.json": "8ca11c3a2467b6a8d37d3ebcdc5cb4e3646bead0e49a1629265978fdf8529b5e",
+    "android-config/mas-networks.json": "c661006212f7e3a968c13ff860e9c5528595d82301d2263947bfc65c184914ff",
+    "android-config/mas-network-catalog.json": "eac7b66c1b1384c848d375001823eab7882c2eadcf23dea99a8e6d5192e09cc8"
+  },
+  "baseline": {
+    "aabBytes": 35039533,
+    "coverage": {
+      "optimization": 27.02,
+      "obfuscation": 27.15,
+      "shrinking": 27.14
+    },
+    "dexTotals": {
+      "bytes": 35530316,
+      "classDefinitions": 38973,
+      "methodIdsIncludingReferences": 244570,
+      "methodDefinitions": 219001,
+      "fieldIdsIncludingReferences": 140386
+    },
+    "allPackagedDexTotals": {
+      "bytes": 40548224,
+      "classDefinitions": 42208,
+      "methodIdsIncludingReferences": 272189,
+      "methodDefinitions": 242732,
+      "fieldIdsIncludingReferences": 154173
+    },
+    "nativeCount": 20,
+    "nativeBytes": 3460752,
+    "aabSha256": "664997a587b4e78f410baf1cf62b271f23eb2572474214a4acb37ae56584f389",
+    "seconds": 407.529,
+    "totalLiveItemsBeforeOptimization": 492211
+  },
+  "variants": [
+    {
+      "network": "admob",
+      "exitCode": 1,
+      "seconds": 28.5485108,
+      "failure": "mandatory-network-guard",
+      "outcome": "mandatory-network-guard"
+    },
+    {
+      "network": "applovin",
+      "exitCode": 1,
+      "seconds": 2.8425619,
+      "failure": "mandatory-network-guard",
+      "outcome": "mandatory-network-guard"
+    },
+    {
+      "network": "bigo",
+      "exitCode": 0,
+      "seconds": 284.6332199,
+      "aabBytes": 33730515,
+      "aabSha256": "1a7523d30f9b2730c89af8f0f8366307fbbea786f2d68d6e606782462e72057e",
+      "coverage": {
+        "optimization": 28.45,
+        "obfuscation": 28.58,
+        "shrinking": 28.57
+      },
+      "dexTotals": {
+        "bytes": 33982756,
+        "classDefinitions": 36902,
+        "methodIdsIncludingReferences": 233150,
+        "methodDefinitions": 208162,
+        "fieldIdsIncludingReferences": 133198
+      },
+      "allPackagedDexTotals": {
+        "bytes": 39000664,
+        "classDefinitions": 40137,
+        "methodIdsIncludingReferences": 260769,
+        "methodDefinitions": 231893,
+        "fieldIdsIncludingReferences": 146985
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 1309018,
+        "r8ManagedDex": 1547560,
+        "allPackagedDex": 1547560,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 471788,
+      "mappingCompressedBytes": 12225324,
+      "outcome": "passed",
+      "removedMasModuleCount": 3,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "facebook",
+      "exitCode": 0,
+      "seconds": 294.1010866,
+      "aabBytes": 32581086,
+      "aabSha256": "bcf46058163832d0c670ac0a2e2d4fcb9213ddc55209bb9fa8b07354b1648ee8",
+      "coverage": {
+        "optimization": 27.12,
+        "obfuscation": 27.24,
+        "shrinking": 27.24
+      },
+      "dexTotals": {
+        "bytes": 35389100,
+        "classDefinitions": 38747,
+        "methodIdsIncludingReferences": 243365,
+        "methodDefinitions": 217551,
+        "fieldIdsIncludingReferences": 140086
+      },
+      "allPackagedDexTotals": {
+        "bytes": 35389100,
+        "classDefinitions": 38747,
+        "methodIdsIncludingReferences": 243365,
+        "methodDefinitions": 217551,
+        "fieldIdsIncludingReferences": 140086
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 2458447,
+        "r8ManagedDex": 141216,
+        "allPackagedDex": 5159124,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 489867,
+      "mappingCompressedBytes": 12292337,
+      "outcome": "passed",
+      "removedMasModuleCount": 4,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "fyber",
+      "exitCode": 0,
+      "seconds": 269.5853739,
+      "aabBytes": 33740546,
+      "aabSha256": "6585898c9e9efccc87b0c0ec74223df49162b4a597a18c6a5f8ce69c306fdf3b",
+      "coverage": {
+        "optimization": 28.23,
+        "obfuscation": 28.36,
+        "shrinking": 28.32
+      },
+      "dexTotals": {
+        "bytes": 33630856,
+        "classDefinitions": 37066,
+        "methodIdsIncludingReferences": 234756,
+        "methodDefinitions": 208674,
+        "fieldIdsIncludingReferences": 133367
+      },
+      "allPackagedDexTotals": {
+        "bytes": 38648764,
+        "classDefinitions": 40301,
+        "methodIdsIncludingReferences": 262375,
+        "methodDefinitions": 232405,
+        "fieldIdsIncludingReferences": 147154
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 1298987,
+        "r8ManagedDex": 1899460,
+        "allPackagedDex": 1899460,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 472719,
+      "mappingCompressedBytes": 11881453,
+      "outcome": "passed",
+      "removedMasModuleCount": 4,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "inmobi",
+      "exitCode": 0,
+      "seconds": 259.0182182,
+      "aabBytes": 32170358,
+      "aabSha256": "278b9abe2ea6194b17b28d4ce5f7e5d2a4bcb326c94a09a35e5453609b89fb77",
+      "coverage": {
+        "optimization": 25.29,
+        "obfuscation": 25.41,
+        "shrinking": 25.43
+      },
+      "dexTotals": {
+        "bytes": 31092672,
+        "classDefinitions": 32676,
+        "methodIdsIncludingReferences": 225665,
+        "methodDefinitions": 200489,
+        "fieldIdsIncludingReferences": 127076
+      },
+      "allPackagedDexTotals": {
+        "bytes": 36110580,
+        "classDefinitions": 35911,
+        "methodIdsIncludingReferences": 253284,
+        "methodDefinitions": 224220,
+        "fieldIdsIncludingReferences": 140863
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 2869175,
+        "r8ManagedDex": 4437644,
+        "allPackagedDex": 4437644,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 450150,
+      "mappingCompressedBytes": 11068185,
+      "outcome": "passed",
+      "removedMasModuleCount": 4,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "ironsource",
+      "exitCode": 0,
+      "seconds": 310.8396846,
+      "aabBytes": 32563821,
+      "aabSha256": "b1f5d4572816bd6a599dbb97a469af33f6202420a894a7a89c80a28a71a0d3eb",
+      "coverage": {
+        "optimization": 30.08,
+        "obfuscation": 30.22,
+        "shrinking": 30.21
+      },
+      "dexTotals": {
+        "bytes": 31838380,
+        "classDefinitions": 35336,
+        "methodIdsIncludingReferences": 219796,
+        "methodDefinitions": 196137,
+        "fieldIdsIncludingReferences": 124081
+      },
+      "allPackagedDexTotals": {
+        "bytes": 36856288,
+        "classDefinitions": 38571,
+        "methodIdsIncludingReferences": 247415,
+        "methodDefinitions": 219868,
+        "fieldIdsIncludingReferences": 137868
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 2475712,
+        "r8ManagedDex": 3691936,
+        "allPackagedDex": 3691936,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 449853,
+      "mappingCompressedBytes": 11774644,
+      "outcome": "passed",
+      "removedMasModuleCount": 12,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "mintegral",
+      "exitCode": 0,
+      "seconds": 256.5738767,
+      "aabBytes": 31538065,
+      "aabSha256": "a181edcf861cc2f20ef0c20d55793ea002684640255246d0ab979cb139dc8547",
+      "coverage": {
+        "optimization": 30.4,
+        "obfuscation": 30.53,
+        "shrinking": 30.53
+      },
+      "dexTotals": {
+        "bytes": 30976484,
+        "classDefinitions": 35291,
+        "methodIdsIncludingReferences": 215536,
+        "methodDefinitions": 192933,
+        "fieldIdsIncludingReferences": 122928
+      },
+      "allPackagedDexTotals": {
+        "bytes": 35994392,
+        "classDefinitions": 38526,
+        "methodIdsIncludingReferences": 243155,
+        "methodDefinitions": 216664,
+        "fieldIdsIncludingReferences": 136715
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 3501468,
+        "r8ManagedDex": 4553832,
+        "allPackagedDex": 4553832,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 444841,
+      "mappingCompressedBytes": 11174878,
+      "outcome": "passed",
+      "removedMasModuleCount": 3,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "moloco",
+      "exitCode": 1,
+      "seconds": 242.7529457,
+      "aabBytes": 30775938,
+      "aabSha256": "5b7ee1a37598be57b356334bd8d6c7057f13e1a4dcd5aac9f1915754f7ee93e9",
+      "coverage": {
+        "optimization": 21.61,
+        "obfuscation": 21.71,
+        "shrinking": 21.72
+      },
+      "dexTotals": {
+        "bytes": 32320092,
+        "classDefinitions": 35548,
+        "methodIdsIncludingReferences": 226301,
+        "methodDefinitions": 204068,
+        "fieldIdsIncludingReferences": 125092
+      },
+      "allPackagedDexTotals": {
+        "bytes": 37338000,
+        "classDefinitions": 38783,
+        "methodIdsIncludingReferences": 253920,
+        "methodDefinitions": 227799,
+        "fieldIdsIncludingReferences": 138879
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 4263595,
+        "r8ManagedDex": 3210224,
+        "allPackagedDex": 3210224,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 421951,
+      "mappingCompressedBytes": 9900653,
+      "outcome": "packaged-artifact-rejected-by-bundleRelease-coverage-gate",
+      "removedMasModuleCount": 4,
+      "nativeHashesIdentical": true
+    },
+    {
+      "network": "pangle",
+      "exitCode": 1,
+      "seconds": 131.6741524,
+      "failure": "r8-missing-meta-nullsafe",
+      "outcome": "r8-missing-meta-nullsafe"
+    },
+    {
+      "network": "unityads",
+      "exitCode": 0,
+      "seconds": 287.1669232,
+      "aabBytes": 33052544,
+      "aabSha256": "88eccfead7393a031a0b4cfa9d14454352d9d49c525c5f925e7c8795ac7f01bb",
+      "coverage": {
+        "optimization": 29.34,
+        "obfuscation": 29.48,
+        "shrinking": 29.47
+      },
+      "dexTotals": {
+        "bytes": 31835060,
+        "classDefinitions": 35342,
+        "methodIdsIncludingReferences": 213726,
+        "methodDefinitions": 190368,
+        "fieldIdsIncludingReferences": 130492
+      },
+      "allPackagedDexTotals": {
+        "bytes": 36852968,
+        "classDefinitions": 38577,
+        "methodIdsIncludingReferences": 241345,
+        "methodDefinitions": 214099,
+        "fieldIdsIncludingReferences": 144279
+      },
+      "nativeCount": 20,
+      "nativeBytes": 3460752,
+      "deltaSavedBytes": {
+        "aab": 1986989,
+        "r8ManagedDex": 3695256,
+        "allPackagedDex": 3695256,
+        "native": 0
+      },
+      "appAssetsIdentical": true,
+      "totalLiveItemsBeforeOptimization": 450537,
+      "mappingCompressedBytes": 11582501,
+      "outcome": "passed",
+      "removedMasModuleCount": 4,
+      "nativeHashesIdentical": true
+    }
+  ],
+  "limitations": [
+    "One-at-a-time marginal differences are not additive.",
+    "Moloco produced a fresh measurable artifact, but bundleRelease failed its coverage gate.",
+    "No size result is assigned to mandatory guard or R8 compilation failures.",
+    "No runtime, revenue, fill rate, device download or Play ranking measurement is represented."
+  ],
+  "dependencyVersionChanges": {
+    "without-bigo": {},
+    "without-facebook": {},
+    "without-fyber": {},
+    "without-inmobi": {
+      "com.squareup.okio:okio": {
+        "baseline": [
+          "3.7.0"
+        ],
+        "variant": [
+          "3.2.0"
+        ]
+      },
+      "com.squareup.okio:okio-jvm": {
+        "baseline": [
+          "3.7.0"
+        ],
+        "variant": [
+          "3.2.0"
+        ]
+      },
+      "androidx.exifinterface:exifinterface": {
+        "baseline": [
+          "1.3.6"
+        ],
+        "variant": [
+          "1.3.3"
+        ]
+      },
+      "org.checkerframework:checker-qual": {
+        "baseline": [
+          "3.41.0"
+        ],
+        "variant": [
+          "3.12.0"
+        ]
+      },
+      "com.google.guava:failureaccess": {
+        "baseline": [
+          "1.0.2"
+        ],
+        "variant": [
+          "1.0.1"
+        ]
+      },
+      "com.google.guava:guava": {
+        "baseline": [
+          "33.0.0-android"
+        ],
+        "variant": [
+          "31.1-android"
+        ]
+      }
+    },
+    "without-ironsource": {},
+    "without-mintegral": {},
+    "without-moloco": {
+      "org.jetbrains.kotlinx:kotlinx-coroutines-android": {
+        "baseline": [
+          "1.10.2"
+        ],
+        "variant": [
+          "1.10.1"
+        ]
+      },
+      "androidx.room:room-runtime": {
+        "baseline": [
+          "2.5.2"
+        ],
+        "variant": [
+          "2.2.5"
+        ]
+      },
+      "org.jetbrains.kotlinx:kotlinx-coroutines-bom": {
+        "baseline": [
+          "1.10.2"
+        ],
+        "variant": [
+          "1.10.1"
+        ]
+      },
+      "androidx.media:media": {
+        "baseline": [
+          "1.6.0"
+        ],
+        "variant": [
+          "1.0.0"
+        ]
+      },
+      "androidx.work:work-runtime-ktx": {
+        "baseline": [
+          "2.8.1"
+        ],
+        "variant": [
+          "2.7.0"
+        ]
+      },
+      "androidx.room:room-common": {
+        "baseline": [
+          "2.5.2"
+        ],
+        "variant": [
+          "2.2.5"
+        ]
+      },
+      "androidx.sqlite:sqlite": {
+        "baseline": [
+          "2.3.1"
+        ],
+        "variant": [
+          "2.1.0"
+        ]
+      },
+      "androidx.sqlite:sqlite-framework": {
+        "baseline": [
+          "2.3.1"
+        ],
+        "variant": [
+          "2.1.0"
+        ]
+      },
+      "org.jetbrains.kotlinx:kotlinx-coroutines-core": {
+        "baseline": [
+          "1.10.2"
+        ],
+        "variant": [
+          "1.10.1"
+        ]
+      },
+      "androidx.work:work-runtime": {
+        "baseline": [
+          "2.8.1"
+        ],
+        "variant": [
+          "2.7.0"
+        ]
+      },
+      "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm": {
+        "baseline": [
+          "1.10.2"
+        ],
+        "variant": [
+          "1.10.1"
+        ]
+      }
+    },
+    "without-pangle": {},
+    "without-route-inmobi-applovin": {},
+    "without-unityads": {
+      "org.jetbrains.kotlin:kotlin-stdlib-jdk8": {
+        "baseline": [
+          "1.8.10"
+        ],
+        "variant": [
+          "1.8.0"
+        ]
+      },
+      "com.google.protobuf:protobuf-javalite": {
+        "baseline": [
+          "3.25.6"
+        ],
+        "variant": [
+          "3.21.9"
+        ]
+      }
+    }
+  },
+  "routeExperiment": {
+    "aabBytes": 35023317,
+    "aabSha256": "aa4ce9b90a36e0de9e7386be3c478ab0c3189d930f64e4f092000345f23e24e7",
+    "coverage": {
+      "optimization": 27.04,
+      "obfuscation": 27.16,
+      "shrinking": 27.15
+    },
+    "dexTotals": {
+      "bytes": 35513144,
+      "classDefinitions": 38954,
+      "methodIdsIncludingReferences": 244406,
+      "methodDefinitions": 218855,
+      "fieldIdsIncludingReferences": 140357
+    },
+    "allPackagedDexTotals": {
+      "bytes": 40531052,
+      "classDefinitions": 42189,
+      "methodIdsIncludingReferences": 272025,
+      "methodDefinitions": 242586,
+      "fieldIdsIncludingReferences": 154144
+    },
+    "nativeCount": 20,
+    "nativeBytes": 3460752,
+    "route": "inmobi:applovin",
+    "seconds": 318.7814483,
+    "exitCode": 0,
+    "outcome": "passed",
+    "deltaSavedBytes": {
+      "aab": 16216,
+      "allPackagedDex": 17172,
+      "native": 0
+    },
+    "retainedDependencyVersionsIdentical": true,
+    "totalLiveItemsBeforeOptimization": 491987
+  },
+  "finalProduction": {
+    "aabBytes": 35039520,
+    "aabSha256": "bd32a43d4e1a17bf3523901e0e26aa7360c549a10a56f0cbae6febc7580a3e4f",
+    "coverage": {
+      "optimization": 27.02,
+      "obfuscation": 27.15,
+      "shrinking": 27.14
+    },
+    "dexTotals": {
+      "bytes": 35530316,
+      "classDefinitions": 38973,
+      "methodIdsIncludingReferences": 244570,
+      "methodDefinitions": 219001,
+      "fieldIdsIncludingReferences": 140386
+    },
+    "allPackagedDexTotals": {
+      "bytes": 40548224,
+      "classDefinitions": 42208,
+      "methodIdsIncludingReferences": 272189,
+      "methodDefinitions": 242732,
+      "fieldIdsIncludingReferences": 154173
+    },
+    "nativeCount": 20,
+    "nativeBytes": 3460752,
+    "sourceCommit": "72a2921a4a42644c0f12f7591d25f2b75e7ad622",
+    "standardRelease": {
+      "seconds": 32.0376268,
+      "exitCode": 0
+    },
+    "additionalFullAndroidLint": {
+      "exitCode": 1,
+      "seconds": 294.9404981,
+      "errors": 3,
+      "warnings": 20
+    },
+    "archiveVerification": {
+      "bundletool": 0,
+      "apkSignature": 0,
+      "jarSignature": 0,
+      "apkCertificateMatchesPinnedFingerprint": true,
+      "apkZip16KiBAlignment": 0
+    },
+    "comparisonToBaseline": {
+      "baselineAabBytes": 35039533,
+      "finalAabBytes": 35039520,
+      "finalAabSha256": "bd32a43d4e1a17bf3523901e0e26aa7360c549a10a56f0cbae6febc7580a3e4f",
+      "allFiveDexFilesByteIdentical": true,
+      "nativeAllFilesByteIdentical": true,
+      "networkProfileAndMasCoordinatesIdentical": true,
+      "baselineWebAssetBytes": 1153779,
+      "finalWebAssetBytes": 1153777,
+      "baselineWebAssetCount": 54,
+      "finalWebAssetCount": 54,
+      "apkBytes": 25419314,
+      "apkSha256": "8e649637414bb18c9152873762040103fba9eed06f640ba645079c31ba49c9ab",
+      "apkNativeCount": 20,
+      "apkUncompressedNativeCount": 20
+    }
+  },
+  "webPublication": {
+    "sourceCommit": "72a2921a4a42644c0f12f7591d25f2b75e7ad622",
+    "version": 91,
+    "status": "succeeded",
+    "url": "https://tic-tac-toe-plus-alpha.stofs.chatgpt.site"
+  }
+}

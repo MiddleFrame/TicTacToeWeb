@@ -1,0 +1,169 @@
+{
+  "task": ":app:lintRelease",
+  "status": "failed",
+  "errors": 3,
+  "warnings": 20,
+  "issues": [
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": null,
+      "severity": "error",
+      "id": "NotificationPermission",
+      "message": "Picasso RemoteViewsAction.NotificationAction references notifications without POST_NOTIFICATIONS."
+    },
+    {
+      "source": "android/local.properties",
+      "line": 1,
+      "severity": "error",
+      "id": "PropertyEscape",
+      "message": "The SDK path in the ignored local.properties needs properties-file escaping."
+    },
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": 7,
+      "severity": "warning",
+      "id": "UnusedAttribute",
+      "message": "Attribute appCategory is only used in API level 26 and higher (current min is 25)"
+    },
+    {
+      "source": "android/app/src/main/java/com/MiddleFrame/Tictactoe/GoogleAuthPlugin.java",
+      "line": 55,
+      "severity": "warning",
+      "id": "CredentialManagerMisuse",
+      "message": "Call to CredentialManager.getCredential without use of NoCredentialException"
+    },
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": 45,
+      "severity": "warning",
+      "id": "ManifestOrder",
+      "message": "<uses-permission> tag appears after <application> tag"
+    },
+    {
+      "source": "android/gradle/wrapper/gradle-wrapper.properties",
+      "line": 4,
+      "severity": "warning",
+      "id": "AndroidGradlePluginVersion",
+      "message": "A newer version of Gradle than 9.5.0 is available: 9.7.1"
+    },
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": 28,
+      "severity": "warning",
+      "id": "LockedOrientationActivity",
+      "message": "Expecting android:screenOrientation=\"unspecified\" or \"fullSensor\" for this activity so the user can use the application in any orientation and provide a great experience on Chrome OS devices"
+    },
+    {
+      "source": "android/app/src/main/java/com/MiddleFrame/Tictactoe/GoogleAuthPlugin.java",
+      "line": 68,
+      "severity": "error",
+      "id": "RestrictedApi",
+      "message": "GoogleAuthPlugin calls GetCredentialException.getType, marked restricted to the androidx.credentials library group."
+    },
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": 28,
+      "severity": "warning",
+      "id": "DiscouragedApi",
+      "message": "Fixed screen orientations will be ignored in most cases, starting from Android 16. Android is moving toward a model where apps are expected to adapt to various orientations, display sizes, and aspect ratios."
+    },
+    {
+      "source": "com.unity3d.ads-mediation:applovin-adapter:5.2.0/proguard.txt",
+      "line": null,
+      "severity": "warning",
+      "id": "GlobalOptionInConsumerRules",
+      "message": "Vendor consumer rules contain a global option: -printmapping."
+    },
+    {
+      "source": "com.pangle.global:pag-sdk-ad:unfat-7909-20260204213520-release/proguard.txt",
+      "line": null,
+      "severity": "warning",
+      "id": "GlobalOptionInConsumerRules",
+      "message": "Vendor consumer rules contain a global option: -ignorewarnings."
+    },
+    {
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": 6,
+      "severity": "warning",
+      "id": "DataExtractionRules",
+      "message": "The attribute android:allowBackup is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures cloud backups and device transfers on Android 12 and higher."
+    },
+    {
+      "source": "android/app/src/main/res/drawable-v24",
+      "line": null,
+      "severity": "warning",
+      "id": "ObsoleteSdkInt",
+      "message": "This folder configuration (v24) is unnecessary; minSdkVersion is 25. Merge all the resources in this folder into drawable."
+    },
+    {
+      "source": "android/app/src/main/res/layout/activity_main.xml",
+      "line": 2,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.layout.activity_main appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/xml/config.xml",
+      "line": 2,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.xml.config appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "line": 2,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.drawable.ic_launcher_background appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/values/ic_launcher_background.xml",
+      "line": 3,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.color.ic_launcher_background appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml",
+      "line": 1,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.drawable.ic_launcher_foreground appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/values/strings.xml",
+      "line": 5,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.string.package_name appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/values/strings.xml",
+      "line": 6,
+      "severity": "warning",
+      "id": "UnusedResources",
+      "message": "The resource R.string.custom_url_scheme appears to be unused"
+    },
+    {
+      "source": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_background.png",
+      "line": null,
+      "severity": "warning",
+      "id": "IconXmlAndPng",
+      "message": "The following images appear both as density independent .xml files and as bitmap files: srcmainresdrawableic_launcher_background.xml, srcmainresmipmap-hdpiic_launcher_background.png"
+    },
+    {
+      "source": "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "line": 2,
+      "severity": "warning",
+      "id": "MonochromeLauncherIcon",
+      "message": "The application adaptive icon is missing a monochrome tag"
+    },
+    {
+      "source": "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "line": 2,
+      "severity": "warning",
+      "id": "MonochromeLauncherIcon",
+      "message": "The application adaptive roundIcon is missing a monochrome tag"
+    }
+  ]
+}
