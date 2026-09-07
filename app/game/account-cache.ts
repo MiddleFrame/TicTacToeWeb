@@ -1,3 +1,6 @@
+import { readProgressOperations } from "./progress-operation-queue.ts";
+import { ProgressRequestError } from "./progress-request-error.ts";
+
 const ACCOUNT_KEYS = [
   "tttp-deck", "tttp-unlocked", "tttp-coins", "tttp-player-name",
   "tttp-pending-deck", "tttp-pending-name", "tttp-pending-rewards", "tttp-pending-rounds", "tttp-cloud-account",
@@ -12,6 +15,7 @@ export function clearAccountCache(storage: Pick<Storage, "removeItem" | "setItem
 export function adoptCloudAccount(storage: Pick<Storage, "getItem" | "removeItem" | "setItem">, accountId: string): void {
   const previous = storage.getItem("tttp-cloud-account");
   if (previous && previous !== accountId) {
+    if (readProgressOperations(storage).length > 0) throw new ProgressRequestError("account-progress-conflict", 409);
     for (const key of ["tttp-pending-deck", "tttp-pending-name", "tttp-pending-rewards", "tttp-pending-rounds", "tttp-progress-operations-v1"]) storage.removeItem(key);
   }
   storage.setItem("tttp-cloud-account", accountId);

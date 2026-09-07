@@ -21,6 +21,7 @@ export function usePhotonGame(
 ) {
   const [network, setNetwork] = useState<PhotonSnapshot>(INITIAL_PHOTON_SNAPSHOT);
   const [intentPending, setIntentPending] = useState(false);
+  const networkRef = useRef(INITIAL_PHOTON_SNAPSHOT);
   const sessionRef = useRef<PhotonSession | null>(null);
 
   if (sessionRef.current === null) {
@@ -40,19 +41,21 @@ export function usePhotonGame(
         onOpponentLeave?.();
       },
       onSnapshot: (snapshot) => {
+        networkRef.current = snapshot;
         setNetwork(snapshot);
         if (snapshot.phase !== "ready") setIntentPending(false);
       },
       onState: (remoteState) => {
+        if (networkRef.current.side !== 2 || networkRef.current.phase !== "ready") return;
         setIntentPending(false);
         setGame(remoteState);
       },
       onIntent: (intent) => {
-        if (network.side !== 1) return;
+        if (networkRef.current.side !== 1 || networkRef.current.phase !== "ready") return;
         setGame((current) => applyNetworkIntent(current, intent, 2));
       },
     });
-  }, [network.side, onOpponentLeave, setGame]);
+  }, [onOpponentLeave, setGame]);
 
   useEffect(() => {
     if (!intentPending) return;
@@ -66,7 +69,15 @@ export function usePhotonGame(
     }
   }, [game, mode, network.phase, network.side]);
 
-  useEffect(() => () => sessionRef.current?.disconnect(), []);
+  useEffect(() => () => {
+    sessionRef.current?.updateCallbacks({
+      onOpponentLeave: () => undefined,
+      onSnapshot: () => undefined,
+      onState: () => undefined,
+      onIntent: () => undefined,
+    });
+    sessionRef.current?.disconnect();
+  }, []);
 
   const connect = useCallback((config: PhotonGameConfig) => {
     setIntentPending(false);

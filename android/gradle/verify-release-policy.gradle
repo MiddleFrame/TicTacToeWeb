@@ -1,0 +1,208 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.zip.ZipFile
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+
+def policy = new JsonSlurper().parse(file("$rootDir/../android-config/release-policy.json"))
+
+def inspectElf = { byte[] data ->
+    if (data.length < 64 || data[0] != 127 || data[1] != 69 || data[2] != 76 || data[3] != 70 ||
+        !((int) data[4] in [1, 2]) || !((int) data[5] in [1, 2])) {
+        throw new GradleException('Malformed native ELF header')
+    }
+    def bytes = ByteBuffer.wrap(data).order(data[5] == 1 ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN)
+    boolean wide = data[4] == 2
+    long offset = wide ? bytes.getLong(32) : Integer.toUnsignedLong(bytes.getInt(28))
+    int entrySize = Short.toUnsignedInt(bytes.getShort(wide ? 54 : 42))
+    int count = Short.toUnsignedInt(bytes.getShort(wide ? 56 : 44))
+    if (offset < 0 || offset > data.length || count == 0 || entrySize < (wide ? 56 : 32) ||
+        offset + (long) entrySize * count > data.length) throw new GradleException('Malformed ELF program headers')
+    def alignments = []
+    for (int i = 0; i < count; i++) {
+        int position = (int) offset + i * entrySize
+        if (bytes.getInt(position) != 1) continue
+        long alignment = wide ? bytes.getLong(position + 48) : Integer.toUnsignedLong(bytes.getInt(position + 28))
+        long fileOffset = wide ? bytes.getLong(position + 8) : Integer.toUnsignedLong(bytes.getInt(position + 4))
+        long address = wide ? bytes.getLong(position + 16) : Integer.toUnsignedLong(bytes.getInt(position + 8))
+        if (alignment < 16384 || (alignment & (alignment - 1)) != 0 ||
+            Math.floorMod(address, 16384) != Math.floorMod(fileOffset, 16384)) {
+            throw new GradleException('Native PT_LOAD segment is not compatible with 16 KiB pages')
+        }
+        alignments.add(alignment)
+    }
+    if (alignments.isEmpty()) throw new GradleException('Native ELF has no PT_LOAD segment')
+    [elfClass: (int) data[4], machine: Short.toUnsignedInt(bytes.getShort(18)), minimumAlignment: alignments.min()]
+}
+
+def sampleElf = { boolean wide, ByteOrder order, long alignment ->
+    byte[] data = new byte[wide ? 120 : 84]
+    data[0] = 127; data[1] = 69; data[2] = 76; data[3] = 70
+    data[4] = wide ? 2 : 1; data[5] = order == ByteOrder.LITTLE_ENDIAN ? 1 : 2
+    def bytes = ByteBuffer.wrap(data).order(order)
+    bytes.putShort(18, (short) (wide ? 183 : 40))
+    int offset = wide ? 64 : 52
+    if (wide) bytes.putLong(32, offset)
+    else bytes.putInt(28, offset)
+    bytes.putShort(wide ? 54 : 42, (short) (wide ? 56 : 32))
+    bytes.putShort(wide ? 56 : 44, (short) 1)
+    bytes.putInt(offset, 1)
+    if (wide) bytes.putLong(offset + 48, alignment)
+    else bytes.putInt(offset + 28, (int) alignment)
+    data
+}
+
+def requireBudgets = { measured ->
+    policy.maximum.each { name, maximum ->
+        def value = measured[name]
+        if (!(value instanceof Number) || !Double.isFinite(value.doubleValue()) || value < 0 || value > maximum) {
+            throw new GradleException("Android release budget exceeded or missing: ${name} (${value}, maximum ${maximum})")
+        }
+    }
+}
+
+def verifyPolicy = tasks.register('verifyReleasePolicy') {
+    doLast {
+        def profile = new JsonSlurper().parse(file(providers.gradleProperty('masNetworkProfile')
+            .getOrElse("$rootDir/../android-config/mas-networks.json")))
+        def catalog = new JsonSlurper().parse(file("$rootDir/../android-config/mas-network-catalog.json"))
+        def app = new Properties()
+        file("$rootDir/../android-config/app.properties").withInputStream { app.load(it) }
+        def masModules = configurations.releaseRuntimeClasspath.incoming.resolutionResult.allComponents
+            .collect { it.id }.findAll { it instanceof ModuleComponentIdentifier && it.group.startsWith('com.yodo1.mas') }
+        if (masModules.isEmpty() || masModules.any { it.version != policy.toolchain.mas }) {
+            throw new GradleException('Resolved MAS versions violate release policy')
+        }
+        if (JavaVersion.current().majorVersion != policy.toolchain.java ||
+            gradle.gradleVersion != policy.toolchain.gradle || catalog.sdkVersion != policy.toolchain.mas ||
+            profile.enabled.sort() != policy.enabledNetworks.sort() ||
+            profile.disabledRoutes.sort() != policy.disabledRoutes.sort() ||
+            app.abiFilters.split(',').toList().sort() != policy.abis.sort()) {
+            throw new GradleException('Android toolchain or production network/ABI policy changed; review release-policy.json')
+        }
+        ['minSdk', 'targetSdk', 'compileSdk'].each { name ->
+            if ((app[name] as Integer) != policy.toolchain[name]) {
+                throw new GradleException("Android SDK policy changed: ${name}")
+            }
+        }
+        def rules = file('proguard-rules.pro').text
+        if (rules =~ /(?m)^\s*-(ignorewarnings|dontoptimize|dontshrink|dontobfuscate)\b/ ||
+            rules =~ /(?m)^\s*-dontwarn\s+\*+(?:\s|$)/) {
+            throw new GradleException('App-owned global R8 suppression or disabled optimization is prohibited')
+        }
+    }
+}
+
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn(verifyPolicy)
+}
+
+tasks.register('testReleasePolicy') {
+    doLast {
+        requireBudgets(policy.maximum)
+        policy.maximum.each { name, limit ->
+            [[(name): limit + 1], [(name): -1], [(name): 'invalid'], [(name): null], [(name): Double.NaN]].each { change ->
+                def rejected = false
+                try {
+                    requireBudgets(policy.maximum + change)
+                } catch (GradleException expected) {
+                    rejected = true
+                }
+                assert rejected
+            }
+        }
+        [false, true].each { wide ->
+            [ByteOrder.LITTLE_ENDIAN, ByteOrder.BIG_ENDIAN].each { order ->
+                assert inspectElf(sampleElf(wide, order, 16384)).minimumAlignment == 16384
+            }
+        }
+        [new byte[10], new byte[64], sampleElf(true, ByteOrder.LITTLE_ENDIAN, 4096),
+            sampleElf(true, ByteOrder.LITTLE_ENDIAN, 24576)].each { malformed ->
+            def rejected = false
+            try { inspectElf(malformed) } catch (GradleException expected) { rejected = true }
+            assert rejected
+        }
+        logger.lifecycle('Android release budget boundary tests passed')
+    }
+}
+
+tasks.matching { it.name == 'bundleRelease' }.configureEach {
+    doLast {
+        def bundle = layout.buildDirectory.file('outputs/bundle/release/app-release.aab').get().asFile
+        def measured = [aabBytes: bundle.length(), allDexBytes: 0L, classDefinitions: 0L,
+            methodIdSlots: 0L, nativeBytes: 0L, nativeCount: 0, webAssetBytes: 0L,
+            allDexCount: 0, r8DexCount: 0, r8DexBytes: 0L, minimumNativeAlignment: Long.MAX_VALUE]
+        new ZipFile(bundle).withCloseable { archive ->
+            def metadataEntry = archive.getEntry('BUNDLE-METADATA/com.android.tools/r8.json')
+            def metadata = archive.getInputStream(metadataEntry).withCloseable { new JsonSlurper().parse(it) }
+            def agp = new Properties()
+            archive.getInputStream(archive.getEntry('BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties'))
+                .withCloseable { agp.load(it) }
+            def capacitor = archive.getInputStream(archive.getEntry('base/assets/capacitor.config.json'))
+                .withCloseable { new JsonSlurper().parse(it) }
+            if (capacitor.android.minWebViewVersion != policy.webView.minimumChromiumMajor ||
+                capacitor.server.errorPath != policy.webView.errorPage || capacitor.server.url != null ||
+                archive.getEntry("base/assets/public/${policy.webView.errorPage}") == null) {
+                throw new GradleException('Bundled WebView minimum/local fallback violates release policy; rebuild and sync Android assets')
+            }
+            if (metadata.version != policy.toolchain.r8 || agp.androidGradlePluginVersion != policy.toolchain.agp ||
+                metadata.options.minApiLevel.toString() != policy.toolchain.minSdk.toString() ||
+                metadata.options.isProGuardCompatibilityModeEnabled != false || metadata.options.isDebugModeEnabled != false ||
+                metadata.resourceOptimization.isOptimizedShrinkingEnabled != true ||
+                ['isOptimizationsEnabled', 'isObfuscationEnabled', 'isShrinkingEnabled'].any { metadata.options[it] != true }) {
+                throw new GradleException('Embedded Android toolchain/optimization metadata violates release policy')
+            }
+            def nativeAbis = [] as Set
+            archive.entries().each { entry ->
+                if (entry.directory) return
+                if (entry.name.startsWith('base/assets/public/')) measured.webAssetBytes += entry.size
+                if (entry.name.endsWith('.so')) {
+                    def nativePath = entry.name =~ /^[^\/]+\/lib\/([^\/]+)\/[^\/]+\.so$/
+                    if (!nativePath.matches() || !policy.abis.contains(nativePath.group(1))) {
+                        throw new GradleException('Unexpected native library module path or ABI')
+                    }
+                    String abi = nativePath.group(1)
+                    def elf = archive.getInputStream(entry).withCloseable { inspectElf(it.readAllBytes()) }
+                    def expected = ['arm64-v8a': [elfClass: 2, machine: 183], 'armeabi-v7a': [elfClass: 1, machine: 40]][abi]
+                    if (elf.elfClass != expected?.elfClass || elf.machine != expected?.machine) {
+                        throw new GradleException('Packaged native ELF architecture does not match its ABI path')
+                    }
+                    measured.nativeBytes += entry.size
+                    measured.nativeCount++
+                    measured.minimumNativeAlignment = Math.min(measured.minimumNativeAlignment, elf.minimumAlignment)
+                    nativeAbis.add(abi)
+                }
+                byte[] header = archive.getInputStream(entry).withCloseable { it.readNBytes(112) }
+                boolean dex = header.length >= 4 && header[0] == 100 && header[1] == 101 && header[2] == 120 && header[3] == 10
+                if (!dex && entry.name.endsWith('.dex')) throw new GradleException('Unexpected DEX entry header')
+                if (!dex) return
+                if (header.length < 112 || !(new String(header, 4, 3, 'US-ASCII') in ['035', '037', '038', '039', '040'])) {
+                    throw new GradleException('Unsupported DEX container; update the release inspector before accepting it')
+                }
+                def bytes = ByteBuffer.wrap(header).order(ByteOrder.LITTLE_ENDIAN)
+                if (Integer.toUnsignedLong(bytes.getInt(32)) != entry.size || bytes.getInt(40) != 0x12345678) {
+                    throw new GradleException('Invalid DEX size or byte order')
+                }
+                measured.allDexBytes += entry.size
+                measured.allDexCount++
+                if (entry.name ==~ /^[^\/]+\/dex\/[^\/]+\.dex$/) {
+                    measured.r8DexBytes += entry.size
+                    measured.r8DexCount++
+                }
+                measured.classDefinitions += Integer.toUnsignedLong(bytes.getInt(96))
+                measured.methodIdSlots += Integer.toUnsignedLong(bytes.getInt(88))
+            }
+            if (nativeAbis != policy.abis.toSet()) throw new GradleException('Packaged native ABI set violates release policy')
+        }
+        measured.embeddedDexBytes = measured.allDexBytes - measured.r8DexBytes
+        if (measured.allDexBytes == 0 || measured.nativeCount == 0 || measured.webAssetBytes == 0) {
+            throw new GradleException('Release bundle is missing expected Android code or bundled web assets')
+        }
+        def report = layout.buildDirectory.file('reports/optimization/artifact-budget.json').get().asFile
+        report.parentFile.mkdirs()
+        report.text = JsonOutput.prettyPrint(JsonOutput.toJson([measured: measured, maximum: policy.maximum])) + '\n'
+        requireBudgets(measured)
+        logger.lifecycle("Android release artifact budgets passed: ${measured}")
+    }
+}

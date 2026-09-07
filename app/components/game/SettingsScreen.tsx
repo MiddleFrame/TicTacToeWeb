@@ -22,7 +22,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
   return (
     <main className="settings-shell">
       <header className="section-screen-header">
-        <button className="back-button" onClick={props.onBack} aria-label={t("back")}><BackIcon /></button>
+        <button className="back-button" onClick={props.onBack} disabled={props.googlePending} aria-label={t("back")}><BackIcon /></button>
         <div>
           <span>{t("options")}</span>
           <h1>{t("settings")}</h1>
@@ -31,7 +31,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
       <section className="settings-panel">
         <label className="settings-row settings-name-row">
           <span>{t("playerName")}</span>
-          <input value={props.playerName} maxLength={20} onChange={(event) => props.onNameChange(event.target.value)} />
+          <input disabled={props.googlePending} value={props.playerName} maxLength={20} onChange={(event) => props.onNameChange(event.target.value)} />
         </label>
         <button className="settings-row settings-toggle" onClick={() => setLanguage(language === "ru" ? "en" : "ru")}>
           <span>{t("language")}</span>
@@ -77,7 +77,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
         </a>
       </section>
       <div className="settings-account">
-      <AccountDeletionPanel english={language === "en"} />
+      {!props.googlePending && <AccountDeletionPanel english={language === "en"} />}
       <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/delete-account" target="_blank" rel="noreferrer">{language === "ru" ? "Удаление через сайт и поддержка" : "Account deletion website and support"}</a></p>
       <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/privacy" target="_blank" rel="noreferrer">{language === "ru" ? "Политика конфиденциальности" : "Privacy policy"}</a></p>
       </div>

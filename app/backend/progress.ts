@@ -1,13 +1,13 @@
 import { applyProgressionAction } from "./progression-actions";
-import { and, count, eq, gt, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getDb, getRawDb } from "../../db";
 import { readElementProgress } from "./element-progress";
 import { purchaseCollectionPack } from "./collection-store";
+import { grantRewardedAd } from "./rewarded-rewards";
 import {
   inventory,
   playerProgress,
   profiles,
-  rewardLedger,
   wallets,
 } from "../../db/schema";
 import {
@@ -20,9 +20,6 @@ import {
   parseStoredKinds,
   type PlayerProgressSnapshot,
 } from "../game/player-progress";
-
-const AD_REWARD = 50;
-const AD_REWARD_LIMIT_PER_HOUR = 20;
 
 async function ensureProgressRows(userId: string, now: Date): Promise<void> {
   const db = getDb();
@@ -126,40 +123,6 @@ export async function grantRewardedAdCoins(
   operationId: string,
   now = new Date(),
 ): Promise<PlayerProgressSnapshot> {
-  const db = getDb();
-  const previous = await db.select({ id: rewardLedger.id })
-    .from(rewardLedger)
-    .where(and(
-      eq(rewardLedger.operationId, operationId),
-      eq(rewardLedger.userId, userId),
-    ))
-    .get();
-  if (previous) return getPlayerProgress(userId, now);
-  const [{ value: recentRewards }] = await db.select({ value: count() })
-    .from(rewardLedger)
-    .where(and(
-      eq(rewardLedger.userId, userId),
-      eq(rewardLedger.reason, "rewarded-ad"),
-      gt(rewardLedger.createdAt, new Date(now.getTime() - 60 * 60 * 1000)),
-    ));
-  if (recentRewards >= AD_REWARD_LIMIT_PER_HOUR) throw new Error("reward-rate-limited");
-  const current = await getPlayerProgress(userId, now);
-  const balanceAfter = current.coins + AD_REWARD;
-  await db.batch([
-    db.update(wallets).set({
-      coins: sql`${wallets.coins} + ${AD_REWARD}`,
-      updatedAt: now,
-    }).where(eq(wallets.userId, userId)),
-    db.insert(rewardLedger).values({
-      id: crypto.randomUUID(),
-      operationId,
-      userId,
-      currency: "coins",
-      amount: AD_REWARD,
-      balanceAfter,
-      reason: "rewarded-ad",
-      createdAt: now,
-    }),
-  ]);
+  await grantRewardedAd(getRawDb(), userId, operationId, now.getTime());
   return getPlayerProgress(userId, now);
 }

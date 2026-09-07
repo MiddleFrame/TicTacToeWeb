@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { androidWebViewPolicy } from "./build/android-webview-policy";
 
 const config: CapacitorConfig = {
   appId: "com.MiddleFrame.Tictactoe",
@@ -7,8 +8,11 @@ const config: CapacitorConfig = {
   loggingBehavior: "none",
   backgroundColor: "#ffffff",
   android: {
-    minWebViewVersion: 60,
+    minWebViewVersion: androidWebViewPolicy.minimumChromiumMajor,
     webContentsDebuggingEnabled: false,
+  },
+  server: {
+    errorPath: androidWebViewPolicy.errorPage,
   },
 };
 

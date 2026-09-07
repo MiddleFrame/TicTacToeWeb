@@ -108,6 +108,7 @@ dependencies {
 apply from: 'capacitor.build.gradle'
 apply from: '../gradle/rewarded-networks.gradle'
 apply from: '../gradle/verify-release-optimization.gradle'
+apply from: '../gradle/verify-release-policy.gradle'
 
 try {
     def servicesJSON = file('google-services.json')

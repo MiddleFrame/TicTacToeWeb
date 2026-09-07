@@ -7,6 +7,8 @@ import type { XpAward } from "./element-progression";
 import type { PlayerProgressSnapshot } from "./player-progress";
 import { adoptCloudAccount, clearAccountCache } from "./account-cache";
 import type { ProgressOperation } from "./progress-operation-queue";
+import { parseRetryAfter, ProgressRequestError } from "./progress-request-error";
+import { withRequestDeadline } from "./request-timeout";
 
 type SecureSessionPlugin = {
   getToken(): Promise<{ value: string | null }>;
@@ -48,6 +50,7 @@ const configuredOrigin = process.env.NEXT_PUBLIC_API_ORIGIN?.trim().replace(/\/$
 const apiOrigin = android ? configuredOrigin : "";
 let initializationPromise: Promise<PlayerProgressSnapshot> | null = null;
 let accountCleared = false;
+let sessionGeneration = 0;
 
 async function sessionToken(): Promise<string | null> {
   if (!android) return null;
@@ -59,25 +62,33 @@ async function sessionToken(): Promise<string | null> {
 }
 
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
-  if (accountCleared) throw new Error("unauthorized");
+  if (accountCleared) throw new ProgressRequestError("unauthorized", 401);
   if (android && !apiOrigin) throw new Error("api-unavailable");
+  const generation = sessionGeneration;
   const token = await sessionToken();
-  const response = await fetch(`${apiOrigin}${path}`, {
-    ...init,
-    credentials: android ? "omit" : "same-origin",
-    headers: {
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(android ? { "X-TTTP-Client": "android" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init.headers,
-    },
-  });
-  if (accountCleared) throw new Error("unauthorized");
-  if (!response.ok) {
-    const body = await response.json().catch(() => null) as { error?: string } | null;
-    throw new Error(body?.error ?? `request-${response.status}`);
-  }
-  return response.json() as Promise<T>;
+  if (accountCleared || generation !== sessionGeneration) throw new ProgressRequestError("session-changed", 401);
+  return withRequestDeadline(async (signal) => {
+    const response = await fetch(`${apiOrigin}${path}`, {
+      ...init,
+      signal,
+      credentials: android ? "omit" : "same-origin",
+      headers: {
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        ...(android ? { "X-TTTP-Client": "android" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init.headers,
+      },
+    });
+    if (accountCleared || generation !== sessionGeneration) throw new ProgressRequestError("session-changed", 401);
+    if (!response.ok) {
+      const body = await response.json().catch(() => null) as { error?: string } | null;
+      if (accountCleared || generation !== sessionGeneration) throw new ProgressRequestError("session-changed", 401);
+      throw new ProgressRequestError(body?.error ?? `request-${response.status}`, response.status, parseRetryAfter(response.headers.get("Retry-After")));
+    }
+    const result = await response.json() as T;
+    if (accountCleared || generation !== sessionGeneration) throw new ProgressRequestError("session-changed", 401);
+    return result;
+  }, init.signal);
 }
 
 async function createGuestSession(): Promise<void> {
@@ -86,7 +97,13 @@ async function createGuestSession(): Promise<void> {
   });
   if (!android) return;
   if (!response.sessionToken) throw new Error("native-session-missing");
-  await SecureSession.setToken({ value: response.sessionToken });
+  await replaceNativeSession(response.sessionToken);
+}
+
+async function replaceNativeSession(token: string): Promise<void> {
+  const generation = ++sessionGeneration;
+  await SecureSession.setToken({ value: token });
+  if (accountCleared || generation !== sessionGeneration) throw new ProgressRequestError("session-changed", 401);
 }
 
 async function initialize(): Promise<PlayerProgressSnapshot> {
@@ -96,9 +113,11 @@ async function initialize(): Promise<PlayerProgressSnapshot> {
   } catch (error) {
     if (!(error instanceof Error) || error.message !== "unauthorized") throw error;
     const previousAccount = window.localStorage.getItem("tttp-cloud-account");
+    if (previousAccount) {
+      throw new ProgressRequestError("account-session-expired", 401);
+    }
     if (android) await SecureSession.removeToken().catch(() => undefined);
     await createGuestSession();
-    if (previousAccount) clearAccountCache(window.localStorage);
     current = (await apiRequest<ProgressResponse>("/api/progress")).progress;
   }
   if (!current) throw new Error("progress-unavailable");
@@ -107,10 +126,12 @@ async function initialize(): Promise<PlayerProgressSnapshot> {
 }
 
 export function initializePlayerProgress(): Promise<PlayerProgressSnapshot> {
-  initializationPromise ??= initialize().catch((error) => {
-    initializationPromise = null;
-    throw error;
-  });
+  if (!initializationPromise) {
+    const pending = initialize().finally(() => {
+      if (initializationPromise === pending) initializationPromise = null;
+    });
+    initializationPromise = pending;
+  }
   return initializationPromise;
 }
 
@@ -169,7 +190,14 @@ export async function sendCloudProgressOperation(operation: ProgressOperation): 
 }
 
 export async function getGoogleAccountState(): Promise<GoogleAccountState> {
-  const status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  let status: GoogleAccountStatus;
+  try {
+    status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  } catch (error) {
+    if (accountCleared || !android || !(error instanceof ProgressRequestError) || error.message !== "unauthorized") throw error;
+    const native = await GoogleAuth.isAvailable().catch(() => ({ available: false }));
+    return { available: native.available, email: null, linked: false };
+  }
   if (!android) return { available: false, email: status.email, linked: status.linked };
   const native = await GoogleAuth.isAvailable().catch(() => ({ available: false }));
   return {
@@ -181,7 +209,14 @@ export async function getGoogleAccountState(): Promise<GoogleAccountState> {
 
 export async function connectGoogleAccount(): Promise<GoogleAccountResponse> {
   if (!android) throw new Error("google-auth-unavailable");
-  const status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  let status: GoogleAccountStatus;
+  try {
+    status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  } catch (error) {
+    if (accountCleared || !(error instanceof ProgressRequestError) || error.message !== "unauthorized") throw error;
+    await createGuestSession();
+    status = await apiRequest<GoogleAccountStatus>("/api/account/google");
+  }
   if (!status.configured || !status.nonce) {
     throw new Error("google-auth-unavailable");
   }
@@ -191,7 +226,8 @@ export async function connectGoogleAccount(): Promise<GoogleAccountResponse> {
     body: JSON.stringify({ idToken: credential.idToken }),
   });
   if (!connected.sessionToken) throw new Error("native-session-missing");
-  await SecureSession.setToken({ value: connected.sessionToken });
+  await replaceNativeSession(connected.sessionToken);
+  initializationPromise = null;
   adoptCloudAccount(window.localStorage, connected.progress.accountId);
   return connected;
 }
@@ -206,6 +242,7 @@ export async function confirmNativeGoogleIdentity(nonce: string): Promise<string
 
 export async function clearDeletedAccount(): Promise<void> {
   accountCleared = true;
+  sessionGeneration++;
   initializationPromise = null;
   clearAccountCache(window.localStorage);
   if (android) await SecureSession.removeToken();

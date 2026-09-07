@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { cardTransferSlot } from "../../game/card-transfer-layout";
+import { AnimationSequence } from "../../game/animation-sequence";
 import type { CardKind } from "../../game/cards";
 import { useLocalization } from "../../game/localization";
 import type { PlayCardDock } from "./hooks/useGameAudio";
@@ -30,11 +31,7 @@ function edgePosition(index: number): EdgePosition {
   };
 }
 
-function wait(duration: number) {
-  return new Promise<void>((resolve) => window.setTimeout(resolve, duration));
-}
-
-function scrollCardIntoView(container: HTMLElement, target: HTMLElement, duration: number) {
+async function scrollCardIntoView(container: HTMLElement, target: HTMLElement, duration: number, sequence: AnimationSequence) {
   const containerRect = container.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
   const start = container.scrollTop;
@@ -42,18 +39,16 @@ function scrollCardIntoView(container: HTMLElement, target: HTMLElement, duratio
   const maximum = container.scrollHeight - container.clientHeight;
   const destination = Math.max(0, Math.min(maximum, desired));
   const distance = destination - start;
-  if (Math.abs(distance) < 2) return Promise.resolve();
-  return new Promise<void>((resolve) => {
-    const startedAt = performance.now();
-    const move = (now: number) => {
-      const progress = Math.min(1, (now - startedAt) / duration);
+  if (Math.abs(distance) < 2) return;
+  const startedAt = performance.now();
+  let progress = 0;
+  while (progress < 1 && !sequence.cancelled) {
+    await sequence.frame((now) => {
+      progress = Math.min(1, (now - startedAt) / duration);
       const eased = 1 - (1 - progress) ** 3;
       container.scrollTop = start + distance * eased;
-      if (progress < 1) requestAnimationFrame(move);
-      else resolve();
-    };
-    requestAnimationFrame(move);
-  });
+    });
+  }
 }
 
 export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, unlockedKinds }: CardDeckTransferProps) {
@@ -63,34 +58,40 @@ export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, u
   const rootRef = useRef<HTMLDivElement | null>(null);
   const flightRefs = useRef(new Map<CardKind, HTMLElement>());
   const onCompleteRef = useRef(onComplete);
+  const playDockRef = useRef(playDock);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
   useEffect(() => {
-    let cancelled = false;
+    playDockRef.current = playDock;
+  }, [playDock]);
+
+  useEffect(() => {
+    const sequence = new AnimationSequence();
+    const wait = (duration: number) => sequence.wait(duration);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const run = async () => {
       if (reducedMotion) {
         setLandedKinds([...kinds]);
         await wait(80);
-        if (!cancelled) onCompleteRef.current(kinds.at(-1)!);
+        if (!sequence.cancelled) onCompleteRef.current(kinds.at(-1)!);
         return;
       }
       await wait(30);
-      if (cancelled) return;
+      if (sequence.cancelled) return;
       if (kinds.length > 1) {
         setScattered(true);
         await wait(460);
       }
       const duration = kinds.length === 1 ? 1000 : Math.max(280, 620 - kinds.length * 26);
       for (const kind of kinds) {
-        if (cancelled) return;
+        if (sequence.cancelled) return;
         const target = rootRef.current?.querySelector<HTMLElement>(`[data-card-kind="${kind}"]`);
         const scroll = rootRef.current?.querySelector<HTMLElement>(".purchase-deck-scroll");
-        if (target && scroll) await scrollCardIntoView(scroll, target, kinds.length === 1 ? 220 : 150);
-        await wait(40);
+        if (target && scroll) await scrollCardIntoView(scroll, target, kinds.length === 1 ? 220 : 150, sequence);
+        if (!await wait(40) || sequence.cancelled) return;
         const flight = flightRefs.current.get(kind);
         if (!target || !flight) continue;
         const from = flight.getBoundingClientRect();
@@ -102,20 +103,19 @@ export function CardDeckTransfer({ kinds, onComplete, playDock, selectedKinds, u
           ],
           { duration, easing: "cubic-bezier(0.2, 0.78, 0.18, 1)", fill: "forwards" },
         );
-        await animation.finished.catch(() => undefined);
-        if (cancelled) return;
+        if (!await sequence.animate(animation) || sequence.cancelled) return;
         setLandedKinds((current) => [...current, kind]);
-        playDock(kind, 1.15);
+        playDockRef.current(kind, 1.15);
         await wait(kinds.length === 1 ? 260 : 90);
       }
       await wait(420);
-      if (!cancelled) onCompleteRef.current(kinds.at(-1)!);
+      if (!sequence.cancelled) onCompleteRef.current(kinds.at(-1)!);
     };
     void run();
     return () => {
-      cancelled = true;
+      sequence.cancel();
     };
-  }, [kinds, playDock]);
+  }, [kinds]);
 
   return (
     <div className={`purchase-deck-transfer ${kinds.length === 1 ? "single-card" : "multi-card"} ${scattered ? "scattered" : "gathered"}`} ref={rootRef}>

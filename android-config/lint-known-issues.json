@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "knownErrors": [
+    {
+      "id": "NotificationPermission",
+      "source": "android/app/src/main/AndroidManifest.xml",
+      "line": null,
+      "message": "When targeting Android 13 or higher, posting a permission requires holding the POST_NOTIFICATIONS permission (usage from com.squareup.picasso.RemoteViewsAction.NotificationAction)",
+      "maximumCount": 1,
+      "owner": "Android maintainer",
+      "reason": "Existing Picasso notification path; no notification API is invoked by the game. Do not add a permission or suppress vendor R8 rules to satisfy lint.",
+      "reviewBy": "2026-10-07"
+    }
+  ]
+}

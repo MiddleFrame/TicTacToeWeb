@@ -2,6 +2,8 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { androidPublicAssetsPlugin } from "./build/android-public-assets-plugin";
+import { androidCompatibilityPlugin } from "./build/android-compatibility-plugin";
+import { androidWebViewPolicy } from "./build/android-webview-policy";
 import { photonBrowserPlugin } from "./build/photon-browser-plugin";
 
 const projectRoot = fileURLToPath(new URL(".", import.meta.url));
@@ -24,8 +26,14 @@ export default defineConfig({
     photonBrowserPlugin,
     react(),
     androidPublicAssetsPlugin({ source: gameAssets, destination: androidGameAssets }),
+    androidCompatibilityPlugin({
+      outputDirectory: fileURLToPath(new URL("./android-shell", import.meta.url)),
+      errorPageSource: fileURLToPath(new URL("./android-client/webview-update.html", import.meta.url)),
+      ...androidWebViewPolicy,
+    }),
   ],
   build: {
+    target: `chrome${androidWebViewPolicy.minimumChromiumMajor}`,
     outDir: fileURLToPath(new URL("./android-shell", import.meta.url)),
     emptyOutDir: true,
   },

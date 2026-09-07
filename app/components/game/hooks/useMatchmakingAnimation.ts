@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimationSequence } from "../../../game/animation-sequence";
 
 export type MatchmakingMark = "x" | "o";
 
@@ -95,34 +96,31 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
 
   useEffect(() => {
     if (failed || matched) return;
-    const timers: number[] = [];
-    let cancelled = false;
-    const wait = (duration: number) => new Promise<void>((resolve) => {
-      timers.push(window.setTimeout(resolve, duration));
-    });
+    const sequence = new AnimationSequence();
+    const wait = (duration: number) => sequence.wait(duration);
 
     const run = async () => {
       await wait(340);
       const liveBoard = [...EMPTY_BOARD];
       let nextMark: MatchmakingMark = "x";
-      while (!cancelled) {
+      while (!sequence.cancelled) {
         const index = chooseCell(liveBoard, nextMark);
         const move = { index, mark: nextMark };
         activeMarkRef.current = nextMark;
         setActiveMark(nextMark);
         setTokenPoints((current) => ({ ...current, [nextMark]: cellPoint(index) }));
         await wait(760);
-        if (cancelled) return;
+        if (sequence.cancelled) return;
         setDrawing(move);
         await wait(660);
-        if (cancelled) return;
+        if (sequence.cancelled) return;
         liveBoard[index] = nextMark;
         setBoard([...liveBoard]);
         setDrawing(null);
         activeMarkRef.current = null;
         setActiveMark(null);
         await wait(280);
-        if (cancelled) return;
+        if (sequence.cancelled) return;
 
         const line = findLine(liveBoard, nextMark);
         const boardIsFull = liveBoard.every((mark): boolean => mark !== null);
@@ -130,10 +128,10 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
           frozenMarkRef.current = nextMark;
           setTokenPoints((current) => ({ ...current, [nextMark]: randomPoint() }));
           await wait(740);
-          if (cancelled) return;
+          if (sequence.cancelled) return;
           setResolution({ kind: "win", cells: line, winner: nextMark });
           await wait(760);
-          if (cancelled) return;
+          if (sequence.cancelled) return;
           line.forEach((cell) => { liveBoard[cell] = null; });
           setBoard([...liveBoard]);
           setResolution(null);
@@ -146,10 +144,10 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
             o: { x: 65 + Math.random() * 25, y: 15 + Math.random() * 70 },
           });
           await wait(740);
-          if (cancelled) return;
+          if (sequence.cancelled) return;
           setResolution({ kind: "draw", cells: Array.from({ length: 9 }, (_, cell) => cell), winner: null });
           await wait(760);
-          if (cancelled) return;
+          if (sequence.cancelled) return;
           liveBoard.fill(null);
           setBoard([...liveBoard]);
           setResolution(null);
@@ -165,8 +163,7 @@ export function useMatchmakingAnimation(failed: boolean, matched: boolean) {
 
     void run();
     return () => {
-      cancelled = true;
-      timers.forEach((timer) => window.clearTimeout(timer));
+      sequence.cancel();
       activeMarkRef.current = null;
       frozenMarkRef.current = null;
     };

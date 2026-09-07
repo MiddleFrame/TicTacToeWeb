@@ -9,7 +9,8 @@ test("Android launches the bundled game instead of a remote server", async () =>
   const properties = await readProjectFile("android-config/app.properties");
 
   assert.match(config, /webDir:\s*["']android-shell["']/);
-  assert.doesNotMatch(config, /server\s*:/);
+  assert.doesNotMatch(config, /\burl\s*:/);
+  assert.match(config, /errorPath:\s*androidWebViewPolicy\.errorPage/);
   assert.doesNotMatch(config, /stofs\.chatgpt\.site/);
   assert.doesNotMatch(properties, /serverUrl/);
 });

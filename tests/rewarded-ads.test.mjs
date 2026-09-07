@@ -23,21 +23,15 @@ test("rewarded ads use a deferred custom privacy flow and resolve on the earned 
     "android/app/src/main/java/com/MiddleFrame/Tictactoe/RewardedAdsPlugin.java",
   );
   const hook = await readProjectFile("app/components/game/hooks/useRewardedAd.ts");
-  const navigation = await readProjectFile("app/components/game/GameNavigation.tsx");
   const store = await readProjectFile("app/components/game/StoreScreen.tsx");
-  const collection = await readProjectFile("app/components/game/hooks/usePlayerCollection.ts");
 
   assert.match(plugin, /enableUserPrivacyDialog\(false\)/);
   assert.match(plugin, /configurePrivacy[\s\S]*setCOPPA/);
   assert.match(plugin, /onRewardAdEarned[\s\S]*result\.put\("rewarded", true\)/);
   assert.match(plugin, /onRewardAdClosed[\s\S]*result\.put\("rewarded", false\)/);
-  assert.match(hook, /result\.rewarded\) onReward\(\)/);
   assert.match(hook, /configurePrivacy/);
   assert.match(hook, /Capacitor\.getPlatform\(\) === "android"/);
-  assert.match(navigation, /creditCoins\(CARD_PRICE\)/);
   assert.match(store, /rewardedAd\.supported/);
   assert.match(store, /AdPrivacyDialog/);
   assert.match(store, /!rewardedAd\.privacyConfigured \|\| rewardedAd\.loaded/);
-  const creditCoins = collection.slice(collection.indexOf("const creditCoins"));
-  assert.match(creditCoins, /enqueueProgressOperation[\s\S]*rewardLocalCoins/);
 });

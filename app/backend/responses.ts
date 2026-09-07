@@ -10,6 +10,7 @@ function corsHeaders(request: Request): Record<string, string> {
   return {
     "Access-Control-Allow-Headers": "Authorization, Content-Type, X-TTTP-Client",
     "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Expose-Headers": "Retry-After",
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",

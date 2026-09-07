@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "baseline": "docs/audit-support/android-measurements.json",
+  "toolchain": { "java": "21", "gradle": "9.5.0", "agp": "9.3.2", "r8": "9.4.14", "mas": "4.18.1", "minSdk": 25, "targetSdk": 36, "compileSdk": 36 },
+  "enabledNetworks": ["admob", "applovin", "bigo", "facebook", "fyber", "inmobi", "ironsource", "mintegral", "moloco", "pangle", "unityads"],
+  "disabledRoutes": ["mintegral:ironsource"],
+  "abis": ["arm64-v8a", "armeabi-v7a"],
+  "webView": { "minimumChromiumMajor": 111, "errorPage": "webview-update.html" },
+  "maximum": {
+    "aabBytes": 38500000,
+    "allDexBytes": 42500000,
+    "classDefinitions": 45000,
+    "methodIdSlots": 286000,
+    "nativeBytes": 3650000,
+    "nativeCount": 20,
+    "webAssetBytes": 1500000
+  }
+}

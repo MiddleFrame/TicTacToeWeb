@@ -5,12 +5,12 @@ import { initialDeckLibrary, type DeckLibrary } from "../../../game/saved-decks"
 import type { PlayerProgressSnapshot } from "../../../game/player-progress";
 import type { CardKind } from "../../../game/cards";
 import { applyLocalProgressionAction } from "../../../game/local-player-progress";
-import { enqueueProgressOperation } from "../../../game/progress-operation-queue";
+import type { ProgressOperation } from "../../../game/progress-operation-queue";
 
 export function useElementProgression(
-  applyProgress: (progress: PlayerProgressSnapshot) => void,
+  commitProgress: (operation: ProgressOperation, progress: PlayerProgressSnapshot) => void,
   readProgress: () => PlayerProgressSnapshot,
-  requestSync: () => void,
+  assertMutable: () => void,
 ) {
   const [passes, setPasses] = useState(initialPasses);
   const [deckLibrary, setDeckLibrary] = useState(initialDeckLibrary);
@@ -29,11 +29,10 @@ export function useElementProgression(
     setBusy(true);
     setError(false);
     try {
+      assertMutable();
       const operation = { id: crypto.randomUUID(), type: "progression" as const, input };
       const result = applyLocalProgressionAction(readProgress(), input);
-      enqueueProgressOperation(window.localStorage, operation);
-      applyProgress(result.progress);
-      requestSync();
+      commitProgress(operation, result.progress);
       return true;
     } catch {
       setError(true);
@@ -42,21 +41,21 @@ export function useElementProgression(
       lock.current = false;
       setBusy(false);
     }
-  }, [applyProgress, readProgress, requestSync]);
+  }, [assertMutable, commitProgress, readProgress]);
 
   const recordRound = useCallback((operationId: string, kinds: CardKind[], outcome: RoundOutcome, mode: GameMode): Promise<XpAward[]> => {
+    const accountId = readProgress().accountId;
     const run = roundQueue.current.then(async () => {
-      const accountId = readProgress().accountId;
+      assertMutable();
+      if (readProgress().accountId !== accountId) throw new Error("round-account-changed");
       const input = { type: "record-round", ...(accountId === "local" ? {} : { accountId }), kinds, outcome, mode };
       const result = applyLocalProgressionAction(readProgress(), input);
-      enqueueProgressOperation(window.localStorage, { id: operationId, type: "progression", input });
-      applyProgress(result.progress);
-      requestSync();
+      commitProgress({ id: operationId, type: "progression", input }, result.progress);
       return result.awards;
     });
     roundQueue.current = run.then(() => undefined, () => undefined);
     return run;
-  }, [applyProgress, readProgress, requestSync]);
+  }, [assertMutable, commitProgress, readProgress]);
 
   return {
     passes, deckLibrary, busy, error, sync, recordRound,

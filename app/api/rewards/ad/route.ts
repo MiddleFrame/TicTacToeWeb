@@ -1,4 +1,5 @@
 import { grantRewardedAdCoins } from "../../../backend/progress";
+import { RewardedAdRateLimitError } from "../../../backend/rewarded-rewards";
 import { authenticateRequest } from "../../../backend/request-session";
 import { apiJson, apiOptions } from "../../../backend/responses";
 import { isOperationId } from "../../../game/player-progress";
@@ -6,13 +7,13 @@ import { isOperationId } from "../../../game/player-progress";
 export async function POST(request: Request): Promise<Response> {
   const authenticated = await authenticateRequest(request);
   if (!authenticated) return apiJson(request, { error: "unauthorized" }, { status: 401 });
-  let input: { operationId?: unknown };
+  let input: unknown;
   try {
     input = await request.json();
   } catch {
     return apiJson(request, { error: "invalid-json" }, { status: 400 });
   }
-  if (!isOperationId(input.operationId)) {
+  if (!input || typeof input !== "object" || !("operationId" in input) || !isOperationId(input.operationId)) {
     return apiJson(request, { error: "invalid-reward" }, { status: 400 });
   }
   try {
@@ -20,7 +21,10 @@ export async function POST(request: Request): Promise<Response> {
     return apiJson(request, { progress });
   } catch (error) {
     const code = error instanceof Error ? error.message : "reward-failed";
-    return apiJson(request, { error: code }, { status: code === "reward-rate-limited" ? 429 : 400 });
+    return apiJson(request, { error: code }, {
+      status: code === "reward-rate-limited" ? 429 : 400,
+      headers: error instanceof RewardedAdRateLimitError ? { "Retry-After": String(error.retryAfter) } : {},
+    });
   }
 }
 

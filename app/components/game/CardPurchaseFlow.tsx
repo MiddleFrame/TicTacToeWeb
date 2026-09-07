@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CardKind } from "../../game/cards";
 import { useLocalization } from "../../game/localization";
 import type { PlayCardDock, StartCardRevealAudio } from "./hooks/useGameAudio";
@@ -40,7 +40,7 @@ export function CardPurchaseFlow({
   const [index, setIndex] = useState(0);
   const isLast = index === kinds.length - 1;
   const copy = progressionCopy[language];
-  const freshKinds = drops.filter((drop) => !drop.duplicate).map((drop) => drop.kind);
+  const freshKinds = useMemo(() => drops.filter((drop) => !drop.duplicate).map((drop) => drop.kind), [drops]);
   const drop = drops[index];
   const acceptLabel = drop.duplicate ? `+${drop.xp} ${copy.xp}` : isLast ? copy.collection : t("nextCard");
 

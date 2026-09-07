@@ -117,10 +117,6 @@ export function readLocalPlayerProgress(storage: Pick<Storage, "getItem">): Play
 
 export function cacheLocalPlayerProgress(storage: Pick<Storage, "setItem">, progress: PlayerProgressSnapshot): void {
   storage.setItem(SNAPSHOT_KEY, JSON.stringify(progress));
-  storage.setItem(DECK_KEY, JSON.stringify(progress.selectedKinds));
-  storage.setItem(UNLOCKED_KEY, JSON.stringify(progress.unlockedKinds));
-  storage.setItem(COINS_KEY, String(progress.coins));
-  storage.setItem(NAME_KEY, progress.nickname);
 }
 
 export function purchaseLocalCardPack(

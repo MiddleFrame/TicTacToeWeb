@@ -2,6 +2,7 @@
 
 import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { RewardAttempt } from "../../../game/account-operation-gate";
 
 type RewardedAdStatus = {
   privacyConfigured: boolean;
@@ -33,48 +34,58 @@ const initialStatus: RewardedAdStatus = {
   loading: false,
 };
 
-export function useRewardedAd(onReward: () => void) {
+export function useRewardedAd(beginReward: () => RewardAttempt | null) {
   const supported = Capacitor.getPlatform() === "android";
   const [status, setStatus] = useState(initialStatus);
   const [showing, setShowing] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const showWhenLoaded = useRef(false);
+  const active = useRef(false);
+  const showLock = useRef(false);
 
   useEffect(() => {
     if (!supported) return;
+    active.current = true;
     let listener: PluginListenerHandle | undefined;
-    let active = true;
+    let listening = true;
     RewardedAds.getStatus()
       .then((next) => {
-        if (active) setStatus(next);
+        if (listening) setStatus(next);
       })
       .catch(() => {
-        if (active) setStatus(initialStatus);
+        if (listening) setStatus(initialStatus);
       });
     RewardedAds.addListener("stateChanged", (next) => {
-      if (active) setStatus(next);
+      if (listening) setStatus(next);
     }).then((handle) => {
-      if (active) listener = handle;
+      if (listening) listener = handle;
       else void handle.remove();
-    });
+    }).catch(() => undefined);
     return () => {
-      active = false;
+      listening = false;
+      active.current = false;
+      showWhenLoaded.current = false;
       if (listener) void listener.remove();
     };
   }, [supported]);
 
   const openAd = useCallback(async () => {
-    if (!supported || !status.loaded || showing) return;
+    if (!supported || !status.loaded || showLock.current || !active.current) return;
+    const attempt = beginReward();
+    if (!attempt) return;
+    showLock.current = true;
     setShowing(true);
     try {
       const result = await RewardedAds.showRewarded();
-      if (result.rewarded) onReward();
+      attempt.complete(result.rewarded);
     } catch {
-      setStatus((current) => ({ ...current, loaded: false }));
+      if (active.current) setStatus((current) => ({ ...current, loaded: false }));
     } finally {
-      setShowing(false);
+      attempt.complete(false);
+      showLock.current = false;
+      if (active.current) setShowing(false);
     }
-  }, [onReward, showing, status.loaded, supported]);
+  }, [beginReward, status.loaded, supported]);
 
   useEffect(() => {
     if (!showWhenLoaded.current || !status.loaded || showing) return;
@@ -100,10 +111,10 @@ export function useRewardedAd(onReward: () => void) {
     showWhenLoaded.current = true;
     try {
       const next = await RewardedAds.configurePrivacy(settings);
-      setStatus(next);
+      if (active.current) setStatus(next);
     } catch {
       showWhenLoaded.current = false;
-      setStatus(initialStatus);
+      if (active.current) setStatus(initialStatus);
     }
   }, [supported]);
 

@@ -20,7 +20,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 @CapacitorPlugin(name = "GoogleAuth")
 public class GoogleAuthPlugin extends Plugin {
     private CancellationSignal cancellationSignal;
-    private PluginCall pendingCall;
+    private final PendingRequest<PluginCall> pending = new PendingRequest<>();
+    private boolean destroyed;
 
     @PluginMethod
     public void isAvailable(PluginCall call) {
@@ -30,7 +31,11 @@ public class GoogleAuthPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void signIn(PluginCall call) {
+    public synchronized void signIn(PluginCall call) {
+        if (destroyed) {
+            call.reject("google-sign-in-cancelled");
+            return;
+        }
         String nonce = call.getString("nonce");
         if (BuildConfig.GOOGLE_AUTH_WEB_CLIENT_ID.isBlank()) {
             call.reject("google-auth-unavailable");
@@ -40,7 +45,7 @@ public class GoogleAuthPlugin extends Plugin {
             call.reject("google-nonce-missing");
             return;
         }
-        if (pendingCall != null) {
+        if (pending.isPending()) {
             call.reject("google-sign-in-pending");
             return;
         }
@@ -50,31 +55,35 @@ public class GoogleAuthPlugin extends Plugin {
         GetCredentialRequest request = new GetCredentialRequest.Builder()
             .addCredentialOption(option)
             .build();
-        pendingCall = call;
+        pending.start(call);
         cancellationSignal = new CancellationSignal();
-        CredentialManager.create(getContext()).getCredentialAsync(
-            getActivity(),
-            request,
-            cancellationSignal,
-            ContextCompat.getMainExecutor(getContext()),
-            new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
-                @Override
-                public void onResult(GetCredentialResponse response) {
-                    resolveCredential(response.getCredential());
-                }
+        try {
+            CredentialManager.create(getContext()).getCredentialAsync(
+                getActivity(),
+                request,
+                cancellationSignal,
+                ContextCompat.getMainExecutor(getContext()),
+                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(GetCredentialResponse response) {
+                        resolveCredential(call, response.getCredential());
+                    }
 
-                @Override
-                public void onError(GetCredentialException error) {
-                    rejectPending(error.getType());
+                    @Override
+                    public void onError(GetCredentialException error) {
+                        rejectPending(call, CredentialErrors.message(error));
+                    }
                 }
-            }
-        );
+            );
+        } catch (RuntimeException error) {
+            rejectPending(call, "google-sign-in-failed");
+        }
     }
 
-    private void resolveCredential(Credential credential) {
+    private void resolveCredential(PluginCall call, Credential credential) {
         if (!(credential instanceof CustomCredential customCredential)
             || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
-            rejectPending("google-credential-invalid");
+            rejectPending(call, "google-credential-invalid");
             return;
         }
         try {
@@ -83,33 +92,34 @@ public class GoogleAuthPlugin extends Plugin {
             );
             JSObject result = new JSObject();
             result.put("idToken", googleCredential.getIdToken());
-            resolvePending(result);
+            resolvePending(call, result);
         } catch (RuntimeException error) {
-            rejectPending("google-token-invalid");
+            rejectPending(call, "google-token-invalid");
         }
     }
 
-    private void resolvePending(JSObject result) {
-        if (pendingCall == null) return;
-        pendingCall.resolve(result);
-        clearPending();
-    }
-
-    private void rejectPending(String message) {
-        if (pendingCall == null) return;
-        pendingCall.reject(message == null ? "google-sign-in-failed" : message);
-        clearPending();
-    }
-
-    private void clearPending() {
-        pendingCall = null;
+    private synchronized void resolvePending(PluginCall expected, JSObject result) {
+        PluginCall call = pending.take(expected);
+        if (call == null) return;
         cancellationSignal = null;
+        call.resolve(result);
+    }
+
+    private synchronized void rejectPending(PluginCall expected, String message) {
+        PluginCall call = pending.take(expected);
+        if (call == null) return;
+        cancellationSignal = null;
+        call.reject(message);
     }
 
     @Override
-    protected void handleOnDestroy() {
-        if (cancellationSignal != null) cancellationSignal.cancel();
-        rejectPending("google-sign-in-cancelled");
+    protected synchronized void handleOnDestroy() {
+        destroyed = true;
+        PluginCall call = pending.take();
+        CancellationSignal signal = cancellationSignal;
+        cancellationSignal = null;
+        if (signal != null) signal.cancel();
+        if (call != null) call.reject("google-sign-in-cancelled");
         super.handleOnDestroy();
     }
 }

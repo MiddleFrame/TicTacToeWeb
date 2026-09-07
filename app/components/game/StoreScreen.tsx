@@ -1,3 +1,6 @@
+import type { RewardAttempt } from "../../game/account-operation-gate";
+import type { ProgressSyncState } from "../../game/progress-request-error";
+import { ProgressSyncNotice } from "./ProgressSyncNotice";
 import { useState, type CSSProperties } from "react";
 import { COLLECTIONS, collectionCards } from "../../game/collections";
 import { emptyPass, type ElementPasses } from "../../game/element-progression";
@@ -27,7 +30,9 @@ type StoreScreenProps = {
   onAmbientSuspendedChange: (suspended: boolean) => void;
   onBack: () => void;
   onBuy: (count: number, collectionId: string) => void;
-  onRewardAd: () => void;
+  beginRewardAd: () => RewardAttempt | null;
+  syncState: ProgressSyncState;
+  onRetrySync: () => void;
   onCompleteReveal: (lastKind: CardKind) => void;
   playDock: PlayCardDock;
   startRevealAudio: StartCardRevealAudio;
@@ -39,7 +44,7 @@ export function StoreScreen(props: StoreScreenProps) {
   const copy = progressionCopy[language];
   const [banner, setBanner] = useState(COLLECTIONS[0].id);
   const buy = (count: number, id: string) => { setBanner(id); props.onBuy(count, id); };
-  const rewardedAd = useRewardedAd(props.onRewardAd);
+  const rewardedAd = useRewardedAd(props.beginRewardAd);
   const canBuy = (count: number) => !props.transactionPending && props.coins >= cardPackCost(count);
   return (
     <main className="store-shell">
@@ -70,13 +75,15 @@ export function StoreScreen(props: StoreScreenProps) {
           </section>;
         })}
       </div>
-      {!props.cloudReady && <p role="status">{t("progressOffline")}</p>}
+      {!props.cloudReady && (props.syncState === "offline"
+        ? <p role="status">{t("progressOffline")}</p>
+        : <ProgressSyncNotice state={props.syncState} onRetry={props.onRetrySync} />)}
       {props.purchaseError && <p role="alert">{copy.failed}</p>}
       <section className="store-ad-panel">
         {rewardedAd.supported && (
           <button
             className="secondary-button store-reward-ad"
-            disabled={rewardedAd.showing || rewardedAd.privacyConfigured && !rewardedAd.loaded}
+            disabled={props.transactionPending || rewardedAd.showing || rewardedAd.privacyConfigured && !rewardedAd.loaded}
             onClick={rewardedAd.show}
           >
             {rewardedAd.showing
