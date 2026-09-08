@@ -22,6 +22,9 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SecureSessionPlugin.class);
         registerPlugin(GoogleAuthPlugin.class);
         super.onCreate(savedInstanceState);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().getSettings().setSupportZoom(false);
+        }
         WindowCompat.enableEdgeToEdge(getWindow());
     }
 

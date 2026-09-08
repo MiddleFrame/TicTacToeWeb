@@ -177,6 +177,7 @@ body {
 
 button {
   font: inherit;
+  touch-action: manipulation;
 }
 
 body {
@@ -822,6 +823,18 @@ body[data-game-screen="menu"]::before {
 .settings-link img {
   object-fit: contain;
   filter: brightness(0);
+}
+
+.store-shell {
+  padding-top: 0;
+}
+
+.store-shell > .section-screen-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: max(20px, env(safe-area-inset-top)) 0 16px;
+  background: var(--paper);
 }
 
 .settings-account { width: min(600px, 100%); margin: 24px auto 0; line-height: 1.5; }
