@@ -32,6 +32,10 @@
     public static final android.os.Parcelable$Creator *;
 }
 
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    public <init>();
+}
+
 -dontwarn com.unity3d.player.UnityPlayer
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket

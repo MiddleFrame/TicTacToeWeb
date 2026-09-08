@@ -1,0 +1,119 @@
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+ext.requiredRoomConstructors = ['androidx.work.impl.WorkDatabase_Impl', 'com.moloco.sdk.acm.db.MetricsDb_Impl']
+
+ext.inspectRoomConstructors = { byte[] data ->
+    def bytes = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    def u32 = { int position ->
+        if (position < 0 || position > data.length - 4) throw new GradleException('Truncated DEX table')
+        int value = bytes.getInt(position)
+        if (value < 0) throw new GradleException('Unsupported DEX table offset or size')
+        value
+    }
+    def uleb = { cursor ->
+        long value = 0
+        for (int shift = 0; shift <= 28; shift += 7) {
+            if (cursor[0] < 0 || cursor[0] >= data.length) throw new GradleException('Truncated DEX ULEB128')
+            int next = data[cursor[0]++] & 255
+            value |= (long) (next & 127) << shift
+            if (value > Integer.MAX_VALUE) throw new GradleException('Unsupported DEX ULEB128 size')
+            if ((next & 128) == 0) return (int) value
+        }
+        throw new GradleException('Invalid DEX ULEB128')
+    }
+    def stringAt = { int index ->
+        if (index < 0 || index >= u32(56)) throw new GradleException('Invalid DEX string index')
+        def cursor = [u32(u32(60) + index * 4)]
+        uleb(cursor)
+        int start = cursor[0]
+        int end = start
+        while (end < data.length && data[end] != 0) end++
+        if (end == data.length) throw new GradleException('Unterminated DEX string')
+        new String(data, start, end - start, 'UTF-8')
+    }
+    def typeAt = { int index ->
+        if (index < 0 || index >= u32(64)) throw new GradleException('Invalid DEX type index')
+        stringAt(u32(u32(68) + index * 4))
+    }
+    def found = [:]
+    int classCount = u32(96)
+    int classTable = u32(100)
+    if ((long) classTable + (long) classCount * 32 > data.length) throw new GradleException('Truncated DEX classes')
+    for (int i = 0; i < classCount; i++) {
+        int position = classTable + i * 32
+        String descriptor = typeAt(u32(position))
+        String name = requiredRoomConstructors.find { descriptor == 'L' + it.replace('.', '/') + ';' }
+        if (name == null) continue
+        found[name] = false
+        def cursor = [u32(position + 24)]
+        if (cursor[0] == 0) continue
+        def sizes = (0..<4).collect { uleb(cursor) }
+        for (int f = 0; f < sizes[0] + sizes[1]; f++) { uleb(cursor); uleb(cursor) }
+        int method = 0
+        for (int m = 0; m < sizes[2]; m++) {
+            method = Math.addExact(method, uleb(cursor))
+            int access = uleb(cursor)
+            int code = uleb(cursor)
+            if (method >= u32(88)) throw new GradleException('Invalid DEX method index')
+            int methodOffset = u32(92) + method * 8
+            int proto = Short.toUnsignedInt(bytes.getShort(methodOffset + 2))
+            if (proto >= u32(72)) throw new GradleException('Invalid DEX proto index')
+            int protoOffset = u32(76) + proto * 12
+            int parameters = u32(protoOffset + 8)
+            boolean noArguments = parameters == 0 || u32(parameters) == 0
+            if (stringAt(u32(methodOffset + 4)) == '<init>' && noArguments &&
+                typeAt(u32(protoOffset + 4)) == 'V' && (access & 1) != 0 && code > 0 && code < data.length) {
+                found[name] = true
+            }
+        }
+    }
+    found
+}
+
+ext.requireRoomConstructors = { found ->
+    def missing = requiredRoomConstructors.findAll { found[it] != true }
+    if (!missing.isEmpty()) throw new GradleException("Release DEX is missing public Room constructors: ${missing}")
+}
+
+tasks.register('testRoomConstructorVerification') {
+    doLast {
+        def fixture = { int access, boolean constructor, boolean arguments, boolean code ->
+            byte[] data = new byte[512]
+            def b = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            b.putInt(56, 3); b.putInt(60, 112)
+            b.putInt(64, 2); b.putInt(68, 124)
+            b.putInt(72, 1); b.putInt(76, 132)
+            b.putInt(88, 1); b.putInt(92, 144)
+            b.putInt(96, 1); b.putInt(100, 152)
+            b.putInt(112, 200); b.putInt(116, 300); b.putInt(120, 320)
+            b.putInt(124, 0); b.putInt(128, 2)
+            b.putInt(136, 1); b.putInt(140, arguments ? 340 : 0)
+            b.putInt(148, 1); b.putInt(176, 360)
+            ['Landroidx/work/impl/WorkDatabase_Impl;', constructor ? '<init>' : 'other', 'V'].eachWithIndex { s, i ->
+                int offset = [200, 300, 320][i]
+                data[offset] = (byte) s.length()
+                System.arraycopy(s.getBytes('UTF-8'), 0, data, offset + 1, s.length())
+            }
+            b.putInt(340, 1)
+            data[362] = 1
+            data[365] = (byte) access
+            data[366] = (byte) (code ? 100 : 0)
+            data
+        }
+        assert inspectRoomConstructors(fixture(1, true, false, true))['androidx.work.impl.WorkDatabase_Impl']
+        [[0, true, false, true], [1, false, false, true], [1, true, true, true], [1, true, false, false]].each { values ->
+            assert !inspectRoomConstructors(fixture(*values))['androidx.work.impl.WorkDatabase_Impl']
+        }
+        boolean rejected = false
+        try { inspectRoomConstructors(new byte[10]) } catch (GradleException expected) { rejected = true }
+        assert rejected
+        [[:], [(requiredRoomConstructors[0]): true], requiredRoomConstructors.collectEntries { [(it): false] }].each { missing ->
+            rejected = false
+            try { requireRoomConstructors(missing) } catch (GradleException expected) { rejected = true }
+            assert rejected
+        }
+        requireRoomConstructors(requiredRoomConstructors.collectEntries { [(it): true] })
+        logger.lifecycle('Room constructor DEX verification tests passed')
+    }
+}

@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-08",
+  "sourceBaselineCommit": "f7dced32a97725ff88624f4f549b8b8a3259704a",
+  "candidateVersionCode": 50,
+  "candidateAabSha256": "8a0f561eb62aea51fd23910f67ad869237ef9af1242f67a031517810f9348625",
+  "candidateApkSha256": "3e9245d11d826d37b6dd04d26c9ee0a162ce1b89affdb9e17cf2b7228f5b99f1",
+  "baselineAabSha256": "869c8b4fefdab7ccf7df90b603984862d5b64e83786b8a2b47d943ab9006841e",
+  "baselineAabBytes": 35063594,
+  "candidateAabBytes": 35170528,
+  "aabDeltaBytes": 106934,
+  "allPackagedDexTotals": {
+    "bytes": 40646900,
+    "classDefinitions": 42237,
+    "methodDefinitions": 243027,
+    "methodIdsIncludingReferences": 272975,
+    "fieldIdsIncludingReferences": 154527
+  },
+  "nativeUnchanged": true,
+  "bundledWebUnchanged": true,
+  "artProbe": {
+    "api": 35,
+    "targets": [
+      "androidx.work.impl.WorkDatabase_Impl",
+      "com.moloco.sdk.acm.db.MetricsDb_Impl"
+    ],
+    "play49": [
+      "NoSuchMethodException",
+      "NoSuchMethodException"
+    ],
+    "local49": [
+      "NoSuchMethodException",
+      "NoSuchMethodException"
+    ],
+    "local50": [
+      "PASS",
+      "PASS"
+    ],
+    "scope": "Class.forName and public no-argument constructor invocation from release APK on ART; no Activity, database open, or rewarded test"
+  },
+  "candidateFullActivityLaunch": "pending Play-signed APK 50",
+  "quality": {
+    "exitCode": 0,
+    "testsPassed": 231
+  },
+  "fullLint": {
+    "startedAt": "2026-09-08T08:14:06.5237826Z",
+    "regressionExit": 0,
+    "fullLintExit": 1
+  },
+  "archiveVerification": {
+    "apkZip16KiBAlignmentExit": 0,
+    "apkSignatureExit": 0,
+    "bundletoolExit": 0,
+    "apkBytes": 25494911,
+    "certificateMatchesPin": true,
+    "aabSignatureExit": 0
+  }
+}

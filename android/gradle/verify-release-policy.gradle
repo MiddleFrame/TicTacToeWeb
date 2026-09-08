@@ -6,6 +6,7 @@ import java.util.zip.ZipFile
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
 def policy = new JsonSlurper().parse(file("$rootDir/../android-config/release-policy.json"))
+apply from: "$rootDir/gradle/room-constructor-verification.gradle"
 
 def inspectElf = { byte[] data ->
     if (data.length < 64 || data[0] != 127 || data[1] != 69 || data[2] != 76 || data[3] != 70 ||
@@ -99,6 +100,7 @@ tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
 }
 
 tasks.register('testReleasePolicy') {
+    dependsOn('testRoomConstructorVerification')
     doLast {
         requireBudgets(policy.maximum)
         policy.maximum.each { name, limit ->
@@ -133,6 +135,7 @@ tasks.matching { it.name == 'bundleRelease' }.configureEach {
         def measured = [aabBytes: bundle.length(), allDexBytes: 0L, classDefinitions: 0L,
             methodIdSlots: 0L, nativeBytes: 0L, nativeCount: 0, webAssetBytes: 0L,
             allDexCount: 0, r8DexCount: 0, r8DexBytes: 0L, minimumNativeAlignment: Long.MAX_VALUE]
+        def roomConstructors = [:]
         new ZipFile(bundle).withCloseable { archive ->
             def metadataEntry = archive.getEntry('BUNDLE-METADATA/com.android.tools/r8.json')
             def metadata = archive.getInputStream(metadataEntry).withCloseable { new JsonSlurper().parse(it) }
@@ -189,11 +192,17 @@ tasks.matching { it.name == 'bundleRelease' }.configureEach {
                 if (entry.name ==~ /^[^\/]+\/dex\/[^\/]+\.dex$/) {
                     measured.r8DexBytes += entry.size
                     measured.r8DexCount++
+                    def constructors = archive.getInputStream(entry).withCloseable { inspectRoomConstructors(it.readAllBytes()) }
+                    if (constructors.keySet().any { roomConstructors.containsKey(it) }) {
+                        throw new GradleException('Duplicate Room database class in release DEX')
+                    }
+                    roomConstructors.putAll(constructors)
                 }
                 measured.classDefinitions += Integer.toUnsignedLong(bytes.getInt(96))
                 measured.methodIdSlots += Integer.toUnsignedLong(bytes.getInt(88))
             }
             if (nativeAbis != policy.abis.toSet()) throw new GradleException('Packaged native ABI set violates release policy')
+            requireRoomConstructors(roomConstructors)
         }
         measured.embeddedDexBytes = measured.allDexBytes - measured.r8DexBytes
         if (measured.allDexBytes == 0 || measured.nativeCount == 0 || measured.webAssetBytes == 0) {
