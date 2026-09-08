@@ -1,0 +1,452 @@
+{
+  "date": "2026-09-08",
+  "sourceBaseline": "2c1a9af8cff7538a92ae79a41584cdc85981eab5",
+  "preFixHead": "21be24ca4814e2e1f9ad3e1422a750622272ed1d",
+  "device": {
+    "model": "23013PC75G",
+    "android": 15,
+    "api": 35,
+    "installedVersionCode": 50,
+    "webView": "com.google.android.webview 151.0.7922.199",
+    "steps": [
+      "Open bot game: 2 cards, board and end-turn button fit",
+      "End turn once and wait for bot: 4 cards",
+      "End turn again and wait for bot: 5 cards, board and button clipped on right"
+    ],
+    "reproduced": true,
+    "fixedApkInstalled": false
+  },
+  "browserBaseline": [
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 97.34230041503906,
+      "rightmostCard": 295.65771484375,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 358,
+      "endTurnRight": 390,
+      "leftmostCard": -1.4361467361450195,
+      "rightmostCard": 405.4361572265625,
+      "horizontalFit": false
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 452,
+      "endTurnRight": 484,
+      "leftmostCard": -6.464378356933594,
+      "rightmostCard": 504.4643859863281,
+      "horizontalFit": false
+    }
+  ],
+  "browserFixed": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 0,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": null,
+      "rightmostCard": null,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 1,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": 122.27999877929688,
+      "rightmostCard": 197.72000122070312,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": 81.0975341796875,
+      "rightmostCard": 238.9024658203125,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 3,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": 39.96611785888672,
+      "rightmostCard": 280.03387451171875,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": 16.890785217285156,
+      "rightmostCard": 303.1092224121094,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 240,
+      "endTurnRight": 306,
+      "leftmostCard": 12.876506805419922,
+      "rightmostCard": 307.1235046386719,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 0,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": null,
+      "rightmostCard": null,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 1,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 149.5800018310547,
+      "rightmostCard": 243.4199981689453,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 97.34230041503906,
+      "rightmostCard": 295.65771484375,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 3,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 45.16815185546875,
+      "rightmostCard": 347.83184814453125,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 14.56385326385498,
+      "rightmostCard": 378.4205322265625,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        393,
+        851
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 347,
+      "endTurnRight": 379,
+      "leftmostCard": 9.535621643066406,
+      "rightmostCard": 383.4643859863281,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 0,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": null,
+      "rightmostCard": null,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 1,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": 159.0800018310547,
+      "rightmostCard": 252.9199981689453,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": 106.84230041503906,
+      "rightmostCard": 305.15771484375,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 3,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": 54.66815185546875,
+      "rightmostCard": 357.33184814453125,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": 14.56385326385498,
+      "rightmostCard": 397.4361572265625,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        412,
+        915
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 366,
+      "endTurnRight": 398,
+      "leftmostCard": 9.535621643066406,
+      "rightmostCard": 402.4643859863281,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 0,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": null,
+      "rightmostCard": null,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 1,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": 233.0800018310547,
+      "rightmostCard": 326.91998291015625,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": 180.84230041503903,
+      "rightmostCard": 379.15771484375,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 3,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": 128.66815185546875,
+      "rightmostCard": 431.3318481445313,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": 76.56385040283203,
+      "rightmostCard": 483.4361572265625,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        560,
+        900
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 510,
+      "endTurnRight": 546,
+      "leftmostCard": 24.535621643066406,
+      "rightmostCard": 535.46435546875,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 0,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": null,
+      "rightmostCard": null,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 1,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": 380.2799987792969,
+      "rightmostCard": 455.7200012207031,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 2,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": 339.0975341796875,
+      "rightmostCard": 496.9024658203125,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 3,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": 297.96612548828125,
+      "rightmostCard": 538.0338745117188,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 4,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": 256.8907775878906,
+      "rightmostCard": 579.1091918945312,
+      "horizontalFit": true
+    },
+    {
+      "viewport": [
+        851,
+        393
+      ],
+      "cards": 5,
+      "scale": 1,
+      "boardWidth": 101,
+      "endTurnRight": 684,
+      "leftmostCard": 215.8765106201172,
+      "rightmostCard": 620.1234741210938,
+      "horizontalFit": true
+    }
+  ]
+}

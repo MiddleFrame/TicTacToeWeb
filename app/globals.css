@@ -4382,6 +4382,7 @@ body[data-game-screen="menu"]::before {
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
 }
 
@@ -4668,6 +4669,8 @@ body[data-game-screen="menu"]::before {
 }
 
 .unity-hand-zone {
+  --hand-card-width: 102px;
+  --hand-card-height: 139px;
   width: 100%;
   min-height: 128px;
   align-self: end;
@@ -4675,9 +4678,7 @@ body[data-game-screen="menu"]::before {
 
 .unity-hand-cards {
   height: 136px;
-  display: flex;
-  align-items: end;
-  justify-content: center;
+  position: relative;
   touch-action: none;
 }
 
@@ -4685,18 +4686,19 @@ body[data-game-screen="menu"]::before {
   --fan-index: 0;
   --fan-center: 0;
   --fan-depth: 0;
-  width: 102px;
-  height: 139px;
-  margin-inline: -4px;
+  --hand-step: min(calc(var(--hand-card-width) - 8px), calc((100% - var(--hand-card-width) - 24px) / max(1, var(--fan-center) * 2)));
+  width: var(--hand-card-width);
+  height: var(--hand-card-height);
   padding: 15px 7px 8px;
-  position: relative;
+  position: absolute;
+  left: calc(50% - var(--hand-card-width) / 2 + (var(--fan-index) - var(--fan-center)) * var(--hand-step));
+  bottom: 0;
   z-index: calc(5 + var(--fan-index));
-  flex: 0 0 auto;
 }
 
 .unity-hand-card {
-  width: 102px;
-  height: 139px;
+  width: var(--hand-card-width);
+  height: var(--hand-card-height);
   padding: 15px 7px 8px;
   position: absolute;
   inset: 0;
@@ -5209,6 +5211,11 @@ body[data-game-screen="menu"]::before {
 }
 
 @media (max-height: 700px) {
+  .unity-hand-zone {
+    --hand-card-width: 82px;
+    --hand-card-height: 111px;
+  }
+
   .unity-game-stage {
     min-height: 540px;
   }
@@ -5228,8 +5235,6 @@ body[data-game-screen="menu"]::before {
   }
 
   .unity-hand-card {
-    width: 82px;
-    height: 111px;
     padding-top: 11px;
   }
 
