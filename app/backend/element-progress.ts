@@ -1,6 +1,6 @@
 import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types";
 import { STARTER_SELECTED_KINDS, type CardKind } from "../game/cards.ts";
-import { initialPasses, type ElementPasses } from "../game/element-progression.ts";
+import { initialPasses, normalizePasses, type ElementPasses } from "../game/element-progression.ts";
 import { initialDeckLibrary, type DeckLibrary } from "../game/saved-decks.ts";
 import { normalizeUnlockedKinds, parseStoredKinds } from "../game/player-progress.ts";
 
@@ -25,7 +25,7 @@ export async function readElementProgress(db: D1Database, userId: string): Promi
   const row = await db.prepare("SELECT state, revision FROM element_progress WHERE user_id = ?").bind(userId).first<{ state: string; revision: number }>();
   if (!row) throw new Error("progress-unavailable");
   const state = JSON.parse(row.state) as ProgressionState;
-  state.passes = { ...initialPasses(), ...state.passes };
+  state.passes = normalizePasses(state.passes);
   return { state, revision: row.revision };
 }
 

@@ -1,6 +1,6 @@
 import type { GameMode } from "../../../game/game-mode";
 import { useCallback, useRef, useState } from "react";
-import { initialPasses, type RewardTrack, type XpAward, type RoundOutcome } from "../../../game/element-progression";
+import { initialPasses, PROGRESSION_VERSION, type RewardTrack, type XpAward, type RoundOutcome } from "../../../game/element-progression";
 import { initialDeckLibrary, type DeckLibrary } from "../../../game/saved-decks";
 import type { PlayerProgressSnapshot } from "../../../game/player-progress";
 import type { CardKind } from "../../../game/cards";
@@ -30,8 +30,9 @@ export function useElementProgression(
     setError(false);
     try {
       assertMutable();
-      const operation = { id: crypto.randomUUID(), type: "progression" as const, input };
-      const result = applyLocalProgressionAction(readProgress(), input);
+      const versionedInput = { ...input, progressionVersion: PROGRESSION_VERSION };
+      const operation = { id: crypto.randomUUID(), type: "progression" as const, input: versionedInput };
+      const result = applyLocalProgressionAction(readProgress(), versionedInput);
       commitProgress(operation, result.progress);
       return true;
     } catch {
@@ -48,7 +49,7 @@ export function useElementProgression(
     const run = roundQueue.current.then(async () => {
       assertMutable();
       if (readProgress().accountId !== accountId) throw new Error("round-account-changed");
-      const input = { type: "record-round", ...(accountId === "local" ? {} : { accountId }), kinds, outcome, mode };
+      const input = { type: "record-round", ...(accountId === "local" ? {} : { accountId }), kinds, outcome, mode, progressionVersion: PROGRESSION_VERSION };
       const result = applyLocalProgressionAction(readProgress(), input);
       commitProgress({ id: operationId, type: "progression", input }, result.progress);
       return result.awards;

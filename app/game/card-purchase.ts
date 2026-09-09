@@ -1,10 +1,11 @@
 import type { CardKind } from "./cards.ts";
 import { CARD_COLLECTION, collectionCards } from "./collections.ts";
-import { DUPLICATE_XP } from "./element-progression.ts";
+import { DUPLICATE_XP, LEGACY_DUPLICATE_XP, PROGRESSION_VERSION } from "./element-progression.ts";
+import type { ProgressionVersion } from "./progression-curve.ts";
 
 export type CardDrop = { kind: CardKind; duplicate: boolean; collectionId: string; xp: number; xpBefore?: number; xpAfter?: number };
 
-export function drawCollectionPack(collectionId: string, count: number, owned: readonly CardKind[], random = Math.random): CardDrop[] {
+export function drawCollectionPack(collectionId: string, count: number, owned: readonly CardKind[], random = Math.random, version: ProgressionVersion = PROGRESSION_VERSION): CardDrop[] {
   if (!STORE_PACK_SIZES.some((size) => size === count)) throw new Error("invalid-pack-size");
   const pool = collectionCards(collectionId);
   const known = new Set(owned);
@@ -12,7 +13,7 @@ export function drawCollectionPack(collectionId: string, count: number, owned: r
     const kind = pool[Math.max(0, Math.min(pool.length - 1, Math.floor(random() * pool.length)))];
     const duplicate = known.has(kind);
     known.add(kind);
-    return { kind, duplicate, collectionId: CARD_COLLECTION[kind], xp: Number(duplicate) * DUPLICATE_XP };
+    return { kind, duplicate, collectionId: CARD_COLLECTION[kind], xp: Number(duplicate) * (version === 1 ? LEGACY_DUPLICATE_XP : DUPLICATE_XP) };
   });
 }
 

@@ -4,6 +4,7 @@ import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { CardKind } from "./cards";
 import type { CardDrop } from "./card-purchase";
 import type { XpAward } from "./element-progression";
+import { PROGRESSION_VERSION } from "./progression-curve";
 import type { PlayerProgressSnapshot } from "./player-progress";
 import { adoptCloudAccount, clearAccountCache } from "./account-cache";
 import type { ProgressOperation } from "./progress-operation-queue";
@@ -74,6 +75,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
       credentials: android ? "omit" : "same-origin",
       headers: {
         ...(init.body ? { "Content-Type": "application/json" } : {}),
+        "X-TTTP-Progression": String(PROGRESSION_VERSION),
         ...(android ? { "X-TTTP-Client": "android" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init.headers,
@@ -153,10 +155,11 @@ export async function purchaseCloudCardPack(
   count: number,
   collectionId: string,
   operationId = crypto.randomUUID(),
+  version: number = PROGRESSION_VERSION,
 ): Promise<PurchaseResponse> {
   return apiRequest<PurchaseResponse>("/api/store/purchase", {
     method: "POST",
-    body: JSON.stringify({ count, collectionId, operationId }),
+    body: JSON.stringify({ count, collectionId, operationId, progressionVersion: version }),
   });
 }
 
@@ -178,7 +181,7 @@ export async function grantCloudAdReward(
 
 export async function sendCloudProgressOperation(operation: ProgressOperation): Promise<ProgressResponse> {
   if (operation.type === "purchase") {
-    return purchaseCloudCardPack(operation.count, operation.collectionId, operation.id);
+    return purchaseCloudCardPack(operation.count, operation.collectionId, operation.id, operation.progressionVersion ?? 1);
   }
   if (operation.type === "reward-ad") {
     return { progress: await grantCloudAdReward(operation.id) };

@@ -1,3 +1,5 @@
+import { progressionResponse } from "./progression-response.ts";
+
 const ANDROID_ORIGINS = new Set([
   "http://localhost",
   "https://localhost",
@@ -8,7 +10,7 @@ function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin");
   if (!origin || !ANDROID_ORIGINS.has(origin)) return {};
   return {
-    "Access-Control-Allow-Headers": "Authorization, Content-Type, X-TTTP-Client",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type, X-TTTP-Client, X-TTTP-Progression",
     "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
     "Access-Control-Expose-Headers": "Retry-After",
     "Access-Control-Allow-Origin": origin,
@@ -22,7 +24,7 @@ export function apiJson(
   body: unknown,
   init: ResponseInit = {},
 ): Response {
-  return Response.json(body, {
+  return Response.json(progressionResponse(body, request.headers.get("X-TTTP-Progression")), {
     ...init,
     headers: {
       "Cache-Control": "no-store",

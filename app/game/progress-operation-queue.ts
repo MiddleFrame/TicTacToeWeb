@@ -4,7 +4,7 @@ import { isOperationId, type PlayerProgressSnapshot } from "./player-progress.ts
 export const PROGRESS_OPERATIONS_KEY = "tttp-progress-operations-v1";
 
 export type ProgressOperation =
-  | { id: string; type: "purchase"; count: number; collectionId: string }
+  | { id: string; type: "purchase"; count: number; collectionId: string; progressionVersion?: number }
   | { id: string; type: "reward-ad" }
   | { id: string; type: "progression"; input: Record<string, unknown> }
   | { id: string; type: "profile"; input: { nickname?: string; selectedKinds?: CardKind[] } };

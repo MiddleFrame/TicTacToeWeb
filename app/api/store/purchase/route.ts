@@ -2,11 +2,12 @@ import { purchaseCardPack } from "../../../backend/progress";
 import { authenticateRequest } from "../../../backend/request-session";
 import { apiJson, apiOptions } from "../../../backend/responses";
 import { isOperationId } from "../../../game/player-progress";
+import { progressionVersion } from "../../../game/progression-curve";
 
 export async function POST(request: Request): Promise<Response> {
   const authenticated = await authenticateRequest(request);
   if (!authenticated) return apiJson(request, { error: "unauthorized" }, { status: 401 });
-  let input: { operationId?: unknown; count?: unknown; collectionId?: unknown };
+  let input: { operationId?: unknown; count?: unknown; collectionId?: unknown; progressionVersion?: unknown };
   try {
     input = await request.json();
   } catch {
@@ -18,7 +19,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     return apiJson(
       request,
-      await purchaseCardPack(authenticated.account.id, input.operationId, input.count, input.collectionId),
+      await purchaseCardPack(authenticated.account.id, input.operationId, input.count, input.collectionId, progressionVersion(input.progressionVersion)),
     );
   } catch (error) {
     const code = error instanceof Error ? error.message : "purchase-failed";

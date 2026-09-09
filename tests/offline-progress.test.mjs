@@ -54,7 +54,7 @@ test("offline progression grants round XP, claims and ad currency locally", () =
   });
   assert.ok(round.awards.some((award) => award.amount > 0));
   const withLevel = structuredClone(round.progress);
-  withLevel.passes.regular.xp = 1000;
+  withLevel.passes.regular = { xp: 1000, premium: false, claimed: [] };
   const claimed = applyLocalProgressionAction(withLevel, {
     type: "claim",
     collectionId: "regular",

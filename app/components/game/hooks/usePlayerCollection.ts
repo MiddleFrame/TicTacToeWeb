@@ -17,6 +17,7 @@ import {
 import { createAccountOperationGate } from "../../../game/account-operation-gate";
 import { useCloudAccount } from "./useCloudAccount";
 import { CARD_PRICE, type CardDrop } from "../../../game/card-purchase";
+import { PROGRESSION_VERSION } from "../../../game/element-progression";
 import { commitLocalProgressOperation } from "../../../game/local-progress-commit";
 import type { PlayerProgressSnapshot } from "../../../game/player-progress";
 import type { PlaySound } from "./useGameAudio";
@@ -119,7 +120,7 @@ export function usePlayerCollection(playSfx: PlaySound) {
     setPurchaseError(false);
     try {
       cloud.assertMutable();
-      const operation = { id: crypto.randomUUID(), type: "purchase" as const, count, collectionId };
+      const operation = { id: crypto.randomUUID(), type: "purchase" as const, count, collectionId, progressionVersion: PROGRESSION_VERSION };
       const result = purchaseLocalCardPack(progressRef.current, operation.id, count, collectionId);
       commitProgress(operation, result.progress);
       setDrops(result.drops);

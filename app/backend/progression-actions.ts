@@ -1,7 +1,8 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { validRoundCards } from "../game/round-progression.ts";
 import { collectionById } from "../game/collections.ts";
-import { awardExperience, canClaim, claimableRewards, claimKey, PASS_REWARDS, ROUND_XP, roundExperience, type RewardTrack, type RoundOutcome } from "../game/element-progression.ts";
+import { awardExperience, canClaim, claimableRewards, claimKey, PROGRESSION_VERSION, rewardsFor, ROUND_XP, roundExperience, type RewardTrack, type RoundOutcome } from "../game/element-progression.ts";
+import { progressionVersion } from "../game/progression-curve.ts";
 import { validateLibrary } from "../game/saved-decks.ts";
 import { changeCoins, mutateElementProgress, type ProgressionContext } from "./element-progress.ts";
 
@@ -18,7 +19,7 @@ const claim: ActionHandler = (context, input) => {
   const level = Number(input.level);
   const track = input.track as RewardTrack;
   if (!canClaim(pass, level, track)) throw new Error("reward-unavailable");
-  const rewards = PASS_REWARDS[level - 1].rewards[track];
+  const rewards = rewardsFor(pass, level, track);
   for (const reward of rewards) rewardHandlers[reward.type](context, reward.amount);
   pass.claimed.push(claimKey(level, track));
   return { claimed: claimKey(level, track) };
@@ -54,7 +55,7 @@ const recordRound: ActionHandler = (context, input) => {
   const outcome = input.outcome as RoundOutcome;
   if (!Object.hasOwn(ROUND_XP, outcome)) throw new Error("invalid-round-outcome");
   const cards = validRoundCards(input.mode, input.kinds, context.unlockedKinds);
-  return { awards: awardExperience(context.state.passes, roundExperience(cards, outcome)) };
+  return { awards: awardExperience(context.state.passes, roundExperience(cards, outcome), progressionVersion(input.progressionVersion)) };
 };
 
 const actions: Record<string, ActionHandler> = {
@@ -66,7 +67,8 @@ const actions: Record<string, ActionHandler> = {
 };
 
 export async function applyProgressionAction(db: D1Database, userId: string, operationId: string, input: ActionInput) {
+  progressionVersion(input.progressionVersion);
   const handler = actions[String(input.type)];
   if (!Object.hasOwn(actions, String(input.type))) throw new Error("unknown-progression-action");
-  return mutateElementProgress(db, userId, operationId, (context) => handler(context, input));
+  return mutateElementProgress(db, userId, operationId, (context) => ({ ...handler(context, input), progressionVersion: PROGRESSION_VERSION }));
 }

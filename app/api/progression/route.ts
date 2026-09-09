@@ -16,7 +16,7 @@ export async function POST(request: Request): Promise<Response> {
     return apiJson(request, { ...result, progress: await getPlayerProgress(userId) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "progression-failed";
-    const publicErrors = ["account-changed", "invalid-operation", "input-too-large", "unknown-collection", "reward-unavailable", "invalid-deck-library", "invalid-round-outcome", "invalid-round-deck", "invalid-round-mode", "unknown-progression-action", "progress-busy"];
+    const publicErrors = ["account-changed", "invalid-operation", "input-too-large", "unknown-collection", "reward-unavailable", "invalid-deck-library", "invalid-round-outcome", "invalid-round-deck", "invalid-round-mode", "unknown-progression-action", "progress-busy", "unsupported-progression-version"];
     return apiJson(request, { error: publicErrors.includes(message) ? message : "progression-failed" }, { status: 400 });
   }
 }

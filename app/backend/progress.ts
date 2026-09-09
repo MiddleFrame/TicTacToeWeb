@@ -4,6 +4,7 @@ import { getDb, getRawDb } from "../../db";
 import { readElementProgress } from "./element-progress";
 import { purchaseCollectionPack } from "./collection-store";
 import { grantRewardedAd } from "./rewarded-rewards";
+import type { ProgressionVersion } from "../game/progression-curve";
 import {
   inventory,
   playerProgress,
@@ -112,9 +113,10 @@ export async function purchaseCardPack(
   operationId: string,
   countValue: number,
   collectionId: string,
+  version: ProgressionVersion,
 ) {
   await getPlayerProgress(userId);
-  const result = await purchaseCollectionPack(getRawDb(), userId, operationId, countValue, collectionId);
+  const result = await purchaseCollectionPack(getRawDb(), userId, operationId, countValue, collectionId, version);
   return { ...result, progress: await getPlayerProgress(userId) };
 }
 

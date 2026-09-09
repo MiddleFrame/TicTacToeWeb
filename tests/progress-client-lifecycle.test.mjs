@@ -5,6 +5,7 @@ import * as cache from "../app/game/account-cache.ts";
 import * as queue from "../app/game/progress-operation-queue.ts";
 import * as errors from "../app/game/progress-request-error.ts";
 import * as timeout from "../app/game/request-timeout.ts";
+import * as curve from "../app/game/progression-curve.ts";
 import { cacheLocalPlayerProgress, initialLocalPlayerProgress } from "../app/game/local-player-progress.ts";
 
 function clientFixture() {
@@ -23,6 +24,7 @@ function clientFixture() {
     "./progress-operation-queue": queue,
     "./progress-request-error": errors,
     "./request-timeout": timeout,
+    "./progression-curve": curve,
   }, {
     window: { localStorage: storage },
     process: { env: { NEXT_PUBLIC_API_ORIGIN: "https://test.invalid" } },

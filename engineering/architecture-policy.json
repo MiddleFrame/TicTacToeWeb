@@ -26,6 +26,7 @@
     "network-message.ts",
     "player-progress.ts",
     "progress-request-error.ts",
+    "progression-curve.ts",
     "progression-copy.ts",
     "roguelike.ts",
     "round-progression.ts",

@@ -3,7 +3,7 @@ import test from "node:test";
 import { CARD_COUNTS, DECK_BUILDING_KINDS, STARTER_SELECTED_KINDS } from "../app/game/cards.ts";
 import { CARD_COLLECTION, COLLECTIONS, collectionCards, compatibleDeck, compatibleElements } from "../app/game/collections.ts";
 import { drawCollectionPack, operationRandom } from "../app/game/card-purchase.ts";
-import { availableClaims, awardExperience, canClaim, claimableRewards, emptyPass, initialPasses, PASS_REWARDS, passLevel, roundExperience } from "../app/game/element-progression.ts";
+import { availableClaims, awardExperience, canClaim, claimableRewards, initialPasses, PASS_REWARDS, passLevel, roundExperience } from "../app/game/element-progression.ts";
 import { initialDeckLibrary, validateLibrary } from "../app/game/saved-decks.ts";
 import { validRoundCards } from "../app/game/round-progression.ts";
 import { purchaseCollectionPack } from "../app/backend/collection-store.ts";
@@ -32,7 +32,7 @@ async function setPass(db, sqlite, id, xp, premium = false) {
   sqlite.prepare("UPDATE element_progress SET state = ? WHERE user_id = 'owner'").run(JSON.stringify(state));
 }
 
-const action = (db, input, id = crypto.randomUUID()) => applyProgressionAction(db, "owner", id, input);
+const action = (db, input, id = crypto.randomUUID()) => applyProgressionAction(db, "owner", id, { progressionVersion: 2, ...input });
 
 test("each card belongs to exactly one configured banner and neutral cards combine with ice", () => {
   assert.deepEqual(Object.keys(CARD_COLLECTION).sort(), [...DECK_BUILDING_KINDS].sort());
@@ -46,7 +46,7 @@ test("each card belongs to exactly one configured banner and neutral cards combi
 
 test("draws include owned starter cards and duplicates within a five-card purchase", () => {
   const drops = drawCollectionPack("regular", 5, ["place"], () => 0);
-  assert.ok(drops.every((drop) => drop.duplicate && drop.xp === 100 && drop.kind === "place"));
+  assert.ok(drops.every((drop) => drop.duplicate && drop.xp === 30 && drop.kind === "place"));
   assert.throws(() => drawCollectionPack("fire", 1, []), /unknown-collection/);
   for (const count of [0, 2, 6, NaN, Infinity]) assert.throws(() => drawCollectionPack("regular", count, []));
 });
@@ -67,16 +67,16 @@ test("experience counts actual copies, separates paths, handles defeat and caps 
   const exact = validRoundCards("roguelike", ["place", "place", "freeze-3"], []);
   assert.deepEqual(roundExperience(exact, "win"), { regular: 6, ice: 3 });
   const passes = initialPasses();
-  passes.ice.xp = 99950;
+  passes.ice.xp = 123950;
   assert.equal(awardExperience(passes, { ice: 100 })[0].amount, 50);
-  assert.equal(passLevel(passes.ice.xp), 100);
+  assert.equal(passLevel(passes.ice.xp, "ice"), 100);
   assert.equal(awardExperience(passes, { ice: 100 })[0].amount, 0);
   assert.equal(PASS_REWARDS.length, 100);
   assert.equal(CARD_COUNTS.place, 5);
 });
 
-test("premium rewards stay locked, become retroactively available, and claims stay unique", () => {
-  const pass = { ...emptyPass(), xp: 2000 };
+test("legacy premium rewards stay locked, become retroactively available, and claims stay unique", () => {
+  const pass = { xp: 2000, premium: false, claimed: [] };
   assert.equal(availableClaims(pass).length, 2);
   assert.equal(canClaim(pass, 1, "premium"), false);
   pass.premium = true;
@@ -88,8 +88,8 @@ test("premium rewards stay locked, become retroactively available, and claims st
   assert.equal(canClaim(pass, 1.5, "free"), false);
 });
 
-test("claim all includes every accessible unclaimed reward", () => {
-  const pass = { ...emptyPass(), xp: 2000, premium: true, claimed: ["1:free"] };
+test("claim all includes every accessible unclaimed legacy reward", () => {
+  const pass = { xp: 2000, premium: true, claimed: ["1:free"] };
   assert.deepEqual(claimableRewards(pass), { keys: ["1:premium", "2:free", "2:premium"], coins: 60 });
 });
 
@@ -116,9 +116,9 @@ test("completed collection remains purchasable; dust, inventory and coins commit
   const operationId = crypto.randomUUID();
   const first = await purchaseCollectionPack(db, "owner", operationId, 5, "ice");
   assert.ok(first.drops.every((drop) => drop.duplicate));
-  assert.deepEqual(first.drops.map((drop) => drop.xpAfter), [100, 200, 300, 400, 500]);
+  assert.deepEqual(first.drops.map((drop) => drop.xpAfter), [30, 60, 90, 120, 150]);
   assert.deepEqual(await purchaseCollectionPack(db, "owner", operationId, 5, "ice"), first);
-  assert.equal((await readElementProgress(db, "owner")).state.passes.ice.xp, 500);
+  assert.equal((await readElementProgress(db, "owner")).state.passes.ice.xp, 150);
   assert.equal(sqlite.prepare("SELECT coins FROM wallets").get().coins, 1750);
   assert.equal(sqlite.prepare("SELECT count(*) AS n FROM reward_ledger").get().n, 1);
   assert.deepEqual(JSON.parse(sqlite.prepare("SELECT selected_kinds FROM player_progress").get().selected_kinds), STARTER_SELECTED_KINDS);

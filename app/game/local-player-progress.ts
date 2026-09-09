@@ -1,5 +1,4 @@
 import { cardPackCost, drawCollectionPack, operationRandom, type CardDrop } from "./card-purchase.ts";
-import { COLLECTIONS } from "./collections.ts";
 import { STARTER_SELECTED_KINDS, type CardKind } from "./cards.ts";
 import {
   awardExperience,
@@ -7,14 +6,15 @@ import {
   claimableRewards,
   claimKey,
   initialPasses,
-  PASS_LEVELS,
-  PASS_REWARDS,
+  normalizePasses,
+  PROGRESSION_VERSION,
+  rewardsFor,
   roundExperience,
-  type ElementPasses,
   type RewardTrack,
   type RoundOutcome,
   type XpAward,
 } from "./element-progression.ts";
+import { progressionVersion, type ProgressionVersion } from "./progression-curve.ts";
 import type { GameMode } from "./game-mode.ts";
 import {
   normalizeCoins,
@@ -43,24 +43,6 @@ export type LocalPurchaseResult = {
   purchasedKinds: CardKind[];
   awards: XpAward[];
 };
-
-function normalizedPasses(value: unknown): ElementPasses {
-  const source = value && typeof value === "object" ? value as Record<string, unknown> : {};
-  const passes = initialPasses();
-  for (const { id } of COLLECTIONS) {
-    const candidate = source[id];
-    if (!candidate || typeof candidate !== "object") continue;
-    const pass = candidate as Record<string, unknown>;
-    passes[id] = {
-      xp: Math.min(PASS_LEVELS * 1000, normalizeCoins(pass.xp)),
-      premium: pass.premium === true,
-      claimed: Array.isArray(pass.claimed)
-        ? [...new Set(pass.claimed.filter((item): item is string => typeof item === "string" && /^\d{1,3}:(free|premium)$/.test(item)))]
-        : [],
-    };
-  }
-  return passes;
-}
 
 function parsedSnapshot(storage: Pick<Storage, "getItem">): StoredProgress {
   try {
@@ -110,7 +92,7 @@ export function readLocalPlayerProgress(storage: Pick<Storage, "getItem">): Play
     selectedKinds: normalizeSelectedKinds(deckLibrary.decks.find((deck) => deck.id === deckLibrary.activeId)?.kinds, unlockedKinds),
     unlockedKinds,
     legacyImported: stored.legacyImported === true,
-    passes: normalizedPasses(stored.passes),
+    passes: normalizePasses(stored.passes),
     deckLibrary,
   };
 }
@@ -124,16 +106,18 @@ export function purchaseLocalCardPack(
   operationId: string,
   count: number,
   collectionId: string,
+  version: ProgressionVersion = PROGRESSION_VERSION,
 ): LocalPurchaseResult {
   const cost = cardPackCost(count);
   if (progress.coins < cost) throw new Error("insufficient-coins");
-  const drops = drawCollectionPack(collectionId, count, progress.unlockedKinds, operationRandom(operationId));
-  const passes = structuredClone(progress.passes);
+  const drops = drawCollectionPack(collectionId, count, progress.unlockedKinds, operationRandom(operationId), version);
+  const passes = normalizePasses(progress.passes);
   const unlockedKinds = [...progress.unlockedKinds];
   const awards: XpAward[] = [];
   for (const drop of drops) {
     if (drop.duplicate) {
-      const award = awardExperience(passes, { [collectionId]: drop.xp })[0];
+      const award = awardExperience(passes, { [collectionId]: drop.xp }, version)[0];
+      drop.xp = award.amount;
       drop.xpBefore = award.before;
       drop.xpAfter = award.after;
       awards.push(award);
@@ -162,7 +146,8 @@ export function applyLocalProgressionAction(
   input: ProgressionInput,
 ): { progress: PlayerProgressSnapshot; awards: XpAward[] } {
   const type = String(input.type);
-  const passes = structuredClone(progress.passes);
+  const passes = normalizePasses(progress.passes);
+  const version = progressionVersion(input.progressionVersion ?? PROGRESSION_VERSION);
   if (type === "save-decks") {
     if (!validateLibrary(input.library, progress.unlockedKinds)) throw new Error("invalid-deck-library");
     const library = structuredClone(input.library as DeckLibrary);
@@ -175,7 +160,7 @@ export function applyLocalProgressionAction(
     const track = input.track as RewardTrack;
     const pass = passes[collectionId];
     if (!pass || !canClaim(pass, level, track)) throw new Error("reward-unavailable");
-    const rewards = PASS_REWARDS[level - 1].rewards[track];
+    const rewards = rewardsFor(pass, level, track);
     pass.claimed.push(claimKey(level, track));
     const coins = rewards.reduce((total, reward) => total + (reward.currency === "coins" ? reward.amount : 0), progress.coins);
     return { progress: { ...progress, coins, passes }, awards: [] };
@@ -199,7 +184,7 @@ export function applyLocalProgressionAction(
     const outcome = input.outcome as RoundOutcome;
     if (!(["win", "loss", "draw"] as const).includes(outcome)) throw new Error("invalid-round-outcome");
     const cards = validRoundCards(input.mode as GameMode, input.kinds, progress.unlockedKinds);
-    const awards = awardExperience(passes, roundExperience(cards, outcome));
+    const awards = awardExperience(passes, roundExperience(cards, outcome), version);
     return { progress: { ...progress, passes }, awards };
   }
   throw new Error("unknown-progression-action");
