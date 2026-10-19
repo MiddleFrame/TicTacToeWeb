@@ -25,6 +25,7 @@ function fixture(fail = false) {
     "./StoreScreen": deferred("StoreScreen"),
     "./MatchmakingScreen": { MatchmakingScreen: () => React.createElement("div", null, "matchmaking") },
     "./MenuScreen": { MenuScreen: () => React.createElement("div", null, "menu") },
+    "./WorldControls": { WorldControls: () => React.createElement("div", null, "worlds") },
   });
   const props = { audio: {}, collection: { progression: {}, purchasedKinds: [] }, network: {}, onMenu() {} };
   return { loaded, GameNavigation, DeferredScreen, props };

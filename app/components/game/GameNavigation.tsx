@@ -4,6 +4,7 @@ import type { PhotonSnapshot } from "../../game/photon";
 import { DeferredScreen } from "./DeferredScreen";
 import { MatchmakingScreen } from "./MatchmakingScreen";
 import { MenuScreen } from "./MenuScreen";
+import { WorldControls, type WorldControlsProps } from "./WorldControls";
 import type { GameMode, GameScreen } from "./types";
 import type { useGameAudio } from "./hooks/useGameAudio";
 import type { usePlayerCollection } from "./hooks/usePlayerCollection";
@@ -17,7 +18,8 @@ type NavigationScreen = Exclude<GameScreen, "game">;
 type Collection = ReturnType<typeof usePlayerCollection>;
 type Audio = ReturnType<typeof useGameAudio>;
 
-type GameNavigationProps = {
+export type GameNavigationProps = {
+  worldControls: WorldControlsProps;
   audio: Pick<
     Audio,
     "playRevealDock" | "playSfx" | "setAmbientSuspended" | "startCardRevealAudio"
@@ -147,6 +149,7 @@ export function GameNavigation(props: GameNavigationProps) {
 
   return (
     <MenuScreen
+      worldControls={<WorldControls {...props.worldControls} />}
       passes={collection.progression.passes}
       onPass={(id) => { setPassId(id); onNavigate("passes"); }}
       coins={collection.coins}

@@ -1,0 +1,231 @@
+.world-controls {
+  width: min(100%, 350px);
+  display: grid;
+  gap: 8px;
+  margin: 25px auto 0;
+}
+
+.world-controls button {
+  width: 100%;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.world-switch {
+  min-height: 62px;
+  padding: 10px 16px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper, #fff);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.world-switch small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: .75;
+}
+
+.world-default {
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid currentColor;
+  color: inherit;
+  background: transparent;
+  font-size: 12px;
+}
+
+.world-default:disabled {
+  cursor: default;
+  opacity: .6;
+}
+
+.world-controls p {
+  font-size: 12px;
+}
+
+.world-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: #f4efe5;
+  color: #252b2d;
+}
+
+.world-loading-tttr {
+  color: #f3eedc;
+  background: radial-gradient(ellipse at top, #344c42, #101d1b 70%);
+}
+
+.world-loading h1 {
+  margin: 0;
+  font-size: clamp(22px, 6vw, 36px);
+}
+
+.world-loading > button {
+  width: min(280px, 100%);
+}
+
+.world-loading-mark {
+  display: flex;
+  gap: 18px;
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.world-loading-mark span {
+  animation: world-pulse 1.3s ease-in-out infinite alternate;
+}
+
+.world-loading-mark span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.world-loading-mark span:nth-child(3) {
+  animation-delay: .4s;
+}
+
+@keyframes world-pulse {
+  from { transform: translateY(0) rotate(-8deg); opacity: .35; }
+  to { transform: translateY(-14px) rotate(8deg); opacity: 1; }
+}
+
+.roguelite-home {
+  min-height: 100dvh;
+  width: 100%;
+  padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 85% 0%, #345245, transparent 65%), #101d1b;
+  color: #f3eedc;
+}
+
+.roguelite-top {
+  display: flex;
+  justify-content: space-between;
+  max-width: 520px;
+  margin: auto;
+  color: #b5c2a9;
+  font-size: 13px;
+  letter-spacing: .12em;
+}
+
+.roguelite-home-content {
+  max-width: 440px;
+  margin: clamp(40px, 9vh, 90px) auto 0;
+}
+
+.roguelite-home-content > .eyebrow {
+  color: #e3bc74;
+}
+
+.roguelite-home h1 {
+  margin: 16px 0;
+  font-size: clamp(30px, 8vw, 48px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  white-space: pre-line;
+}
+
+.roguelite-home p {
+  color: #bdcabe;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.roguelite-start {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 28px;
+  padding: 20px 22px;
+  border: 0;
+  border-radius: 14px;
+  background: #e3bc74;
+  color: #172820;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.roguelite-start:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+
+.roguelite-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 30px 0;
+}
+
+.roguelite-stats dt {
+  color: #bdcabe;
+  font-size: 11px;
+  min-height: 30px;
+}
+
+.roguelite-stats dd {
+  margin: 0;
+  font-size: 30px;
+}
+
+.roguelite-sections,
+.roguelite-options {
+  display: flex;
+  gap: 12px;
+}
+
+.roguelite-sections button,
+.roguelite-options button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #6a7f70;
+  border-radius: 10px;
+  background: transparent;
+  color: #f3eedc;
+  cursor: pointer;
+}
+
+.roguelite-home .roguelite-local-note,
+.roguelite-round-note {
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.roguelite-home .world-controls {
+  width: 100%;
+  max-width: none;
+}
+
+.roguelite-home .world-switch {
+  background: #f3eedc;
+  color: #172820;
+  border-color: #f3eedc;
+}
+
+.roguelite-placeholder {
+  margin: 30px 0;
+}
+
+.roguelite-save-error {
+  padding: 12px;
+  border: 1px solid #d17d68;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-loading-mark span { animation: none; }
+}

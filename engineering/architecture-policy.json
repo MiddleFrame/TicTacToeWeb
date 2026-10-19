@@ -22,6 +22,7 @@
     "element-progression.ts",
     "engine.ts",
     "game-mode.ts",
+    "game-world.ts",
     "game-presentation.ts",
     "network-message.ts",
     "player-progress.ts",
@@ -29,6 +30,7 @@
     "progression-curve.ts",
     "progression-copy.ts",
     "roguelike.ts",
+    "roguelite-progress.ts",
     "round-progression.ts",
     "round-transition.ts",
     "saved-decks.ts",
@@ -47,6 +49,7 @@
     "progress-operation-queue.ts",
     "progress-sync.ts",
     "request-timeout.ts",
+    "roguelite-storage.ts",
     "round-progress-client.ts"
   ],
   "platformPackages": ["react", "react-dom", "@capacitor", "photon-realtime", "next/navigation"],

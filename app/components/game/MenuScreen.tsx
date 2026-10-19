@@ -1,4 +1,5 @@
 import type { ElementPasses } from "../../game/element-progression";
+import type { ReactNode } from "react";
 import { PassShortcuts } from "./ElementProgress";
 import { useLocalization } from "../../game/localization";
 import { Image } from "./Image";
@@ -6,6 +7,7 @@ import { RulesModal } from "./RulesModal";
 import type { GameMode } from "./types";
 
 type MenuScreenProps = {
+  worldControls: ReactNode;
   passes: ElementPasses;
   onPass: (id: string) => void;
   coins: number;
@@ -49,7 +51,6 @@ export function MenuScreen(props: MenuScreenProps) {
         <Image className="unity-logo" src="/game/logo.png" alt="Tic Tac Toe Plus Card Game" width="420" height="160" priority unoptimized />
         <div className="unity-menu-actions">
           <button className="unity-menu-button unity-menu-button-main" onClick={() => props.onStart("bot")}>{t("bot")}</button>
-          <button className="unity-menu-button" onClick={() => props.onStart("roguelike")}>{t("roguelike")}</button>
           <button className="unity-menu-button" disabled={!props.photonAvailable} onClick={props.onStartOnline}>{t("multiplayer")}</button>
           <button className="unity-menu-button" onClick={() => props.onStart("local")}>{t("local")}</button>
           <button className="unity-menu-button" onClick={props.onOpenRules}>{t("guide")}</button>
@@ -70,6 +71,7 @@ export function MenuScreen(props: MenuScreenProps) {
             <span>{t("settings")}</span>
           </button>
         </nav>
+        {props.worldControls}
       </section>
       <RulesModal open={props.rulesOpen} onClose={props.onCloseRules} />
     </main>
