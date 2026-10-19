@@ -50,7 +50,8 @@
     "progress-sync.ts",
     "request-timeout.ts",
     "roguelite-storage.ts",
-    "round-progress-client.ts"
+    "round-progress-client.ts",
+    "world-preference.ts"
   ],
   "platformPackages": ["react", "react-dom", "@capacitor", "photon-realtime", "next/navigation"],
   "serverPackages": ["drizzle-orm", "cloudflare:workers", "node:"],

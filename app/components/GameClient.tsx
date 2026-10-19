@@ -18,7 +18,7 @@ function GameWorlds() {
     {Scene && <div className="game-world-scene" inert={world.loading || world.failed || undefined}><DeferredScreen key={world.scene!.world}
       onBack={() => world.switchWorld(world.scene!.world === "tttr" ? "tttp" : "tttr")}><Scene worldControls={{
       world: world.scene!.world, defaultWorld: world.defaultWorld,
-      onSwitch: world.switchWorld, onMakeDefault: world.makeDefault, error: world.preferenceFailed,
+      onSwitch: world.switchWorld, onMakeDefault: world.makeDefault, error: world.preferenceFailed, pending: world.preferencePending,
     }} /></DeferredScreen></div>}
     {(world.loading || world.failed) && <WorldLoading world={world.target} failed={world.failed}
       onRetry={world.retry} onBack={world.scene ? world.cancel : () => world.switchWorld(world.target === "tttr" ? "tttp" : "tttr")}

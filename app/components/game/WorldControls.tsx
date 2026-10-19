@@ -7,6 +7,7 @@ export type WorldControlsProps = {
   onSwitch: (world: GameWorld) => void;
   onMakeDefault: () => void;
   error: boolean;
+  pending: boolean;
 };
 
 export type WorldSceneProps = { worldControls: WorldControlsProps };
@@ -21,8 +22,8 @@ export function WorldControls(props: WorldControlsProps) {
       <span aria-hidden="true">⇄</span> {ru ? "Перейти в" : "Switch to"} {other.toUpperCase()}
       <small>{other === "tttr" ? "Tic Tac Toe Roguelite" : "Tic Tac Toe Plus"}</small>
     </button>
-    <button className="unity-menu-button world-default" disabled={isDefault} onClick={props.onMakeDefault}>
-      {isDefault ? (ru ? "✓ Открывается при запуске" : "✓ Opens on launch") : (ru ? "Открывать по умолчанию" : "Open by default")}
+    <button className="unity-menu-button world-default" disabled={isDefault || props.pending} onClick={props.onMakeDefault}>
+      {props.pending ? (ru ? "Сохраняем…" : "Saving…") : isDefault ? (ru ? "✓ Открывается при запуске" : "✓ Opens on launch") : (ru ? "Открывать по умолчанию" : "Open by default")}
     </button>
     {props.error && <p role="alert">{ru ? "Не удалось сохранить выбор. Проверьте доступ к хранилищу и повторите." : "Could not save your choice. Check storage access and try again."}</p>}
   </nav>;

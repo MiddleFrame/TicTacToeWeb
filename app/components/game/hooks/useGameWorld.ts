@@ -1,29 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
-import { gameWorld, type GameWorld } from "../../../game/game-world";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { GameWorld } from "../../../game/game-world";
+import { readWorldPreference, writeWorldPreference } from "../../../game/world-preference";
 import { loadWorld, type WorldScene } from "../world-scenes";
 
-const DEFAULT_WORLD_KEY = "tttp-default-world-v1";
-
 export function useGameWorld() {
+  const lifecycle = useRef(0);
+  const navigation = useRef(0);
+  const preferenceWrite = useRef(false);
+  const preferenceRevision = useRef(0);
   const [scene, setScene] = useState<WorldScene | null>(null);
   const [defaultWorld, setDefaultWorld] = useState<GameWorld>("tttp");
   const [request, setRequest] = useState<{ target: GameWorld; generation: number } | null>(null);
   const [failed, setFailed] = useState(false);
   const [preferenceFailed, setPreferenceFailed] = useState(false);
+  const [preferencePending, setPreferencePending] = useState(false);
   const switchWorld = useCallback((target: GameWorld) => {
+    navigation.current++;
     setFailed(false);
     setRequest((current) => ({ target, generation: (current?.generation ?? 0) + 1 }));
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const owner = ++lifecycle.current;
+    const initialNavigation = navigation.current;
+    const initialPreference = preferenceRevision.current;
+    const restore = async () => {
       let saved: GameWorld = "tttp";
-      try { saved = gameWorld(window.localStorage.getItem(DEFAULT_WORLD_KEY)); }
-      catch { setPreferenceFailed(true); }
-      setDefaultWorld(saved);
-      switchWorld(saved);
-    }, 0);
-    return () => window.clearTimeout(timer);
+      try { saved = await readWorldPreference(); }
+      catch { if (lifecycle.current === owner && preferenceRevision.current === initialPreference) setPreferenceFailed(true); }
+      if (lifecycle.current !== owner) return;
+      if (preferenceRevision.current === initialPreference) setDefaultWorld(saved);
+      if (navigation.current === initialNavigation) switchWorld(saved);
+    };
+    const timer = window.setTimeout(() => { void restore(); }, 0);
+    return () => { lifecycle.current = owner + 1; window.clearTimeout(timer); };
   }, [switchWorld]);
 
   useEffect(() => {
@@ -45,16 +55,26 @@ export function useGameWorld() {
   }, [request]);
 
   const makeDefault = () => {
-    if (!scene) return;
-    try {
-      window.localStorage.setItem(DEFAULT_WORLD_KEY, scene.world);
-      setDefaultWorld(scene.world);
+    if (!scene || preferenceWrite.current) return;
+    const owner = lifecycle.current;
+    const target = scene.world;
+    preferenceWrite.current = true;
+    setPreferencePending(true);
+    void writeWorldPreference(target).then(() => {
+      if (lifecycle.current !== owner) return;
+      preferenceRevision.current++;
+      setDefaultWorld(target);
       setPreferenceFailed(false);
-    } catch { setPreferenceFailed(true); }
+    }).catch(() => {
+      if (lifecycle.current === owner) setPreferenceFailed(true);
+    }).finally(() => {
+      preferenceWrite.current = false;
+      if (lifecycle.current === owner) setPreferencePending(false);
+    });
   };
 
   return {
-    scene, defaultWorld, preferenceFailed, makeDefault, switchWorld, failed,
+    scene, defaultWorld, preferenceFailed, preferencePending, makeDefault, switchWorld, failed,
     target: request?.target ?? scene?.world ?? defaultWorld,
     loading: !scene || request !== null && !failed,
     retry: () => switchWorld(request?.target ?? defaultWorld),

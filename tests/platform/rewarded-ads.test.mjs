@@ -8,7 +8,7 @@ test("Android integrates Yodo1 MAS rewarded ads without exposing ad identifiers"
   const gradle = await readProjectFile("android/app/build.gradle");
   const manifest = await readProjectFile("android/app/src/main/AndroidManifest.xml");
   const activity = await readProjectFile(
-    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java",
   );
 
   assert.match(gradle, /apply from: '\.\.\/gradle\/rewarded-networks.gradle'/);

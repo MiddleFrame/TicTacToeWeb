@@ -13,9 +13,13 @@ function worldFixture(saved = "tttp") {
   storage.setItem("tttp-default-world-v1", saved);
   clock.globals.window.localStorage = storage;
   const requests = [];
+  const preferences = {
+    readWorldPreference: async () => gameWorld(storage.getItem("tttp-default-world-v1")),
+    writeWorldPreference: async world => { storage.setItem("tttp-default-world-v1", world); },
+  };
   const { useGameWorld } = loadFrontendModule("app/components/game/hooks/useGameWorld.ts", {
     react: runtime.react,
-    "../../../game/game-world": { gameWorld },
+    "../../../game/world-preference": preferences,
     "../world-scenes": { loadWorld: (world) => {
       const result = deferred();
       requests.push({ world, ...result });
@@ -28,7 +32,7 @@ function worldFixture(saved = "tttp") {
     await clock.tickTimer();
     return render();
   };
-  return { render, complete, requests, clock, storage, runtime };
+  return { render, complete, requests, clock, storage, runtime, preferences };
 }
 
 test("startup restores TTTR before requesting either game and persists a deliberate default", async () => {
@@ -46,6 +50,7 @@ test("startup restores TTTR before requesting either game and persists a deliber
   world = await f.complete(f.requests[1]);
   assert.equal(f.storage.getItem("tttp-default-world-v1"), "tttr");
   world.makeDefault();
+  await flushMicrotasks();
   assert.equal(f.render().defaultWorld, "tttp");
   assert.equal(f.storage.getItem("tttp-default-world-v1"), "tttp");
   f.runtime.unmount();
@@ -126,6 +131,95 @@ test("unavailable preference storage falls back to Plus and does not report a sa
   world.makeDefault();
   assert.equal(f.render().preferenceFailed, true);
   f.runtime.unmount();
+});
+
+test("a pending native preference restore cannot load a scene after its owner unmounts", async () => {
+  const f = worldFixture();
+  const read = deferred();
+  f.preferences.readWorldPreference = () => read.promise;
+  f.render();
+  await f.clock.tickTimer();
+  assert.equal(f.requests.length, 0);
+  f.runtime.unmount();
+  const writes = f.runtime.stateWrites;
+  read.resolve("tttr");
+  await flushMicrotasks();
+  assert.equal(f.requests.length, 0);
+  assert.equal(f.runtime.stateWrites, writes);
+});
+
+test("a late startup preference cannot replace a newer player navigation", async () => {
+  const f = worldFixture();
+  const read = deferred();
+  f.preferences.readWorldPreference = () => read.promise;
+  f.render();
+  await f.clock.tickTimer();
+  f.render().switchWorld("tttr");
+  f.render();
+  read.resolve("tttp");
+  await flushMicrotasks();
+  assert.equal(f.render().target, "tttr");
+  assert.equal(f.render().defaultWorld, "tttp");
+  assert.deepEqual(f.requests.map(request => request.world), ["tttr"]);
+  f.runtime.unmount();
+});
+
+test("a late startup read cannot replace an acknowledged newer default", async () => {
+  for (const failure of [false, true]) {
+    const f = worldFixture();
+    const read = deferred();
+    f.preferences.readWorldPreference = () => read.promise;
+    f.render(); await f.clock.tickTimer();
+    f.render().switchWorld("tttr"); f.render();
+    const world = await f.complete(f.requests[0]);
+    world.makeDefault(); await flushMicrotasks();
+    assert.equal(f.render().defaultWorld, "tttr");
+    if (failure) read.reject(new Error("late bridge failure"));
+    else read.resolve("tttp");
+    await flushMicrotasks();
+    assert.equal(f.render().defaultWorld, "tttr");
+    assert.equal(f.render().preferenceFailed, false);
+    assert.equal(f.storage.getItem("tttp-default-world-v1"), "tttr");
+    f.runtime.unmount();
+  }
+});
+
+test("a native default write stays pending until acknowledgement and failed persistence remains retryable", async () => {
+  const f = worldFixture("tttr");
+  f.render(); await f.clock.tickTimer(); f.render();
+  let world = await f.complete(f.requests[0]);
+  world.switchWorld("tttp"); f.render();
+  world = await f.complete(f.requests[1]);
+  const write = deferred();
+  const calls = [];
+  f.preferences.writeWorldPreference = target => { calls.push(target); return write.promise; };
+  world.makeDefault(); world.makeDefault();
+  assert.deepEqual(calls, ["tttp"]);
+  assert.equal(f.render().preferencePending, true);
+  assert.equal(f.render().defaultWorld, "tttr");
+  write.reject(new Error("disk full")); await flushMicrotasks();
+  world = f.render();
+  assert.equal(world.preferencePending, false);
+  assert.equal(world.preferenceFailed, true);
+  assert.equal(world.defaultWorld, "tttr");
+  f.preferences.writeWorldPreference = async target => { calls.push(target); };
+  world.makeDefault(); await flushMicrotasks();
+  assert.equal(f.render().defaultWorld, "tttp");
+  assert.equal(f.render().preferenceFailed, false);
+  f.runtime.unmount();
+});
+
+test("a late native default write cannot update an unmounted world owner", async () => {
+  const f = worldFixture();
+  f.render(); await f.clock.tickTimer(); f.render();
+  const world = await f.complete(f.requests[0]);
+  const write = deferred();
+  f.preferences.writeWorldPreference = () => write.promise;
+  world.makeDefault();
+  f.runtime.unmount();
+  const writes = f.runtime.stateWrites;
+  write.resolve(); await flushMicrotasks();
+  assert.equal(f.runtime.stateWrites, writes);
 });
 
 test("TTTR stage progress is durable, independent of every Plus key and replay safe", () => {

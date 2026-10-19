@@ -7,7 +7,7 @@ const readProjectFile = (path) => readFile(new URL(`../../${path}`, import.meta.
 test("Android uses Credential Manager instead of legacy Google Sign-In", async () => {
   const [plugin, activity, gradle, example] = await Promise.all([
     readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/GoogleAuthPlugin.java"),
-    readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java"),
+    readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java"),
     readProjectFile("android/app/build.gradle"),
     readProjectFile("android-config/google-auth.properties.example"),
   ]);

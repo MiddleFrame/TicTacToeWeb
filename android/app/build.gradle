@@ -80,6 +80,14 @@ android {
         buildConfig true
         resValues true
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                maxHeapSize = '1536m'
+            }
+        }
+    }
 }
 
 repositories {
@@ -100,6 +108,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
+    testImplementation 'org.robolectric:robolectric:4.17'
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')

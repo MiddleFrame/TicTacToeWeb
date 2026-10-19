@@ -43,7 +43,7 @@ test("Android release excludes site-only assets and shrinks native code", async 
 
 test("Android uses edge-to-edge rendering in portrait orientation", async () => {
   const activity = await readProjectFile(
-    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java",
   );
   const manifest = await readProjectFile("android/app/src/main/AndroidManifest.xml");
 
@@ -53,7 +53,7 @@ test("Android uses edge-to-edge rendering in portrait orientation", async () => 
 
 test("Android keeps the branded bootstrap splash visible for two seconds", async () => {
   const activity = await readProjectFile(
-    "android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java",
+    "android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java",
   );
 
   assert.match(activity, /SPLASH_DURATION_MS = 2000/);
@@ -89,7 +89,7 @@ test("mobile browsers cannot zoom the web game", async () => {
 });
 
 test("native Activity declares both game lifecycle bridge events", async () => {
-  const activity = await readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java");
+  const activity = await readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java");
   assert.match(activity, /public void onPause\(\)/);
   assert.match(activity, /public void onResume\(\)/);
   assert.match(activity, /tttp-app-pause/);

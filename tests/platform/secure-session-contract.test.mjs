@@ -6,7 +6,7 @@ const readProjectFile = (path) => readFile(new URL(`../../${path}`, import.meta.
 test("native session declarations wire Keystore, AES-GCM and bridge registration", async () => {
   const [plugin, activity, viteConfig] = await Promise.all([
     readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/SecureSessionPlugin.java"),
-    readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/MainActivity.java"),
+    readProjectFile("android/app/src/main/java/com/MiddleFrame/Tictactoe/GameActivity.java"),
     readProjectFile("vite.android.config.ts"),
   ]);
 
