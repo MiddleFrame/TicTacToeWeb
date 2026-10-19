@@ -79,7 +79,7 @@ export function PassScreen({ progression, initialId, onBack }: Props) {
         {progression.error && failedClaim && <p className="pass-action-error" role="alert"><span>{copy.failed}</span><button className="secondary-button" onClick={() => void runClaim(failedClaim)}>{copy.retry}</button></p>}
       </div>
       <div className="pass-track-head"><span>{copy.level}</span><strong>{copy.free}</strong><strong>{copy.premium}</strong></div>
-      <div className="pass-levels">
+      <div className="pass-levels" role="region" aria-label={copy.passes} tabIndex={0}>
         {PASS_REWARDS.map(({ level }) => <div className={`pass-level ${level === currentLevel ? "current" : ""}`} id={`pass-level-${id}-${level}`} key={level}>
           <strong className="pass-level-number"><span>{level}</span>{level === currentLevel && <small>{copy.current}</small>}</strong>
           {(["free", "premium"] as RewardTrack[]).map((track) => <RewardCell key={track} level={level} track={track} />)}

@@ -15,7 +15,9 @@ export function DeckLibraryControls({ progression, selectedKinds }: { progressio
     const id = crypto.randomUUID();
     void saveLibrary({ activeId: id, decks: [...currentDecks(), { id, name: String(deckLibrary.decks.length + 1), kinds: [...selectedKinds] }] });
   };
-  return <section className="deck-library-controls">
+  return <details className="deck-library-panel">
+    <summary>{copy.deckSelect}: <strong>{active.name}</strong></summary>
+    <section className="deck-library-controls">
     <label>{copy.deckSelect}<select value={active.id} disabled={busy} onChange={(event) => void saveLibrary({ activeId: event.target.value, decks: currentDecks() })}>
       {deckLibrary.decks.map((deck) => <option value={deck.id} key={deck.id}>{deck.name}</option>)}
     </select></label>
@@ -26,5 +28,5 @@ export function DeckLibraryControls({ progression, selectedKinds }: { progressio
         void saveLibrary({ activeId: decks[0].id, decks });
       }}>{copy.deleteDeck}</button></div>
     <p>{copy.deckRule}</p>{error && <p role="alert">{copy.failed}</p>}
-  </section>;
+  </section></details>;
 }

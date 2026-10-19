@@ -59,7 +59,7 @@ export function StoreScreen(props: StoreScreenProps) {
           <Image src="/game/menu/coin.png" alt="" width="25" height="25" unoptimized />
         </strong>
       </header>
-      <div className="collection-banners">
+      <div className="collection-banners" role="region" aria-label={t("store")} tabIndex={0}>
         {COLLECTIONS.map((collection) => {
           const remaining = collectionCards(collection.id).filter((kind) => !props.unlockedKinds.includes(kind)).length;
           return <section key={collection.id} className={`collection-banner ${remaining === 0 ? "collection-complete" : ""}`} style={{ "--element-color": collection.color } as CSSProperties}>

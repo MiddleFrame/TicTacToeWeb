@@ -59,6 +59,7 @@ export function DeckScreen({ progression, selectedKinds, unlockedKinds, onBack, 
           </button>
         ))}
       </nav>
+      <section className="deck-card-list" role="region" aria-label={t("allCards")} tabIndex={0}>
       <DeckCardGrid
         kinds={visibleKinds}
         onInspect={(kind, origin) => setInspection({ kind, origin })}
@@ -66,6 +67,7 @@ export function DeckScreen({ progression, selectedKinds, unlockedKinds, onBack, 
         selectedKinds={selectedKinds}
         unlockedKinds={unlockedKinds}
       />
+      </section>
       <footer className="collection-footer">
         <span>{t("deckCopies")}: {cardCount}</span>
         <button className="primary-button" disabled={progression.busy} onClick={onSave}>{t("saveDeck")}</button>

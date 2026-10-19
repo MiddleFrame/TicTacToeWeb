@@ -28,6 +28,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
           <h1>{t("settings")}</h1>
         </div>
       </header>
+      <div className="settings-content" role="region" aria-label={t("settings")} tabIndex={0}>
       <section className="settings-panel">
         <label className="settings-row settings-name-row">
           <span>{t("playerName")}</span>
@@ -80,6 +81,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
       {!props.googlePending && <AccountDeletionPanel english={language === "en"} />}
       <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/delete-account" target="_blank" rel="noreferrer">{language === "ru" ? "Удаление через сайт и поддержка" : "Account deletion website and support"}</a></p>
       <p><a href="https://tic-tac-toe-plus-alpha.stofs.chatgpt.site/privacy" target="_blank" rel="noreferrer">{language === "ru" ? "Политика конфиденциальности" : "Privacy policy"}</a></p>
+      </div>
       </div>
     </main>
   );

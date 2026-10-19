@@ -5,6 +5,7 @@ import { useLocalization } from "../../game/localization";
 import { Image } from "./Image";
 import { RulesModal } from "./RulesModal";
 import type { GameMode } from "./types";
+import { MenuFrame } from "./MenuFrame";
 
 type MenuScreenProps = {
   worldControls: ReactNode;
@@ -25,30 +26,9 @@ type MenuScreenProps = {
 export function MenuScreen(props: MenuScreenProps) {
   const { t } = useLocalization();
   return (
-    <main className="unity-menu-shell">
-      <header className="unity-menu-top">
-        <button className="unity-top-action" disabled>
-          <Image src="/game/menu/friends.png" alt="" width="64" height="64" unoptimized />
-          <span>{t("friends")}</span>
-          <small>{t("inDevelopment")}</small>
-        </button>
-        <a
-          className="unity-discord-link"
-          href="https://discord.gg/4PJbjRZtkU"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Открыть Discord проекта"
-        >
-          <Image className="unity-discord" src="/game/menu/discord-white.svg" alt="Discord" width="58" height="58" priority unoptimized />
-        </a>
-        <span className="unity-coins">
-          {props.coins}
-          <Image src="/game/menu/coin.png" alt="" width="32" height="32" unoptimized />
-        </span>
-      </header>
-
-      <section className="unity-menu-content">
-        <Image className="unity-logo" src="/game/logo.png" alt="Tic Tac Toe Plus Card Game" width="420" height="160" priority unoptimized />
+    <>
+    <MenuFrame coins={props.coins} worldControls={props.worldControls}
+      brand={<Image className="unity-logo" src="/game/logo.png" alt="Tic Tac Toe Plus Card Game" width="420" height="160" priority unoptimized />}>
         <div className="unity-menu-actions">
           <button className="unity-menu-button unity-menu-button-main" onClick={() => props.onStart("bot")}>{t("bot")}</button>
           <button className="unity-menu-button" disabled={!props.photonAvailable} onClick={props.onStartOnline}>{t("multiplayer")}</button>
@@ -71,9 +51,8 @@ export function MenuScreen(props: MenuScreenProps) {
             <span>{t("settings")}</span>
           </button>
         </nav>
-        {props.worldControls}
-      </section>
+    </MenuFrame>
       <RulesModal open={props.rulesOpen} onClose={props.onCloseRules} />
-    </main>
+    </>
   );
 }

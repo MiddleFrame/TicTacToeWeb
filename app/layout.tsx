@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./worlds.css";
 import "./progression.css";
+import "./viewport.css";
 
 export const viewport: Viewport = {
   width: "device-width",

@@ -5,6 +5,7 @@ import { LocalizationProvider } from "../app/game/localization";
 import "../app/globals.css";
 import "../app/worlds.css";
 import "../app/progression.css";
+import "../app/viewport.css";
 
 document.documentElement.dataset.platform = "android";
 

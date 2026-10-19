@@ -86,5 +86,5 @@ test("the application session wraps the dynamic world selection instead of mount
   });
   const root = GameClient();
   assert.equal(root.type, f.GameSessionProvider);
-  assert.equal(typeof root.props.children.type, "function");
+  assert.equal(typeof root.props.children.props.children.type, "function");
 });

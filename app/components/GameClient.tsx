@@ -7,7 +7,7 @@ import { GameSessionProvider } from "./game/GameSessionProvider";
 import { useLocalization } from "../game/localization";
 
 export function GameClient() {
-  return <GameSessionProvider><GameWorlds /></GameSessionProvider>;
+  return <GameSessionProvider><div className="game-viewport"><GameWorlds /></div></GameSessionProvider>;
 }
 
 function GameWorlds() {
@@ -15,7 +15,7 @@ function GameWorlds() {
   const world = useGameWorld();
   const Scene = world.scene?.component;
   return <>
-    {Scene && <div inert={world.loading || world.failed || undefined}><DeferredScreen key={world.scene!.world}
+    {Scene && <div className="game-world-scene" inert={world.loading || world.failed || undefined}><DeferredScreen key={world.scene!.world}
       onBack={() => world.switchWorld(world.scene!.world === "tttr" ? "tttp" : "tttr")}><Scene worldControls={{
       world: world.scene!.world, defaultWorld: world.defaultWorld,
       onSwitch: world.switchWorld, onMakeDefault: world.makeDefault, error: world.preferenceFailed,

@@ -1,0 +1,127 @@
+body:has(.game-viewport) {
+  height: 100dvh;
+  overflow: clip;
+  overscroll-behavior: none;
+}
+
+.game-viewport {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: clip;
+}
+
+.game-world-scene {
+  height: 100%;
+  min-height: 0;
+  overflow: clip;
+}
+
+.game-viewport .unity-menu-shell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.game-viewport .unity-menu-top { min-height: clamp(40px, 7dvh, 62px); }
+.game-viewport .unity-discord-link { width: 44px; height: 44px; }
+.game-viewport .unity-discord { width: 40px; height: 40px; }
+.game-viewport .unity-top-action img { height: 28px; width: 34px; }
+.game-viewport .unity-menu-content {
+  min-height: 0;
+  padding: clamp(4px, 1dvh, 12px) 5% 0;
+  justify-content: space-evenly;
+  gap: clamp(5px, 1dvh, 12px);
+}
+
+.game-viewport .unity-logo { width: auto; max-width: 88%; max-height: clamp(44px, 10dvh, 110px); flex-shrink: 0; }
+.game-viewport .unity-menu-content > .unity-menu-actions { width: min(310px, 94%); margin-top: 0; gap: clamp(4px, .8dvh, 8px); }
+.game-viewport .unity-menu-button { min-height: clamp(30px, 5dvh, 38px); }
+.game-viewport .unity-menu-button-main { min-height: clamp(42px, 7dvh, 60px); }
+.game-viewport .unity-menu-content > .pass-shortcuts { margin: 0; padding-top: 0; }
+.game-viewport .unity-menu-content > .unity-menu-nav { margin-top: 0; padding-top: 0; flex-shrink: 0; }
+.game-viewport .unity-menu-nav img { height: clamp(28px, 5.5dvh, 64px); }
+
+.game-viewport .collection-shell,
+.game-viewport .pass-shell,
+.game-viewport .settings-shell,
+.game-viewport .store-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: clip;
+  padding-bottom: max(12px, var(--safe-area-bottom));
+}
+
+.game-viewport .collection-shell > *,
+.game-viewport .pass-shell > *,
+.game-viewport .settings-shell > *,
+.game-viewport .store-shell > * {
+  flex-shrink: 0;
+}
+
+.game-viewport .collection-shell > .deck-card-list,
+.game-viewport .pass-shell > .pass-levels,
+.game-viewport .store-shell > .collection-banners,
+.game-viewport .settings-content {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.game-viewport .collection-grid { align-content: start; padding: 6px 10px 12px 0; }
+.game-viewport .collection-footer { position: static; width: min(1040px, 100%); margin: 8px auto 0; padding: 8px 0 0; }
+.game-viewport .collection-shell { padding-bottom: max(12px, var(--safe-area-bottom)); }
+.game-viewport .deck-library-controls { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-block: 10px; padding: 10px; }
+.game-viewport .deck-library-panel { width: min(1040px, 100%); margin: 8px auto; }
+.game-viewport .deck-library-panel > summary { padding: 8px 10px; border: 1px solid var(--muted); border-radius: 8px; background: var(--paper); font-size: 12px; cursor: pointer; overflow-wrap: anywhere; }
+.game-viewport .deck-library-panel .deck-library-controls { max-height: 30dvh; overflow: auto; overscroll-behavior: contain; }
+.game-viewport .deck-library-controls label { min-width: 0; gap: 4px; font-size: 11px; }
+.game-viewport .deck-library-controls input, .game-viewport .deck-library-controls select { min-width: 0; min-height: 34px; padding: 6px; }
+.game-viewport .deck-library-controls > div, .game-viewport .deck-library-controls > p { grid-column: 1 / -1; }
+.game-viewport .deck-library-controls > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.game-viewport .deck-library-controls button { min-height: 32px; margin: 0; padding: 5px; font-size: 11px; }
+.game-viewport .deck-library-controls p { font-size: 11px; }
+.game-viewport .collection-lead { margin-block: 4px 8px; font-size: 11px; }
+.game-viewport .deck-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-block: 0 8px; gap: 5px; }
+.game-viewport .deck-filters button { padding: 4px; font-size: 10px; }
+.game-viewport .pass-shell > .pass-shortcuts { margin: 8px 0 0; padding-top: 0; align-self: center; }
+.game-viewport .pass-overview { margin-top: 10px; padding: 10px 12px; }
+.game-viewport .pass-overview-footer { margin-top: 6px; }
+.game-viewport .pass-rules { margin-block: 6px; font-size: 12px; }
+.game-viewport .pass-track-head { position: static; padding-block: 10px; }
+.game-viewport .settings-panel { margin-top: 12px; }
+.game-viewport .settings-content { margin-top: 10px; }
+.game-viewport .collection-banners { margin: 12px 0; align-content: start; grid-auto-rows: max-content; padding-right: 6px; }
+.game-viewport .store-shell > .section-screen-header { position: static; }
+.game-viewport .unity-game-shell { height: 100%; min-height: 0; }
+.game-viewport .unity-game-stage { height: 100%; min-height: 0; }
+.game-viewport .roguelike-backdrop { overflow: clip; }
+.game-viewport .roguelike-modal { display: flex; flex-direction: column; max-height: calc(100dvh - 48px); padding: clamp(12px, 4dvh, 28px); overflow: clip; }
+.game-viewport .roguelike-modal > * { flex-shrink: 0; }
+.game-viewport .roguelike-modal > dl, .game-viewport .roguelike-modal > p { min-height: 0; flex: 0 1 auto; overflow: auto; overscroll-behavior: contain; }
+.game-viewport .roguelike-modal h2 { margin: 0 0 6px; font-size: clamp(20px, 6dvh, 34px); }
+.game-viewport .roguelike-card-modal { display: flex; flex-direction: column; overflow: clip; }
+.game-viewport .roguelike-card-grid { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px; }
+.game-viewport .rules-modal { display: flex; flex-direction: column; max-height: calc(100dvh - 48px); overflow: clip; }
+.game-viewport .rules-modal > h2, .game-viewport .rules-modal > .eyebrow { flex-shrink: 0; }
+.game-viewport .rules-modal ol { min-height: 0; margin-bottom: 0; overflow: auto; overscroll-behavior: contain; }
+
+@media (max-height: 600px) {
+  .game-viewport .unity-menu-shell { padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: max(6px, var(--safe-area-bottom)); }
+  .game-viewport .unity-menu-content { gap: 4px; padding-top: 0; }
+  .game-viewport .unity-menu-top { min-height: 36px; }
+  .game-viewport .unity-discord-link, .game-viewport .unity-discord { height: 30px; }
+  .game-viewport .unity-top-action img { height: 20px; }
+  .game-viewport .unity-menu-nav img { height: 24px; }
+  .game-viewport .unity-menu-nav button { row-gap: 2px; font-size: 12px; }
+  .game-viewport .pass-shortcuts > button { min-height: 56px; grid-template-rows: 12px 24px 3px; padding: 3px; }
+  .game-viewport .pass-shortcut-icon { height: 24px; width: 24px; }
+  .game-viewport .collection-header h1, .game-viewport .section-screen-header h1 { font-size: 24px; }
+  .game-viewport .pass-overview { padding: 6px 10px; }
+  .game-viewport .pass-overview .element-progress > div:first-child { font-size: 11px; }
+}

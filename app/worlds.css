@@ -1,50 +1,44 @@
 .world-controls {
-  width: min(100%, 350px);
+  width: min(100%, 310px);
   display: grid;
-  gap: 8px;
-  margin: 25px auto 0;
+  gap: 5px;
+  margin: 0 auto;
 }
 
-.world-controls button {
+.world-controls .unity-menu-button {
   width: 100%;
-  cursor: pointer;
-  border-radius: 12px;
 }
 
 .world-switch {
-  min-height: 62px;
-  padding: 10px 16px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper, #fff);
-  font-size: 16px;
-  font-weight: 700;
+  min-height: 38px;
+  font-size: 14px;
 }
 
 .world-switch small {
   display: block;
-  margin-top: 3px;
-  font-size: 11px;
+  margin-top: 2px;
+  font-size: 9px;
   font-weight: 400;
-  opacity: .75;
 }
 
-.world-default {
-  min-height: 42px;
-  padding: 8px;
-  border: 1px solid currentColor;
-  color: inherit;
-  background: transparent;
-  font-size: 12px;
+.world-controls .world-default {
+  min-height: 30px;
+  border-width: 1px;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .world-default:disabled {
-  cursor: default;
-  opacity: .6;
+  opacity: .55;
 }
 
 .world-controls p {
-  font-size: 12px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.menu-world-footer {
+  padding-top: clamp(6px, 1dvh, 12px);
 }
 
 .world-loading {
@@ -58,13 +52,8 @@
   gap: 16px;
   padding: 24px;
   text-align: center;
-  background: #f4efe5;
-  color: #252b2d;
-}
-
-.world-loading-tttr {
-  color: #f3eedc;
-  background: radial-gradient(ellipse at top, #344c42, #101d1b 70%);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .world-loading h1 {
@@ -88,143 +77,47 @@
   animation: world-pulse 1.3s ease-in-out infinite alternate;
 }
 
-.world-loading-mark span:nth-child(2) {
-  animation-delay: .2s;
-}
-
-.world-loading-mark span:nth-child(3) {
-  animation-delay: .4s;
-}
+.world-loading-mark span:nth-child(2) { animation-delay: .2s; }
+.world-loading-mark span:nth-child(3) { animation-delay: .4s; }
 
 @keyframes world-pulse {
   from { transform: translateY(0) rotate(-8deg); opacity: .35; }
   to { transform: translateY(-14px) rotate(8deg); opacity: 1; }
 }
 
-.roguelite-home {
-  min-height: 100dvh;
-  width: 100%;
-  padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-  background: radial-gradient(ellipse at 85% 0%, #345245, transparent 65%), #101d1b;
-  color: #f3eedc;
-}
-
-.roguelite-top {
-  display: flex;
-  justify-content: space-between;
-  max-width: 520px;
-  margin: auto;
-  color: #b5c2a9;
-  font-size: 13px;
-  letter-spacing: .12em;
-}
-
-.roguelite-home-content {
-  max-width: 440px;
-  margin: clamp(40px, 9vh, 90px) auto 0;
-}
-
-.roguelite-home-content > .eyebrow {
-  color: #e3bc74;
-}
-
-.roguelite-home h1 {
-  margin: 16px 0;
-  font-size: clamp(30px, 8vw, 48px);
-  line-height: 1.1;
-  font-weight: 600;
-  letter-spacing: -.03em;
-  white-space: pre-line;
-}
-
-.roguelite-home p {
-  color: #bdcabe;
-  font-size: 14px;
-  line-height: 1.65;
-}
-
-.roguelite-start {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 28px;
-  padding: 20px 22px;
-  border: 0;
-  border-radius: 14px;
-  background: #e3bc74;
-  color: #172820;
-  font-size: 20px;
+.roguelite-logo {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: var(--ink);
+  text-align: center;
   font-weight: 700;
-  cursor: pointer;
 }
 
-.roguelite-start:disabled {
-  opacity: .5;
-  cursor: wait;
-}
+.roguelite-logo > div { display: flex; gap: 8px; }
+.roguelite-logo .figure { width: clamp(24px, 5dvh, 42px); height: clamp(24px, 5dvh, 42px); }
+.roguelite-logo > span { font-size: clamp(13px, 2.5dvh, 22px); letter-spacing: .09em; }
+.roguelite-logo h1 { margin: 0; font-size: clamp(22px, 4.5dvh, 36px); line-height: 1; letter-spacing: -.04em; }
 
 .roguelite-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin: 30px 0;
-}
-
-.roguelite-stats dt {
-  color: #bdcabe;
-  font-size: 11px;
-  min-height: 30px;
-}
-
-.roguelite-stats dd {
+  width: min(310px, 100%);
   margin: 0;
-  font-size: 30px;
+  text-align: center;
 }
 
-.roguelite-sections,
-.roguelite-options {
-  display: flex;
-  gap: 12px;
-}
-
-.roguelite-sections button,
-.roguelite-options button {
-  flex: 1;
-  min-height: 44px;
-  padding: 10px;
-  border: 1px solid #6a7f70;
-  border-radius: 10px;
-  background: transparent;
-  color: #f3eedc;
-  cursor: pointer;
-}
-
-.roguelite-home .roguelite-local-note,
-.roguelite-round-note {
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.roguelite-home .world-controls {
-  width: 100%;
-  max-width: none;
-}
-
-.roguelite-home .world-switch {
-  background: #f3eedc;
-  color: #172820;
-  border-color: #f3eedc;
-}
-
-.roguelite-placeholder {
-  margin: 30px 0;
-}
-
-.roguelite-save-error {
-  padding: 12px;
-  border: 1px solid #d17d68;
-  border-radius: 10px;
-}
+.roguelite-stats dt { color: var(--muted); font-size: 11px; }
+.roguelite-stats dd { margin: 4px 0 0; font-size: 24px; font-weight: 700; }
+.roguelite-local-note, .roguelite-round-note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; }
+.roguelite-panel { width: min(400px, 100%); text-align: center; }
+.roguelite-panel h2 { margin: 0 0 12px; font-size: 22px; }
+.roguelite-panel p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.roguelite-panel .settings-panel { margin: 0 0 12px; padding: 10px 16px; }
+.roguelite-panel .settings-row { min-height: 44px; }
+.roguelite-panel > button { margin-top: 12px; width: 100%; }
+.roguelite-save-error { width: min(400px, 100%); margin: 0; padding: 8px; border: 1px solid var(--ink); font-size: 12px; }
 
 @media (prefers-reduced-motion: reduce) {
   .world-loading-mark span { animation: none; }
