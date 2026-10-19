@@ -40,13 +40,13 @@ export function RogueliteWorld({ worldControls }: WorldSceneProps) {
         </dl>
         {saveNotice}
         <p className="roguelite-local-note">{ru ? "Прогресс сохраняется на этом устройстве" : "Progress is saved on this device"}</p>
-        <nav className="unity-menu-nav" aria-label={ru ? "Разделы ТТТР" : "TTTR sections"}>
+        <nav className="unity-menu-nav" aria-label={ru ? "Разделы TTTR" : "TTTR sections"}>
           <button onClick={() => setPanel("collection")}><Image src="/game/menu/deck.png" alt="" width="88" height="76" unoptimized /><span>{ru ? "Карты" : "Cards"}</span></button>
           <button onClick={() => setPanel("store")}><Image src="/game/menu/store.png" alt="" width="88" height="76" unoptimized /><span>{t("store")}</span></button>
           <button onClick={() => setPanel("settings")}><Image src="/game/menu/settings.png" alt="" width="88" height="76" unoptimized /><span>{t("settings")}</span></button>
         </nav>
       </> : <section className="roguelite-panel">
-        <h2>{panel === "settings" ? t("settings") : panel === "collection" ? (ru ? "Карты ТТТР" : "TTTR cards") : (ru ? "Магазин ТТТР" : "TTTR store")}</h2>
+        <h2>{panel === "settings" ? t("settings") : panel === "collection" ? (ru ? "Карты TTTR" : "TTTR cards") : (ru ? "Магазин TTTR" : "TTTR store")}</h2>
         {panel === "settings" ? <div className="settings-panel">
           <button className="settings-row settings-toggle" onClick={() => setLanguage(ru ? "en" : "ru")}><span>{t("language")}</span><strong>{ru ? t("russian") : t("english")}</strong></button>
           <button className="settings-row settings-toggle" onClick={() => audio.setMuted(!audio.muted)} aria-pressed={audio.muted}><span>{t("sound")}</span><span className="settings-sound-state"><SoundIcon muted={audio.muted} /><strong>{audio.muted ? t("soundOff") : t("soundOn")}</strong></span></button>
@@ -54,8 +54,8 @@ export function RogueliteWorld({ worldControls }: WorldSceneProps) {
         </div> : <>
           <span className="eyebrow">{t("inDevelopment")}</span>
           <p>{panel === "collection"
-            ? (ru ? "Здесь появятся собственные карты и эффекты ТТТР." : "TTTR will have its own cards and effects here.")
-            : (ru ? "Здесь появятся покупки за отдельную валюту ТТТР." : "Purchases with TTTR's own currency will be available here.")}</p>
+            ? (ru ? "Здесь появятся собственные карты и эффекты TTTR." : "TTTR will have its own cards and effects here.")
+            : (ru ? "Здесь появятся покупки за отдельную валюту TTTR." : "Purchases with TTTR's own currency will be available here.")}</p>
         </>}
         <button className="unity-menu-button" onClick={() => setPanel("menu")}>{t("back")}</button>
       </section>}
