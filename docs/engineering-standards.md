@@ -9,6 +9,7 @@
 | Границы модулей | `npm run check:architecture` | Runtime-циклы; путь frontend → backend/DB; backend → UI/platform; React/DOM/transport/storage внутри pure rules; новый неклассифицированный игровой модуль |
 | Типы | `npm run typecheck` | Несогласованные контракты, пропущенные поля, несовместимые cleanup; импорт `.ts` разрешён при `noEmit` |
 | Поведение | `npm test` | Повторное начисление, гонки квоты, stale response, переключение аккаунта, отмена lifecycle, ограничения Photon, rollback SQL, границы payload |
+| Чувствительность тестов | `npm run test:sensitivity` | Семь конкретных дефектов в одноразовой копии: исправный сценарий проходит, испорченный код обязан падать на проверке поведения |
 | Стиль / React | `npm run lint` | Ошибки hooks, зависимостей эффектов и кода; временные результаты в `work` не считаются исходниками |
 | Обе production-сборки | `npm run build`, `npm run android:web` | Web/Worker и отдельно локальный Android entrypoint, плагины сборки, bundled assets и WebView preflight |
 | Android web budget | `npm run check:android-web` | Суммарный размер готовых локальных web assets и стартового JavaScript с транзитивными статическими imports/re-exports; пустой output или symlink не допускаются |

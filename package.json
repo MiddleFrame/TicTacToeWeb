@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit --incremental false",
     "check:architecture": "node scripts/check-architecture.mjs",
@@ -19,7 +19,14 @@
     "android:sync": "npm run android:web && cap sync android",
     "android:bundle": "npm run android:sync && cd android && gradlew.bat bundleRelease",
     "db:generate": "drizzle-kit generate",
-    "db:local:migrate": "wrangler d1 migrations apply site-creator-d1 --local --config wrangler.db.jsonc"
+    "db:local:migrate": "wrangler d1 migrations apply site-creator-d1 --local --config wrangler.db.jsonc",
+    "test:domain": "node scripts/run-tests.mjs domain",
+    "test:backend": "node scripts/run-tests.mjs backend",
+    "test:runtime": "node scripts/run-tests.mjs runtime",
+    "test:ui": "node scripts/run-tests.mjs ui",
+    "test:platform": "node scripts/run-tests.mjs platform",
+    "test:tooling": "node scripts/run-tests.mjs tooling",
+    "test:sensitivity": "node scripts/test-sensitivity.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

@@ -9,6 +9,7 @@ export function createTestDb() {
     sqlite.exec(readFileSync(new URL(name, directory), "utf8"));
   }
   const queries = [];
+  let pending = Promise.resolve();
   const db = {
     prepare(sql) {
       const statement = sqlite.prepare(sql);
@@ -21,17 +22,21 @@ export function createTestDb() {
       };
       return wrapper;
     },
-    async batch(statements) {
-      sqlite.exec("BEGIN");
-      try {
-        const results = [];
-        for (const statement of statements) results.push(await statement.all());
-        sqlite.exec("COMMIT");
-        return results;
-      } catch (error) {
-        sqlite.exec("ROLLBACK");
-        throw error;
-      }
+    batch(statements) {
+      const result = pending.then(async () => {
+        sqlite.exec("BEGIN");
+        try {
+          const results = [];
+          for (const statement of statements) results.push(await statement.all());
+          sqlite.exec("COMMIT");
+          return results;
+        } catch (error) {
+          sqlite.exec("ROLLBACK");
+          throw error;
+        }
+      });
+      pending = result.catch(() => undefined);
+      return result;
     },
   };
   return { db, sqlite, queries };
